@@ -1,0 +1,24 @@
+__pycache__/
+*.pyc
+.pytest_cache/
+.DS_Store
+.ipynb_checkpoints/
+artifacts/
+cache/
+*.pt
+*.pth
+*.npy
+*.parquet
+*.jsonl
+*.npz
+*.log
+*.html
+/dataset/
+/log folder/
+/MD5E-s372858558--7433f11d178226779eb9cea2b68b92b9.nii.gz
+/Journal_thesis.pdf
+/Clarification.pdf
+/Cover letter for submission.pdf
+/Pushing fMRI Motor Classification Beyond 70% Accuracy_ A Preprocessing, Temporal Modeling, and Architecture Roadmap.pdf
+/s41597-022-01644-4.pdf
+/Advanced_Task_Based_fMRI_Classification_Using_a_Hybrid_3D_CNN_and_Transformer_Model_with_Attention_Mechanisms__Sir___Copy_.zip
