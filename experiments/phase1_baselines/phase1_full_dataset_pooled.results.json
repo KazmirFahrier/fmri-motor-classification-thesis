@@ -1,0 +1,55 @@
+{
+  "experiment_id": "phase1_full_dataset_pooled",
+  "status": "running",
+  "updated_at": "2026-05-05",
+  "dataset": {
+    "primary": "OpenNeuro ds004044 / thesis public batches",
+    "batches": [
+      "thesis-batch-01",
+      "thesis-batch-02",
+      "thesis-batch-03",
+      "thesis-batch-04",
+      "thesis-batch-05",
+      "thesis-batch-06",
+      "thesis-batch-07"
+    ],
+    "preprocessing_level": "A_minimal"
+  },
+  "split": {
+    "protocol": "pooled_random_80_20",
+    "heldout_subjects": [],
+    "leakage_risk": "high"
+  },
+  "framing": {
+    "sample_unit": "volume",
+    "clip_length": null
+  },
+  "model": {
+    "name": "legacy_cnn_transformer_attention",
+    "checkpoint": "kazmirfahrier/thesis-legacy-full-artifacts:thesis_legacy_full_dataset/train/last_checkpoint.pt",
+    "resume_from": "epoch_8"
+  },
+  "training": {
+    "epochs_completed": 8,
+    "epochs_target": 200,
+    "early_stopping": true,
+    "hardware": "kaggle_gpu"
+  },
+  "metrics": {
+    "accuracy": null,
+    "balanced_accuracy": null,
+    "macro_f1": null,
+    "mcc": null,
+    "roc_auc": null,
+    "prc_auc": null,
+    "accuracy_ci95": [null, null]
+  },
+  "folds": [],
+  "artifacts": {
+    "kaggle_kernel": "kazmirfahrierniloy/thesis-legacy-full-resume",
+    "kaggle_artifact_dataset": "kazmirfahrier/thesis-legacy-full-artifacts",
+    "logs": []
+  },
+  "notes": "Full-dataset pooled split is running as a Phase 1 leakage-gap baseline. It is not the final publication-grade generalization result."
+}
+

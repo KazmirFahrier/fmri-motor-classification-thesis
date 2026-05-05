@@ -1,0 +1,47 @@
+{
+  "experiment_id": "phase1_original_subset_pooled",
+  "status": "complete",
+  "updated_at": "2026-05-05",
+  "dataset": {
+    "primary": "Original 9-subject subset",
+    "batches": [],
+    "preprocessing_level": "A_minimal"
+  },
+  "split": {
+    "protocol": "pooled_random_80_20",
+    "heldout_subjects": [],
+    "leakage_risk": "high"
+  },
+  "framing": {
+    "sample_unit": "volume",
+    "clip_length": null
+  },
+  "model": {
+    "name": "legacy_cnn_transformer_attention",
+    "checkpoint": null,
+    "resume_from": null
+  },
+  "training": {
+    "epochs_completed": 200,
+    "epochs_target": 200,
+    "early_stopping": false,
+    "hardware": "historical_local_or_kaggle"
+  },
+  "metrics": {
+    "accuracy": 0.8522,
+    "balanced_accuracy": null,
+    "macro_f1": null,
+    "mcc": 0.8055,
+    "roc_auc": 0.95,
+    "prc_auc": 0.88,
+    "accuracy_ci95": [null, null]
+  },
+  "folds": [],
+  "artifacts": {
+    "kaggle_kernel": null,
+    "kaggle_artifact_dataset": null,
+    "logs": []
+  },
+  "notes": "Historical pooled-split subset result from the legacy thesis workflow. This is high leakage risk and should be used only to motivate the leakage-aware full-dataset benchmark."
+}
+
