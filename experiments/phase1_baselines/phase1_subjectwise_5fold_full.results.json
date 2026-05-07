@@ -1,7 +1,7 @@
 {
   "experiment_id": "phase1_subjectwise_5fold_full",
-  "status": "running",
-  "updated_at": "2026-05-05",
+  "status": "errored_patch_ready",
+  "updated_at": "2026-05-06",
   "dataset": {
     "primary": "OpenNeuro ds004044 / thesis public batches",
     "batches": [
@@ -30,7 +30,8 @@
     "resume_from": "cv_fold_01"
   },
   "training": {
-    "epochs_completed": 9,
+    "epochs_completed": null,
+    "folds_completed": 1,
     "epochs_target": 40,
     "early_stopping": true,
     "hardware": "kaggle_gpu"
@@ -60,8 +61,10 @@
   "artifacts": {
     "kaggle_kernel": "kazmirfahrierniloy/thesis-7batch-subjectwise-gpucompat-resume",
     "kaggle_artifact_dataset": "kazmirfahrier/thesis-7batch-artifacts",
-    "logs": []
+    "logs": [
+      "/Users/USER/Documents/New project/status_2026-05-06_phase1_subjectwise_niloy/thesis-7batch-subjectwise-gpucompat-resume.log",
+      "/Users/USER/Documents/New project/status_2026-05-06_phase1_subjectwise_niloy/thesis_session/thesis_7batch_subjectwise_gpucompat/session.log"
+    ]
   },
-  "notes": "Subject-wise Phase 1 run is continuing after fold 0. Do not interpret the fold-0 snapshot as a final result; final claims require all folds plus holdout."
+  "notes": "Subject-wise Phase 1 run has fold 0 complete. The May 5 GPU resume selected fold 1 but errored before training because deterministic PyTorch mode needed CUBLAS_WORKSPACE_CONFIG. The Kaggle launcher has been patched locally; do not interpret the fold-0 snapshot as a final result."
 }
-
