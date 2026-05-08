@@ -1,7 +1,7 @@
 {
   "experiment_id": "phase1_subjectwise_5fold_full",
-  "status": "errored_patch_ready",
-  "updated_at": "2026-05-06",
+  "status": "running_after_cublas_fix",
+  "updated_at": "2026-05-07",
   "dataset": {
     "primary": "OpenNeuro ds004044 / thesis public batches",
     "batches": [
@@ -66,5 +66,5 @@
       "/Users/USER/Documents/New project/status_2026-05-06_phase1_subjectwise_niloy/thesis_session/thesis_7batch_subjectwise_gpucompat/session.log"
     ]
   },
-  "notes": "Subject-wise Phase 1 run has fold 0 complete. The May 5 GPU resume selected fold 1 but errored before training because deterministic PyTorch mode needed CUBLAS_WORKSPACE_CONFIG. The Kaggle launcher has been patched locally; do not interpret the fold-0 snapshot as a final result."
+  "notes": "Subject-wise Phase 1 run has fold 0 complete. The May 5 GPU resume selected fold 1 but errored before training because deterministic PyTorch mode needed CUBLAS_WORKSPACE_CONFIG. The launcher was patched and repushed on May 7; the kernel is now running. Do not interpret the fold-0 snapshot as a final result."
 }

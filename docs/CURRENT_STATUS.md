@@ -1,6 +1,6 @@
 # Current Status
 
-Last updated: 2026-05-06 20:40 EDT.
+Last updated: 2026-05-07 00:30 EDT.
 
 This repository is tracking the active full-dataset thesis runs for 4-class motor-task fMRI classification. The unpublished manuscript and private paper PDFs are intentionally not part of this public repo.
 
@@ -8,8 +8,8 @@ This repository is tracking the active full-dataset thesis runs for 4-class moto
 
 | Experiment | Kaggle kernel | Status | Purpose |
 | --- | --- | --- | --- |
-| Full-dataset pooled legacy baseline | [`kazmirfahrierniloy/thesis-legacy-full-resume`](https://www.kaggle.com/code/kazmirfahrierniloy/thesis-legacy-full-resume) | Stopped by Kaggle max-duration limit after epoch 9 | Quantify the full-data pooled-split baseline for the Phase 1 leakage-gap comparison. |
-| Full-dataset subject-wise evaluation | [`kazmirfahrierniloy/thesis-7batch-subjectwise-gpucompat-resume`](https://www.kaggle.com/code/kazmirfahrierniloy/thesis-7batch-subjectwise-gpucompat-resume) | Errored before fold 1 training; launcher patch prepared | Continue leakage-aware subject-wise 5-fold evaluation plus holdout. |
+| Full-dataset pooled legacy baseline | [`kazmirfahrierniloy/thesis-legacy-full-resume`](https://www.kaggle.com/code/kazmirfahrierniloy/thesis-legacy-full-resume) | Epoch-9 artifact refreshed; waiting for next sequential hop | Quantify the full-data pooled-split baseline for the Phase 1 leakage-gap comparison. |
+| Full-dataset subject-wise evaluation | [`kazmirfahrierniloy/thesis-7batch-subjectwise-gpucompat-resume`](https://www.kaggle.com/code/kazmirfahrierniloy/thesis-7batch-subjectwise-gpucompat-resume) | Running after CuBLAS launcher fix | Continue leakage-aware subject-wise 5-fold evaluation plus holdout. |
 
 ## Known Progress
 
@@ -18,16 +18,17 @@ This repository is tracking the active full-dataset thesis runs for 4-class moto
 - Full-dataset pooled legacy run has a resumable artifact tree at `kazmirfahrier/thesis-legacy-full-artifacts`.
 - The pooled legacy run resumed on a Tesla P100 from epoch 8 and saved through epoch 9 before Kaggle stopped the notebook for max allowed execution duration.
 - Latest pooled epoch-9 validation snapshot: accuracy 0.2453, balanced accuracy 0.2476, macro F1 0.1723. This is not a final result.
+- The pooled artifact dataset `kazmirfahrier/thesis-legacy-full-artifacts` has been refreshed from the epoch-9 checkpoint and is ready for resume from epoch 10.
 - Subject-wise fold 0 exists in `kazmirfahrier/thesis-7batch-artifacts`; the May 5 run selected fold 1 and used CUDA on a Tesla P100, but failed before training due PyTorch deterministic CuBLAS configuration.
-- The subject-wise relauncher has been patched locally to set `CUBLAS_WORKSPACE_CONFIG=:4096:8` before invoking PyTorch.
+- The subject-wise relauncher was patched locally to set `CUBLAS_WORKSPACE_CONFIG=:4096:8` before invoking PyTorch, repushed on May 7, and is now running.
 
 ## Current Metrics Snapshot
 
 | Experiment | Metric status |
 | --- | --- |
 | Original 9-subject pooled split | Historical baseline: accuracy 0.8522, MCC 0.8055, ROC-AUC 0.95, PR-AUC 0.88. |
-| Full-dataset pooled split | Epoch 9 validation snapshot: accuracy 0.2453, balanced accuracy 0.2476, macro F1 0.1723. Resume from epoch 10 is required. |
-| Full-dataset subject-wise CV | Fold 0 snapshot: accuracy 0.25, balanced accuracy 0.25, macro F1 0.10. Fold 1 did not train due a CUDA determinism setup error; final 5-fold plus holdout bundle is required before drawing conclusions. |
+| Full-dataset pooled split | Epoch 9 validation snapshot: accuracy 0.2453, balanced accuracy 0.2476, macro F1 0.1723. Resume from epoch 10 is ready. |
+| Full-dataset subject-wise CV | Fold 0 snapshot: accuracy 0.25, balanced accuracy 0.25, macro F1 0.10. Fold 1 is running after the CUDA determinism setup fix; final 5-fold plus holdout bundle is required before drawing conclusions. |
 
 ## Why This Matters
 
@@ -35,7 +36,8 @@ Phase 1 is designed to separate optimistic pooled-split performance from leakage
 
 ## Next Actions
 
-- Refresh the pooled artifact dataset from the downloaded epoch-9 checkpoint and relaunch from epoch 10 when GPU quota is available.
-- Repush the patched subject-wise kernel so fold 1 can train on GPU.
+- Monitor the active patched subject-wise run and download outputs when it stops.
+- Refresh subject-wise artifacts after each completed fold and launch the next sequential account hop.
+- Relaunch pooled legacy from epoch 10 after the current subject-wise hop finishes or if subject-wise is blocked by quota/errors.
 - Download completed outputs into local status folders after each Kaggle session.
 - Update `experiments/phase1_baselines/*.results.json` when new metrics or fold completions are available.
