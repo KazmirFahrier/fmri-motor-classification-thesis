@@ -1,6 +1,6 @@
 {
   "experiment_id": "phase1_subjectwise_5fold_full",
-  "status": "fold2_running_after_fold1_gpu_completion",
+  "status": "fold3_running_after_fold2_gpu_completion",
   "updated_at": "2026-05-08",
   "dataset": {
     "primary": "OpenNeuro ds004044 / thesis public batches",
@@ -26,12 +26,12 @@
   },
   "model": {
     "name": "temporal_resnet3d",
-    "checkpoint": "kazmirfahrier/thesis-7batch-artifacts:thesis_7batch_subjectwise_gpucompat/cv/fold_01/last_checkpoint.pt",
-    "resume_from": "cv_fold_02"
+    "checkpoint": "kazmirfahrier/thesis-7batch-artifacts:thesis_7batch_subjectwise_gpucompat/cv/fold_02/last_checkpoint.pt",
+    "resume_from": "cv_fold_03"
   },
   "training": {
     "epochs_completed": null,
-    "folds_completed": 2,
+    "folds_completed": 3,
     "epochs_target": 40,
     "early_stopping": true,
     "hardware": "kaggle_gpu"
@@ -67,18 +67,31 @@
       "mcc": 0.0,
       "roc_auc_ovr_macro": 0.4998254323538414,
       "pr_auc_macro": 0.25404744398412926
+    },
+    {
+      "fold": 2,
+      "status": "complete",
+      "best_epoch": 0,
+      "top1_accuracy": 0.25,
+      "balanced_accuracy": 0.25,
+      "macro_f1": 0.1,
+      "mcc": 0.0,
+      "roc_auc_ovr_macro": 0.5012984963269054,
+      "pr_auc_macro": 0.2501284838888568
     }
   ],
   "artifacts": {
-    "kaggle_kernel": "kazmirfahrier/thesis-7batch-gpucompat-runner",
-    "previous_kaggle_kernel": "kazmirfahrierniloy/thesis-7batch-subjectwise-gpucompat-resume",
+    "kaggle_kernel": "kazmirfahrierniloy/thesis-7batch-subjectwise-gpucompat-resume",
+    "previous_kaggle_kernel": "kazmirfahrier/thesis-7batch-gpucompat-runner",
     "kaggle_artifact_dataset": "kazmirfahrier/thesis-7batch-artifacts",
     "logs": [
       "/Users/USER/Documents/New project/status_2026-05-06_phase1_subjectwise_niloy/thesis-7batch-subjectwise-gpucompat-resume.log",
       "/Users/USER/Documents/New project/status_2026-05-06_phase1_subjectwise_niloy/thesis_session/thesis_7batch_subjectwise_gpucompat/session.log",
       "/Users/USER/Documents/New project/status_2026-05-08_subjectwise_v3_complete/thesis-7batch-subjectwise-gpucompat-resume.log",
-      "/Users/USER/Documents/New project/status_2026-05-08_subjectwise_v3_complete/thesis_session/thesis_7batch_subjectwise_gpucompat/session.log"
+      "/Users/USER/Documents/New project/status_2026-05-08_subjectwise_v3_complete/thesis_session/thesis_7batch_subjectwise_gpucompat/session.log",
+      "/Users/USER/Documents/New project/status_2026-05-08_subjectwise_main_v3_complete/thesis-7batch-gpucompat-runner.log",
+      "/Users/USER/Documents/New project/status_2026-05-08_subjectwise_main_v3_complete/thesis_session/thesis_7batch_subjectwise_gpucompat/session.log"
     ]
   },
-  "notes": "Subject-wise Phase 1 run has folds 0 and 1 complete. Fold 1 completed on a Kaggle Tesla P100 after setting CUBLAS_WORKSPACE_CONFIG and disabling strict deterministic training for GPU compatibility while keeping fixed seeded splits. The artifact dataset has been refreshed and the main-account runner is now resuming cv fold 2. Do not interpret the fold-level snapshots as final results."
+  "notes": "Subject-wise Phase 1 run has folds 0, 1, and 2 complete. Fold 2 completed on a Kaggle Tesla P100, the artifact dataset has been refreshed, and the Niloy-account runner is now resuming cv fold 3. The completed fold snapshots remain chance-level, so do not interpret them as final publication results."
 }
