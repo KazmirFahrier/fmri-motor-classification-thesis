@@ -1,6 +1,6 @@
 # Current Status
 
-Last updated: 2026-05-09 16:55 EDT.
+Last updated: 2026-05-09 21:25 EDT.
 
 This repository is tracking the active full-dataset thesis runs for 4-class motor-task fMRI classification. The unpublished manuscript and private paper PDFs are intentionally not part of this public repo.
 
@@ -9,7 +9,7 @@ This repository is tracking the active full-dataset thesis runs for 4-class moto
 | Experiment | Kaggle kernel | Status | Purpose |
 | --- | --- | --- | --- |
 | Full-dataset pooled legacy baseline | [`kazmirfahrierniloy/thesis-legacy-full-resume`](https://www.kaggle.com/code/kazmirfahrierniloy/thesis-legacy-full-resume) | Epoch-9 artifact refreshed; waiting for next sequential hop | Quantify the full-data pooled-split baseline for the Phase 1 leakage-gap comparison. |
-| Full-dataset subject-wise evaluation | [`b6uejhvvnmiwb/thesis-7batch-subjectwise-gpucompat-resume`](https://www.kaggle.com/code/b6uejhvvnmiwb/thesis-7batch-subjectwise-gpucompat-resume) | Holdout model running after all 5 CV folds completed on GPU | Continue leakage-aware subject-wise 5-fold evaluation plus holdout. |
+| Full-dataset subject-wise evaluation | [`kazmirfahrier/thesis-7batch-gpucompat-runner`](https://www.kaggle.com/code/kazmirfahrier/thesis-7batch-gpucompat-runner) | Holdout evaluation running after all 5 CV folds and holdout-model training completed on GPU | Continue leakage-aware subject-wise 5-fold evaluation plus holdout. |
 
 ## Known Progress
 
@@ -24,8 +24,10 @@ This repository is tracking the active full-dataset thesis runs for 4-class moto
 - Subject-wise fold 2 completed successfully on a Kaggle Tesla P100.
 - Subject-wise fold 3 completed successfully on a Kaggle Tesla P100 after rebuilding the Niloy runner to remove a stale deterministic config.
 - Subject-wise fold 4 completed successfully on a Kaggle Tesla P100.
-- The subject-wise artifact dataset `kazmirfahrier/thesis-7batch-artifacts` was refreshed after fold 4 and now points to `holdout_model` as the next stage.
-- The next sequential resume hop is running as `b6uejhvvnmiwb/thesis-7batch-subjectwise-gpucompat-resume` version 1.
+- The subject-wise holdout-model stage completed successfully on `b6uejhvvnmiwb/thesis-7batch-subjectwise-gpucompat-resume` version 1 using a Kaggle Tesla P100.
+- The holdout-model validation snapshot is still chance-level: accuracy 0.25, balanced accuracy 0.25, macro F1 0.10, MCC 0.0, ROC-AUC 0.4959, PR-AUC 0.2583.
+- The subject-wise artifact dataset `kazmirfahrier/thesis-7batch-artifacts` was refreshed after holdout-model completion and now points to `holdout_eval` as the next stage.
+- The final subject-wise holdout-evaluation hop is running as `kazmirfahrier/thesis-7batch-gpucompat-runner` version 4.
 
 ## Current Metrics Snapshot
 
@@ -33,7 +35,7 @@ This repository is tracking the active full-dataset thesis runs for 4-class moto
 | --- | --- |
 | Original 9-subject pooled split | Historical baseline: accuracy 0.8522, MCC 0.8055, ROC-AUC 0.95, PR-AUC 0.88. |
 | Full-dataset pooled split | Epoch 9 validation snapshot: accuracy 0.2453, balanced accuracy 0.2476, macro F1 0.1723. Resume from epoch 10 is ready. |
-| Full-dataset subject-wise CV | All five CV folds are complete. Each snapshot is still chance-level: accuracy 0.25, balanced accuracy 0.25, macro F1 0.10. The holdout-model stage is running; final holdout evaluation is required before closing Phase 1. |
+| Full-dataset subject-wise CV | All five CV folds and holdout-model training are complete. Each CV snapshot is still chance-level: accuracy 0.25, balanced accuracy 0.25, macro F1 0.10. Holdout-model validation is also chance-level, and final holdout evaluation is now running. |
 
 ## Why This Matters
 
@@ -41,8 +43,8 @@ Phase 1 is designed to separate optimistic pooled-split performance from leakage
 
 ## Next Actions
 
-- Monitor the active patched subject-wise run and download outputs when it stops.
-- Refresh subject-wise artifacts after each completed fold and launch the next sequential account hop.
+- Monitor the active patched holdout-evaluation run and download outputs when it stops.
+- Refresh subject-wise artifacts after holdout evaluation completes so Phase 1 has a complete resumable record.
 - Relaunch pooled legacy from epoch 10 after the current subject-wise hop finishes or if subject-wise is blocked by quota/errors.
 - Download completed outputs into local status folders after each Kaggle session.
 - Update `experiments/phase1_baselines/*.results.json` when new metrics or fold completions are available.
