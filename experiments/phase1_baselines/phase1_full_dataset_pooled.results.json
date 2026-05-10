@@ -1,7 +1,7 @@
 {
   "experiment_id": "phase1_full_dataset_pooled",
-  "status": "epoch9_artifact_ready_resume_needed",
-  "updated_at": "2026-05-07",
+  "status": "running_from_epoch9_artifact",
+  "updated_at": "2026-05-09",
   "dataset": {
     "primary": "OpenNeuro ds004044 / thesis public batches",
     "batches": [
@@ -52,5 +52,5 @@
       "/Users/USER/Documents/New project/status_2026-05-06_phase1_full_resume_niloy/thesis_session/thesis_legacy_full_dataset/session.log"
     ]
   },
-  "notes": "Latest snapshot is epoch 9 validation after a resumable GPU run stopped at Kaggle's max execution duration. The artifact dataset was refreshed on May 7 and is ready to resume from epoch 10. This pooled split is a Phase 1 leakage-gap baseline, not the final publication-grade generalization result."
+  "notes": "Latest completed snapshot is epoch 9 validation after a resumable GPU run stopped at Kaggle's max execution duration. The artifact dataset was refreshed on May 7, and the Niloy account relaunched the pooled legacy resume on May 9 as the next sequential hop. This pooled split is a Phase 1 leakage-gap baseline, not the final publication-grade generalization result."
 }

@@ -1,6 +1,6 @@
 {
   "experiment_id": "phase1_subjectwise_5fold_full",
-  "status": "holdout_eval_running_after_holdout_model_completion",
+  "status": "complete",
   "updated_at": "2026-05-09",
   "dataset": {
     "primary": "OpenNeuro ds004044 / thesis public batches",
@@ -27,7 +27,7 @@
   "model": {
     "name": "temporal_resnet3d",
     "checkpoint": "kazmirfahrier/thesis-7batch-artifacts:thesis_7batch_subjectwise_gpucompat/holdout_model/last_checkpoint.pt",
-    "resume_from": "holdout_eval"
+    "resume_from": "complete"
   },
   "training": {
     "epochs_completed": null,
@@ -37,13 +37,13 @@
     "hardware": "kaggle_gpu"
   },
   "metrics": {
-    "accuracy": null,
-    "balanced_accuracy": null,
-    "macro_f1": null,
-    "mcc": null,
-    "roc_auc": null,
-    "prc_auc": null,
-    "accuracy_ci95": [null, null]
+    "accuracy": 0.25,
+    "balanced_accuracy": 0.25,
+    "macro_f1": 0.1,
+    "mcc": 0.0,
+    "roc_auc": 0.4983091001157407,
+    "prc_auc": 0.25128495814206214,
+    "accuracy_ci95": [0.2083333283662796, 0.296875]
   },
   "holdout_model": {
     "status": "complete",
@@ -55,6 +55,18 @@
     "roc_auc_ovr_macro": 0.4959375,
     "pr_auc_macro": 0.2583373462684423,
     "next_stage": "holdout_eval"
+  },
+  "holdout_eval": {
+    "status": "complete",
+    "num_samples": 384,
+    "top1_accuracy": 0.25,
+    "balanced_accuracy": 0.25,
+    "macro_f1": 0.1,
+    "mcc": 0.0,
+    "roc_auc_ovr_macro": 0.4983091001157407,
+    "pr_auc_macro": 0.25128495814206214,
+    "top1_accuracy_ci95": [0.2083333283662796, 0.296875],
+    "next_stage": "complete"
   },
   "folds": [
     {
@@ -129,8 +141,11 @@
       "/Users/USER/Documents/New project/status_2026-05-09_subjectwise_lover_v1_complete/thesis-7batch-subjectwise-gpucompat-resume.log",
       "/Users/USER/Documents/New project/status_2026-05-09_subjectwise_lover_v1_complete/thesis_session/thesis_7batch_subjectwise_gpucompat/session.log",
       "/Users/USER/Documents/New project/status_2026-05-09_subjectwise_b6_holdout_model_complete/thesis-7batch-subjectwise-gpucompat-resume.log",
-      "/Users/USER/Documents/New project/status_2026-05-09_subjectwise_b6_holdout_model_complete/thesis_session/thesis_7batch_subjectwise_gpucompat/session.log"
+      "/Users/USER/Documents/New project/status_2026-05-09_subjectwise_b6_holdout_model_complete/thesis_session/thesis_7batch_subjectwise_gpucompat/session.log",
+      "/Users/USER/Documents/New project/status_2026-05-09_subjectwise_main_holdout_eval_complete/thesis-7batch-gpucompat-runner.log",
+      "/Users/USER/Documents/New project/status_2026-05-09_subjectwise_main_holdout_eval_complete/thesis_session/thesis_7batch_subjectwise_gpucompat/session.log",
+      "/Users/USER/Documents/New project/status_2026-05-09_subjectwise_main_holdout_eval_complete/thesis_session/thesis_7batch_subjectwise_gpucompat/publication_bundle/publication_report.md"
     ]
   },
-  "notes": "Subject-wise Phase 1 run has all five CV folds and holdout-model training complete. The holdout-model stage completed on a Kaggle Tesla P100, the artifact dataset has been refreshed, and the main account runner is running the holdout_eval stage. The completed CV fold and holdout-model validation snapshots remain chance-level, so do not interpret them as final publication results until final holdout evaluation is complete."
+  "notes": "Subject-wise Phase 1 run is complete across all five CV folds, holdout-model training, and final holdout evaluation. All CV and holdout snapshots are chance-level, and the final artifact dataset has been refreshed with next_stage=complete. This result should be treated as evidence that the current full-dataset subject-wise setup is not learning, not as support for the original pooled-subset accuracy."
 }
