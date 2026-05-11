@@ -46,12 +46,14 @@
   },
   "folds": [],
   "artifacts": {
-    "kaggle_kernel": "kazmirfahrierlover/thesis-legacy-full-resume",
+    "kaggle_kernel": "b6uejhvvnmiwb/thesis-legacy-full-resume",
     "kaggle_artifact_dataset": "kazmirfahrier/thesis-legacy-full-artifacts",
     "logs": [
       "/Users/USER/Documents/New project/status_2026-05-10_legacy_full_niloy_v2_duration/thesis-legacy-full-resume.log",
-      "/Users/USER/Documents/New project/status_2026-05-10_legacy_full_niloy_v2_duration/thesis_session/thesis_legacy_full_dataset/session.log"
+      "/Users/USER/Documents/New project/status_2026-05-10_legacy_full_niloy_v2_duration/thesis_session/thesis_legacy_full_dataset/session.log",
+      "/Users/USER/Documents/New project/status_2026-05-10_legacy_full_lover_v1_duration/thesis-legacy-full-resume.log",
+      "/Users/USER/Documents/New project/status_2026-05-10_legacy_full_lover_v1_duration/thesis_session/thesis_legacy_full_dataset/session.log"
     ]
   },
-  "notes": "Latest completed snapshot is epoch 11 validation after the Niloy GPU run stopped at Kaggle's max execution duration. The artifact dataset was refreshed on May 10, and the Lover account relaunched the pooled legacy resume from epoch 12 as the next sequential hop. Training accuracy has improved, but validation remains near chance so far. This pooled split is a Phase 1 leakage-gap baseline, not the final publication-grade generalization result."
+  "notes": "Latest completed snapshot is epoch 11 validation after the Niloy GPU run stopped at Kaggle's max execution duration. The artifact dataset was refreshed on May 10. The Lover account then reproduced epochs 10-11 instead of advancing, likely because Kaggle mounted a stale artifact copy shortly after refresh. The B6 account relaunched the pooled legacy resume with a guard that should fail fast unless the mounted checkpoint can resume at epoch 12. Training accuracy has improved, but validation remains near chance so far. This pooled split is a Phase 1 leakage-gap baseline, not the final publication-grade generalization result."
 }
