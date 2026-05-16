@@ -1,7 +1,7 @@
 {
   "experiment_id": "phase1_full_dataset_pooled",
-  "status": "running_from_epoch11_artifact",
-  "updated_at": "2026-05-10",
+  "status": "running_from_epoch13_artifact",
+  "updated_at": "2026-05-16",
   "dataset": {
     "primary": "OpenNeuro ds004044 / thesis public batches",
     "batches": [
@@ -27,33 +27,35 @@
   "model": {
     "name": "legacy_cnn_transformer_attention",
     "checkpoint": "kazmirfahrier/thesis-legacy-full-artifacts:thesis_legacy_full_dataset/train/last_checkpoint.pt",
-    "resume_from": "epoch_12"
+    "resume_from": "epoch_14"
   },
   "training": {
-    "epochs_completed": 12,
+    "epochs_completed": 14,
     "epochs_target": 200,
     "early_stopping": true,
     "hardware": "kaggle_gpu"
   },
   "metrics": {
-    "accuracy": 0.23855522889542208,
-    "balanced_accuracy": 0.24115602589948404,
-    "macro_f1": 0.19700203786974158,
-    "mcc": -0.014035017295127277,
-    "roc_auc": 0.4861012176137278,
-    "prc_auc": 0.24964269257631266,
+    "accuracy": 0.24191516169676605,
+    "balanced_accuracy": 0.24368397297796707,
+    "macro_f1": 0.2285113108922889,
+    "mcc": -0.009039756899459121,
+    "roc_auc": 0.49311174721662454,
+    "prc_auc": 0.25125935455528925,
     "accuracy_ci95": [null, null]
   },
   "folds": [],
   "artifacts": {
-    "kaggle_kernel": "b6uejhvvnmiwb/thesis-legacy-full-resume",
+    "kaggle_kernel": "kazmirfahrier/thesis-legacy-full-resume",
     "kaggle_artifact_dataset": "kazmirfahrier/thesis-legacy-full-artifacts",
     "logs": [
       "/Users/USER/Documents/New project/status_2026-05-10_legacy_full_niloy_v2_duration/thesis-legacy-full-resume.log",
       "/Users/USER/Documents/New project/status_2026-05-10_legacy_full_niloy_v2_duration/thesis_session/thesis_legacy_full_dataset/session.log",
       "/Users/USER/Documents/New project/status_2026-05-10_legacy_full_lover_v1_duration/thesis-legacy-full-resume.log",
-      "/Users/USER/Documents/New project/status_2026-05-10_legacy_full_lover_v1_duration/thesis_session/thesis_legacy_full_dataset/session.log"
+      "/Users/USER/Documents/New project/status_2026-05-10_legacy_full_lover_v1_duration/thesis_session/thesis_legacy_full_dataset/session.log",
+      "/Users/USER/Documents/New project/status_2026-05-16_legacy_full_b6_v1_duration/thesis-legacy-full-resume.log",
+      "/Users/USER/Documents/New project/status_2026-05-16_legacy_full_b6_v1_duration/thesis_session/thesis_legacy_full_dataset/session.log"
     ]
   },
-  "notes": "Latest completed snapshot is epoch 11 validation after the Niloy GPU run stopped at Kaggle's max execution duration. The artifact dataset was refreshed on May 10. The Lover account then reproduced epochs 10-11 instead of advancing, likely because Kaggle mounted a stale artifact copy shortly after refresh. The B6 account relaunched the pooled legacy resume with a guard that should fail fast unless the mounted checkpoint can resume at epoch 12. Training accuracy has improved, but validation remains near chance so far. This pooled split is a Phase 1 leakage-gap baseline, not the final publication-grade generalization result."
+  "notes": "Latest completed snapshot is epoch 13 validation after the B6 guarded GPU run stopped at Kaggle's max execution duration. The B6 run passed the epoch-12 guard, used a Tesla P100, and advanced through epochs 12-13. The artifact dataset was refreshed on May 16, and the main account launched the next pooled legacy resume with an epoch-14 guard. Training accuracy has improved, but validation remains near chance so far. This pooled split is a Phase 1 leakage-gap baseline, not the final publication-grade generalization result."
 }
