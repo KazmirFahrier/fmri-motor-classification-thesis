@@ -27,7 +27,8 @@ This repository is tracking the active full-dataset thesis runs for 4-class moto
 - Latest pooled epoch-13 validation snapshot: accuracy 0.2419, balanced accuracy 0.2437, macro F1 0.2285, MCC -0.0090, ROC-AUC 0.4931, PR-AUC 0.2513. This is not a final result.
 - Training accuracy reached 0.3973 by epoch 13, while validation remains near chance.
 - The pooled artifact dataset `kazmirfahrier/thesis-legacy-full-artifacts` has been refreshed from the epoch-13 checkpoint and is ready for resume from epoch 14.
-- The pooled legacy resume was relaunched as `kazmirfahrier/thesis-legacy-full-resume` version 1 with an epoch-14 guard and is currently running.
+- The first main-account epoch-14 attempt failed fast because Kaggle still mounted the older epoch-11 artifact; the guard prevented wasted GPU time.
+- After Kaggle's dataset listing updated to the May 16 artifact files, `kazmirfahrier/thesis-legacy-full-resume` was repushed as version 2 with the same epoch-14 guard and is currently running.
 - Subject-wise fold 0 exists in `kazmirfahrier/thesis-7batch-artifacts`.
 - Subject-wise fold 1 completed successfully on a Kaggle Tesla P100 after two GPU-compatibility fixes: setting `CUBLAS_WORKSPACE_CONFIG=:4096:8` and using `training.deterministic: false`.
 - Subject-wise fold 2 completed successfully on a Kaggle Tesla P100.

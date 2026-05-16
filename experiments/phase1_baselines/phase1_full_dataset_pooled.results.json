@@ -54,8 +54,10 @@
       "/Users/USER/Documents/New project/status_2026-05-10_legacy_full_lover_v1_duration/thesis-legacy-full-resume.log",
       "/Users/USER/Documents/New project/status_2026-05-10_legacy_full_lover_v1_duration/thesis_session/thesis_legacy_full_dataset/session.log",
       "/Users/USER/Documents/New project/status_2026-05-16_legacy_full_b6_v1_duration/thesis-legacy-full-resume.log",
-      "/Users/USER/Documents/New project/status_2026-05-16_legacy_full_b6_v1_duration/thesis_session/thesis_legacy_full_dataset/session.log"
+      "/Users/USER/Documents/New project/status_2026-05-16_legacy_full_b6_v1_duration/thesis_session/thesis_legacy_full_dataset/session.log",
+      "/Users/USER/Documents/New project/status_2026-05-16_legacy_full_main_v1_error/thesis-legacy-full-resume.log",
+      "/Users/USER/Documents/New project/status_2026-05-16_legacy_full_main_v1_error/thesis_session/thesis_legacy_full_dataset/session.log"
     ]
   },
-  "notes": "Latest completed snapshot is epoch 13 validation after the B6 guarded GPU run stopped at Kaggle's max execution duration. The B6 run passed the epoch-12 guard, used a Tesla P100, and advanced through epochs 12-13. The artifact dataset was refreshed on May 16, and the main account launched the next pooled legacy resume with an epoch-14 guard. Training accuracy has improved, but validation remains near chance so far. This pooled split is a Phase 1 leakage-gap baseline, not the final publication-grade generalization result."
+  "notes": "Latest completed snapshot is epoch 13 validation after the B6 guarded GPU run stopped at Kaggle's max execution duration. The B6 run passed the epoch-12 guard, used a Tesla P100, and advanced through epochs 12-13. The artifact dataset was refreshed on May 16. The first main-account epoch-14 attempt failed fast because Kaggle still mounted the older epoch-11 artifact; after the dataset listing updated, the main account relaunched version 2 with the same epoch-14 guard. Training accuracy has improved, but validation remains near chance so far. This pooled split is a Phase 1 leakage-gap baseline, not the final publication-grade generalization result."
 }
