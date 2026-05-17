@@ -35,6 +35,24 @@
     "early_stopping": true,
     "hardware": "kaggle_gpu"
   },
+  "decision_policy": {
+    "current_decision": "continue_short_baseline_only",
+    "recommendation": "continue only until early stopping unless validation improves materially",
+    "best_epoch_for_patience": 0,
+    "early_stopping_patience": 25,
+    "stop_if": "epochs_since_best >= 25 and validation thresholds are not met",
+    "extend_if": {
+      "accuracy_at_least": 0.3,
+      "macro_f1_at_least": 0.3
+    },
+    "do_not_do": "do not continue toward 200 epochs while validation remains near chance",
+    "next_pivot": [
+      "dataset_label_audit",
+      "preprocessing_and_normalization_check",
+      "leakage_analysis",
+      "simple_sanity_check_baselines"
+    ]
+  },
   "metrics": {
     "accuracy": 0.24191516169676605,
     "balanced_accuracy": 0.24368397297796707,

@@ -52,10 +52,18 @@ This repository is tracking the active full-dataset thesis runs for 4-class moto
 
 Phase 1 is designed to separate optimistic pooled-split performance from leakage-aware generalization. The paper should not claim the original 85% result as the final full-dataset result. The key publication-grade evidence will come from subject-wise cross-validation and held-out subject evaluation.
 
+## Decision Policy
+
+- Continue the pooled legacy lane only as a controlled baseline completion to early stopping.
+- Stop the lane when the configured 25-epoch patience is exhausted unless validation accuracy and macro F1 both exceed 0.30.
+- Do not continue toward the 200-epoch target while validation remains near chance.
+- When the lane stops without meaningful validation improvement, pivot to dataset/label audit, preprocessing checks, leakage analysis, and simpler sanity-check baselines.
+
 ## Next Actions
 
 - Monitor the active main-account pooled legacy resume and download outputs when it stops.
 - Refresh pooled legacy artifacts if the active run saves progress beyond epoch 13.
+- Evaluate every downloaded pooled run with `scripts/assess_pooled_legacy_policy.py` before launching another resume hop.
 - Treat the completed subject-wise result as evidence that the current full-dataset subject-wise setup is not learning; investigate data/model/label issues before making publication claims.
 - Download completed outputs into local status folders after each Kaggle session.
 - Update `experiments/phase1_baselines/*.results.json` when new metrics or fold completions are available.
