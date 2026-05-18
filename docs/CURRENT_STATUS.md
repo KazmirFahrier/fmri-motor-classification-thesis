@@ -1,6 +1,6 @@
 # Current Status
 
-Last updated: 2026-05-17 18:35 EDT.
+Last updated: 2026-05-18 12:20 EDT.
 
 This repository is tracking the active full-dataset thesis runs for 4-class motor-task fMRI classification. The unpublished manuscript and private paper PDFs are intentionally not part of this public repo.
 
@@ -8,7 +8,7 @@ This repository is tracking the active full-dataset thesis runs for 4-class moto
 
 | Experiment | Kaggle kernel | Status | Purpose |
 | --- | --- | --- | --- |
-| Full-dataset pooled legacy baseline | [`kazmirfahrier/thesis-legacy-full-resume`](https://www.kaggle.com/code/kazmirfahrier/thesis-legacy-full-resume) | Running from the epoch-15 artifact with an epoch-16 resume guard | Quantify the full-data pooled-split baseline for the Phase 1 leakage-gap comparison. |
+| Full-dataset pooled legacy baseline | [`kazmirfahrier/thesis-legacy-full-resume`](https://www.kaggle.com/code/kazmirfahrier/thesis-legacy-full-resume) | Running version 4 from the epoch-17 artifact with an epoch-18 resume guard | Quantify the full-data pooled-split baseline for the Phase 1 leakage-gap comparison. |
 | Full-dataset subject-wise evaluation | [`kazmirfahrier/thesis-7batch-gpucompat-runner`](https://www.kaggle.com/code/kazmirfahrier/thesis-7batch-gpucompat-runner) | Complete; final artifacts refreshed | Continue leakage-aware subject-wise 5-fold evaluation plus holdout. |
 
 ## Known Progress
@@ -35,6 +35,12 @@ This repository is tracking the active full-dataset thesis runs for 4-class moto
 - The policy checker decision after epoch 15 is `continue_short_baseline`, with 10 epochs left before the 25-epoch patience stop if validation does not improve.
 - The pooled artifact dataset `kazmirfahrier/thesis-legacy-full-artifacts` has been refreshed from the epoch-15 checkpoint and is ready for resume from epoch 16.
 - `kazmirfahrier/thesis-legacy-full-resume` was repushed as version 3 with an epoch-16 guard and is currently running.
+- The main-account version 3 guarded resume passed the epoch-16 guard, used a Kaggle Tesla P100, saved epochs 16 and 17, then stopped at Kaggle's max allowed execution duration.
+- Latest pooled epoch-17 validation snapshot: accuracy 0.2470, balanced accuracy 0.2497, macro F1 0.2273, MCC -0.0003, ROC-AUC 0.5017, PR-AUC 0.2575. This is not a final result.
+- Training accuracy reached 0.4603 by epoch 17, while validation remains near chance.
+- The policy checker decision after epoch 17 is `continue_short_baseline`, with 8 epochs left before the 25-epoch patience stop if validation does not improve.
+- The pooled artifact dataset `kazmirfahrier/thesis-legacy-full-artifacts` has been refreshed from the epoch-17 checkpoint and is ready for resume from epoch 18.
+- `kazmirfahrier/thesis-legacy-full-resume` was repushed as version 4 with an epoch-18 guard and is currently running.
 - Subject-wise fold 0 exists in `kazmirfahrier/thesis-7batch-artifacts`.
 - Subject-wise fold 1 completed successfully on a Kaggle Tesla P100 after two GPU-compatibility fixes: setting `CUBLAS_WORKSPACE_CONFIG=:4096:8` and using `training.deterministic: false`.
 - Subject-wise fold 2 completed successfully on a Kaggle Tesla P100.
@@ -51,7 +57,7 @@ This repository is tracking the active full-dataset thesis runs for 4-class moto
 | Experiment | Metric status |
 | --- | --- |
 | Original 9-subject pooled split | Historical baseline: accuracy 0.8522, MCC 0.8055, ROC-AUC 0.95, PR-AUC 0.88. |
-| Full-dataset pooled split | Epoch 15 validation snapshot: accuracy 0.2365, balanced accuracy 0.2381, macro F1 0.2227, MCC -0.0167. Guarded resume from epoch 16 is running. |
+| Full-dataset pooled split | Epoch 17 validation snapshot: accuracy 0.2470, balanced accuracy 0.2497, macro F1 0.2273, MCC -0.0003. Guarded resume from epoch 18 is running. |
 | Full-dataset subject-wise CV + holdout | Complete. All five CV folds and final holdout are chance-level: accuracy 0.25, balanced accuracy 0.25, macro F1 0.10, MCC 0.0. |
 
 ## Why This Matters
@@ -68,7 +74,7 @@ Phase 1 is designed to separate optimistic pooled-split performance from leakage
 ## Next Actions
 
 - Monitor the active main-account pooled legacy resume and download outputs when it stops.
-- Refresh pooled legacy artifacts if the active run saves progress beyond epoch 15.
+- Refresh pooled legacy artifacts if the active run saves progress beyond epoch 17.
 - Evaluate every downloaded pooled run with `scripts/assess_pooled_legacy_policy.py` before launching another resume hop.
 - Treat the completed subject-wise result as evidence that the current full-dataset subject-wise setup is not learning; investigate data/model/label issues before making publication claims.
 - Download completed outputs into local status folders after each Kaggle session.

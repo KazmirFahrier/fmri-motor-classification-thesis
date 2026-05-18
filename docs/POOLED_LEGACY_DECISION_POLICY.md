@@ -1,6 +1,6 @@
 # Pooled Legacy Baseline Decision Policy
 
-Last updated: 2026-05-17.
+Last updated: 2026-05-18.
 
 ## Current Decision
 
@@ -10,7 +10,7 @@ Continue the full-dataset pooled legacy baseline only as a short controlled comp
 
 - Subject-wise full-dataset evaluation is complete and chance-level.
 - The pooled legacy baseline is improving on training accuracy, but validation remains near chance.
-- Latest completed pooled snapshot is epoch 15: validation accuracy 0.2365, balanced accuracy 0.2381, macro F1 0.2227, MCC -0.0167.
+- Latest completed pooled snapshot is epoch 17: validation accuracy 0.2470, balanced accuracy 0.2497, macro F1 0.2273, MCC -0.0003.
 - Best visible pooled validation accuracy from the resumed metric rows is 0.2474, still below the 0.25 random baseline for four balanced classes.
 
 ## Continue, Stop, Or Extend

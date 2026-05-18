@@ -1,7 +1,7 @@
 {
   "experiment_id": "phase1_full_dataset_pooled",
-  "status": "running_from_epoch15_artifact",
-  "updated_at": "2026-05-17",
+  "status": "running_from_epoch17_artifact",
+  "updated_at": "2026-05-18",
   "dataset": {
     "primary": "OpenNeuro ds004044 / thesis public batches",
     "batches": [
@@ -27,10 +27,10 @@
   "model": {
     "name": "legacy_cnn_transformer_attention",
     "checkpoint": "kazmirfahrier/thesis-legacy-full-artifacts:thesis_legacy_full_dataset/train/last_checkpoint.pt",
-    "resume_from": "epoch_16"
+    "resume_from": "epoch_18"
   },
   "training": {
-    "epochs_completed": 15,
+    "epochs_completed": 17,
     "epochs_target": 200,
     "early_stopping": true,
     "hardware": "kaggle_gpu"
@@ -54,12 +54,12 @@
     ]
   },
   "metrics": {
-    "accuracy": 0.2364552708945821,
-    "balanced_accuracy": 0.23813635630326457,
-    "macro_f1": 0.22269760405927552,
-    "mcc": -0.01665972275511679,
-    "roc_auc": 0.49604433480349575,
-    "prc_auc": 0.25212268546059796,
+    "accuracy": 0.24695506089878203,
+    "balanced_accuracy": 0.2497375512846589,
+    "macro_f1": 0.22731670541176716,
+    "mcc": -0.0002537994397769959,
+    "roc_auc": 0.5016872563036556,
+    "prc_auc": 0.25754533175289546,
     "accuracy_ci95": [null, null]
   },
   "folds": [],
@@ -76,8 +76,10 @@
       "/Users/USER/Documents/New project/status_2026-05-16_legacy_full_main_v1_error/thesis-legacy-full-resume.log",
       "/Users/USER/Documents/New project/status_2026-05-16_legacy_full_main_v1_error/thesis_session/thesis_legacy_full_dataset/session.log",
       "/Users/USER/Documents/New project/status_2026-05-17_legacy_full_main_v2_duration/thesis-legacy-full-resume.log",
-      "/Users/USER/Documents/New project/status_2026-05-17_legacy_full_main_v2_duration/thesis_session/thesis_legacy_full_dataset/session.log"
+      "/Users/USER/Documents/New project/status_2026-05-17_legacy_full_main_v2_duration/thesis_session/thesis_legacy_full_dataset/session.log",
+      "/Users/USER/Documents/New project/status_2026-05-18_legacy_full_main_v3_duration/thesis-legacy-full-resume.log",
+      "/Users/USER/Documents/New project/status_2026-05-18_legacy_full_main_v3_duration/thesis_session/thesis_legacy_full_dataset/session.log"
     ]
   },
-  "notes": "Latest completed snapshot is epoch 15 validation after the main-account guarded GPU run stopped at Kaggle's max execution duration. The run passed the epoch-14 guard, used a Tesla P100, and advanced through epochs 14-15. The artifact dataset was refreshed on May 17 and the main account relaunched version 3 with an epoch-16 guard. The policy checker decision remains continue_short_baseline with 10 epochs left before the 25-epoch patience stop. Training accuracy has improved, but validation remains near chance so far. This pooled split is a Phase 1 leakage-gap baseline, not the final publication-grade generalization result."
+  "notes": "Latest completed snapshot is epoch 17 validation after the main-account guarded GPU run stopped at Kaggle's max execution duration. The run passed the epoch-16 guard, used a Tesla P100, and advanced through epochs 16-17. The artifact dataset was refreshed on May 18 and the main account relaunched version 4 with an epoch-18 guard. The policy checker decision remains continue_short_baseline with 8 epochs left before the 25-epoch patience stop. Training accuracy has improved, but validation remains near chance so far. This pooled split is a Phase 1 leakage-gap baseline, not the final publication-grade generalization result."
 }
