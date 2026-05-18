@@ -26,7 +26,7 @@
   },
   "model": {
     "name": "legacy_cnn_transformer_attention",
-    "checkpoint": "kazmirfahrier/thesis-legacy-full-artifacts:thesis_legacy_full_dataset/train/last_checkpoint.pt",
+    "checkpoint": "kazmirfahrier/thesis-legacy-full-artifacts-epoch17:thesis_legacy_full_dataset/train/last_checkpoint.pt",
     "resume_from": "epoch_18"
   },
   "training": {
@@ -80,8 +80,10 @@
       "/Users/USER/Documents/New project/status_2026-05-18_legacy_full_main_v3_duration/thesis-legacy-full-resume.log",
       "/Users/USER/Documents/New project/status_2026-05-18_legacy_full_main_v3_duration/thesis_session/thesis_legacy_full_dataset/session.log",
       "/Users/USER/Documents/New project/status_2026-05-18_legacy_full_main_v4_error/thesis-legacy-full-resume.log",
-      "/Users/USER/Documents/New project/status_2026-05-18_legacy_full_main_v4_error/thesis_session/thesis_legacy_full_dataset/session.log"
+      "/Users/USER/Documents/New project/status_2026-05-18_legacy_full_main_v4_error/thesis_session/thesis_legacy_full_dataset/session.log",
+      "/Users/USER/Documents/New project/status_2026-05-18_legacy_full_main_v5_error/thesis-legacy-full-resume.log",
+      "/Users/USER/Documents/New project/status_2026-05-18_legacy_full_main_v5_error/thesis_session/thesis_legacy_full_dataset/session.log"
     ]
   },
-  "notes": "Latest completed snapshot is epoch 17 validation after the main-account guarded GPU run stopped at Kaggle's max execution duration. The run passed the epoch-16 guard, used a Tesla P100, and advanced through epochs 16-17. The main account version 4 failed fast because Kaggle mounted a stale epoch-15 artifact copy despite the refreshed artifact dataset; the epoch-18 guard prevented wasted training. A dedicated cache-busting artifact dataset, kazmirfahrier/thesis-legacy-full-artifacts-epoch17, was created on May 18 and version 5 was launched with an epoch-18 guard. The policy checker decision remains continue_short_baseline with 8 epochs left before the 25-epoch patience stop. Training accuracy has improved, but validation remains near chance so far. This pooled split is a Phase 1 leakage-gap baseline, not the final publication-grade generalization result."
+  "notes": "Latest completed snapshot is epoch 17 validation after the main-account guarded GPU run stopped at Kaggle's max execution duration. The run passed the epoch-16 guard, used a Tesla P100, and advanced through epochs 16-17. The main account version 4 failed fast because Kaggle mounted a stale epoch-15 artifact copy despite the refreshed artifact dataset; the epoch-18 guard prevented wasted training. A dedicated cache-busting artifact dataset, kazmirfahrier/thesis-legacy-full-artifacts-epoch17, was created on May 18. Version 5 failed fast because the embedded resume script did not auto-discover the new dedicated artifact slug, leaving no checkpoint synced into the working train directory. Version 6 was launched with the dedicated epoch-17 dataset, explicit resume root, and an epoch-18 guard. The policy checker decision remains continue_short_baseline with 8 epochs left before the 25-epoch patience stop. Training accuracy has improved, but validation remains near chance so far. This pooled split is a Phase 1 leakage-gap baseline, not the final publication-grade generalization result."
 }
