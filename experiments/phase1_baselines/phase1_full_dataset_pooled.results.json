@@ -1,7 +1,7 @@
 {
   "experiment_id": "phase1_full_dataset_pooled",
-  "status": "running_from_epoch17_artifact",
-  "updated_at": "2026-05-18",
+  "status": "running_from_epoch19_artifact",
+  "updated_at": "2026-05-19",
   "dataset": {
     "primary": "OpenNeuro ds004044 / thesis public batches",
     "batches": [
@@ -26,11 +26,11 @@
   },
   "model": {
     "name": "legacy_cnn_transformer_attention",
-    "checkpoint": "kazmirfahrier/thesis-legacy-full-artifacts-epoch17:thesis_legacy_full_dataset/train/last_checkpoint.pt",
-    "resume_from": "epoch_18"
+    "checkpoint": "kazmirfahrierniloy/thesis-legacy-full-artifacts-epoch19:thesis_legacy_full_dataset/train/last_checkpoint.pt",
+    "resume_from": "epoch_20"
   },
   "training": {
-    "epochs_completed": 17,
+    "epochs_completed": 19,
     "epochs_target": 200,
     "early_stopping": true,
     "hardware": "kaggle_gpu"
@@ -54,18 +54,18 @@
     ]
   },
   "metrics": {
-    "accuracy": 0.24695506089878203,
-    "balanced_accuracy": 0.2497375512846589,
-    "macro_f1": 0.22731670541176716,
-    "mcc": -0.0002537994397769959,
-    "roc_auc": 0.5016872563036556,
-    "prc_auc": 0.25754533175289546,
+    "accuracy": 0.24443511129777404,
+    "balanced_accuracy": 0.24679970505121024,
+    "macro_f1": 0.2325581182901783,
+    "mcc": -0.004112712495135056,
+    "roc_auc": 0.505832044293476,
+    "prc_auc": 0.25863940508598326,
     "accuracy_ci95": [null, null]
   },
   "folds": [],
   "artifacts": {
-    "kaggle_kernel": "kazmirfahrier/thesis-legacy-full-resume",
-    "kaggle_artifact_dataset": "kazmirfahrier/thesis-legacy-full-artifacts-epoch17",
+    "kaggle_kernel": "kazmirfahrierniloy/thesis-legacy-full-resume",
+    "kaggle_artifact_dataset": "kazmirfahrierniloy/thesis-legacy-full-artifacts-epoch19",
     "logs": [
       "/Users/USER/Documents/New project/status_2026-05-10_legacy_full_niloy_v2_duration/thesis-legacy-full-resume.log",
       "/Users/USER/Documents/New project/status_2026-05-10_legacy_full_niloy_v2_duration/thesis_session/thesis_legacy_full_dataset/session.log",
@@ -84,8 +84,11 @@
       "/Users/USER/Documents/New project/status_2026-05-18_legacy_full_main_v5_error/thesis-legacy-full-resume.log",
       "/Users/USER/Documents/New project/status_2026-05-18_legacy_full_main_v5_error/thesis_session/thesis_legacy_full_dataset/session.log",
       "/Users/USER/Documents/New project/status_2026-05-18_legacy_full_main_v6_error/thesis-legacy-full-resume.log",
-      "/Users/USER/Documents/New project/status_2026-05-18_legacy_full_main_v6_error/thesis_session/thesis_legacy_full_dataset/session.log"
+      "/Users/USER/Documents/New project/status_2026-05-18_legacy_full_main_v6_error/thesis_session/thesis_legacy_full_dataset/session.log",
+      "/Users/USER/Documents/New project/status_2026-05-19_legacy_full_main_v7_duration/thesis-legacy-full-resume.log",
+      "/Users/USER/Documents/New project/status_2026-05-19_legacy_full_main_v7_duration/thesis_session/thesis_legacy_full_dataset/session.log",
+      "/Users/USER/Documents/New project/status_2026-05-19_legacy_full_niloy_v4_error/thesis-legacy-full-resume.log"
     ]
   },
-  "notes": "Latest completed snapshot is epoch 17 validation after the main-account guarded GPU run stopped at Kaggle's max execution duration. The run passed the epoch-16 guard, used a Tesla P100, and advanced through epochs 16-17. The main account version 4 failed fast because Kaggle mounted a stale epoch-15 artifact copy despite the refreshed artifact dataset; the epoch-18 guard prevented wasted training. A dedicated cache-busting artifact dataset, kazmirfahrier/thesis-legacy-full-artifacts-epoch17, was created on May 18. Version 5 failed fast because the embedded resume script did not auto-discover the new dedicated artifact slug, leaving no checkpoint synced into the working train directory. Version 6 failed fast because Kaggle mounted the dedicated dataset somewhere other than the guessed /kaggle/input/datasets/kazmirfahrier/thesis-legacy-full-artifacts-epoch17 path. Version 7 was launched with runtime /kaggle/input mount discovery and an epoch-18 guard. The policy checker decision remains continue_short_baseline with 8 epochs left before the 25-epoch patience stop. Training accuracy has improved, but validation remains near chance so far. This pooled split is a Phase 1 leakage-gap baseline, not the final publication-grade generalization result."
+  "notes": "Latest completed snapshot is epoch 19 validation after the main-account version 7 guarded GPU run stopped at Kaggle's max execution duration. The run passed the epoch-18 guard, used a Tesla P100, and advanced through epochs 18-19. Epoch 18 briefly improved validation accuracy to 0.2545 and macro F1 to 0.2504, but this remains near chance and below the 0.30/0.30 extension threshold; epoch 19 validation fell back to accuracy 0.2444 and macro F1 0.2326. A dedicated Niloy-account cache-busting artifact dataset, kazmirfahrierniloy/thesis-legacy-full-artifacts-epoch19, was created on May 19. Niloy version 3 failed because the main-account private epoch-19 artifact could not be attached to the Niloy kernel. Niloy version 4 reached a Tesla P100 and found the epoch-19 artifact, but failed before training because the wrapper passed an unsupported --min-resume-epoch argument to the bundled training script. Niloy version 5 was launched with the epoch-20 guard moved into the wrapper. The policy checker decision remains continue_short_baseline with 6 epochs left before the 25-epoch patience stop. Training accuracy has improved, but validation remains near chance so far. This pooled split is a Phase 1 leakage-gap baseline, not the final publication-grade generalization result."
 }

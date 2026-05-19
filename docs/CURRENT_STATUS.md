@@ -1,6 +1,6 @@
 # Current Status
 
-Last updated: 2026-05-18 13:45 EDT.
+Last updated: 2026-05-19 19:55 EDT.
 
 This repository is tracking the active full-dataset thesis runs for 4-class motor-task fMRI classification. The unpublished manuscript and private paper PDFs are intentionally not part of this public repo.
 
@@ -8,7 +8,7 @@ This repository is tracking the active full-dataset thesis runs for 4-class moto
 
 | Experiment | Kaggle kernel | Status | Purpose |
 | --- | --- | --- | --- |
-| Full-dataset pooled legacy baseline | [`kazmirfahrier/thesis-legacy-full-resume`](https://www.kaggle.com/code/kazmirfahrier/thesis-legacy-full-resume) | Running version 7 from a dedicated epoch-17 artifact dataset with runtime mount discovery and epoch-18 guard | Quantify the full-data pooled-split baseline for the Phase 1 leakage-gap comparison. |
+| Full-dataset pooled legacy baseline | [`kazmirfahrierniloy/thesis-legacy-full-resume`](https://www.kaggle.com/code/kazmirfahrierniloy/thesis-legacy-full-resume) | Running version 5 from Niloy's dedicated epoch-19 artifact dataset with a local epoch-20 resume guard | Quantify the full-data pooled-split baseline for the Phase 1 leakage-gap comparison. |
 | Full-dataset subject-wise evaluation | [`kazmirfahrier/thesis-7batch-gpucompat-runner`](https://www.kaggle.com/code/kazmirfahrier/thesis-7batch-gpucompat-runner) | Complete; final artifacts refreshed | Continue leakage-aware subject-wise 5-fold evaluation plus holdout. |
 
 ## Known Progress
@@ -44,7 +44,16 @@ This repository is tracking the active full-dataset thesis runs for 4-class moto
 - A dedicated cache-busting artifact dataset, `kazmirfahrier/thesis-legacy-full-artifacts-epoch17`, was created from the verified local epoch-17 checkpoint tree.
 - `kazmirfahrier/thesis-legacy-full-resume` version 5 failed fast because the embedded resume script did not auto-discover the new dedicated artifact slug, leaving no checkpoint synced into `/kaggle/working/thesis_session/thesis_legacy_full_dataset/train/last_checkpoint.pt`.
 - `kazmirfahrier/thesis-legacy-full-resume` version 6 failed fast because Kaggle mounted the dedicated dataset somewhere other than the guessed `/kaggle/input/datasets/kazmirfahrier/thesis-legacy-full-artifacts-epoch17` path.
-- `kazmirfahrier/thesis-legacy-full-resume` was repushed as version 7 with runtime `/kaggle/input` mount discovery and an epoch-18 guard; it is currently running.
+- `kazmirfahrier/thesis-legacy-full-resume` was repushed as version 7 with runtime `/kaggle/input` mount discovery and an epoch-18 guard.
+- The main-account version 7 guarded resume passed the epoch-18 guard, used a Kaggle Tesla P100, saved epochs 18 and 19, then stopped at Kaggle's max allowed execution duration.
+- Latest pooled epoch-19 validation snapshot: accuracy 0.2444, balanced accuracy 0.2468, macro F1 0.2326, MCC -0.0041, ROC-AUC 0.5058, PR-AUC 0.2586. This is not a final result.
+- Epoch 18 briefly improved validation accuracy to 0.2545 and macro F1 to 0.2504, but this remains near chance and below the 0.30/0.30 extension threshold.
+- Training accuracy reached 0.4889 by epoch 19, while validation remains near chance.
+- The policy checker decision after epoch 19 is `continue_short_baseline`, with 6 epochs left before the 25-epoch patience stop if validation does not materially improve.
+- A dedicated Niloy-account artifact dataset, `kazmirfahrierniloy/thesis-legacy-full-artifacts-epoch19`, was created from the verified local epoch-19 checkpoint tree.
+- `kazmirfahrierniloy/thesis-legacy-full-resume` version 3 failed because the main-account private epoch-19 artifact dataset could not be attached to the Niloy kernel.
+- `kazmirfahrierniloy/thesis-legacy-full-resume` version 4 reached a Tesla P100 and found the epoch-19 artifact, but failed before training because the wrapper passed an unsupported `--min-resume-epoch` argument to the bundled training script.
+- `kazmirfahrierniloy/thesis-legacy-full-resume` was repushed as version 5 with the epoch-20 guard moved into the wrapper; it is currently running.
 - Subject-wise fold 0 exists in `kazmirfahrier/thesis-7batch-artifacts`.
 - Subject-wise fold 1 completed successfully on a Kaggle Tesla P100 after two GPU-compatibility fixes: setting `CUBLAS_WORKSPACE_CONFIG=:4096:8` and using `training.deterministic: false`.
 - Subject-wise fold 2 completed successfully on a Kaggle Tesla P100.
@@ -61,7 +70,7 @@ This repository is tracking the active full-dataset thesis runs for 4-class moto
 | Experiment | Metric status |
 | --- | --- |
 | Original 9-subject pooled split | Historical baseline: accuracy 0.8522, MCC 0.8055, ROC-AUC 0.95, PR-AUC 0.88. |
-| Full-dataset pooled split | Epoch 17 validation snapshot: accuracy 0.2470, balanced accuracy 0.2497, macro F1 0.2273, MCC -0.0003. Version 7 guarded resume from epoch 18 is running. |
+| Full-dataset pooled split | Epoch 19 validation snapshot: accuracy 0.2444, balanced accuracy 0.2468, macro F1 0.2326, MCC -0.0041. Version 5 Niloy guarded resume from epoch 20 is running. |
 | Full-dataset subject-wise CV + holdout | Complete. All five CV folds and final holdout are chance-level: accuracy 0.25, balanced accuracy 0.25, macro F1 0.10, MCC 0.0. |
 
 ## Why This Matters
