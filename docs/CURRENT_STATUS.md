@@ -1,6 +1,6 @@
 # Current Status
 
-Last updated: 2026-05-19 19:55 EDT.
+Last updated: 2026-05-20 18:35 EDT.
 
 This repository is tracking the active full-dataset thesis runs for 4-class motor-task fMRI classification. The unpublished manuscript and private paper PDFs are intentionally not part of this public repo.
 
@@ -8,7 +8,7 @@ This repository is tracking the active full-dataset thesis runs for 4-class moto
 
 | Experiment | Kaggle kernel | Status | Purpose |
 | --- | --- | --- | --- |
-| Full-dataset pooled legacy baseline | [`kazmirfahrierniloy/thesis-legacy-full-resume`](https://www.kaggle.com/code/kazmirfahrierniloy/thesis-legacy-full-resume) | Running version 5 from Niloy's dedicated epoch-19 artifact dataset with a local epoch-20 resume guard | Quantify the full-data pooled-split baseline for the Phase 1 leakage-gap comparison. |
+| Full-dataset pooled legacy baseline | [`kazmirfahrierlover/thesis-legacy-full-resume`](https://www.kaggle.com/code/kazmirfahrierlover/thesis-legacy-full-resume) | Running version 2 from Lover's dedicated epoch-21 artifact dataset with a local epoch-22 resume guard | Quantify the full-data pooled-split baseline for the Phase 1 leakage-gap comparison. |
 | Full-dataset subject-wise evaluation | [`kazmirfahrier/thesis-7batch-gpucompat-runner`](https://www.kaggle.com/code/kazmirfahrier/thesis-7batch-gpucompat-runner) | Complete; final artifacts refreshed | Continue leakage-aware subject-wise 5-fold evaluation plus holdout. |
 
 ## Known Progress
@@ -53,7 +53,13 @@ This repository is tracking the active full-dataset thesis runs for 4-class moto
 - A dedicated Niloy-account artifact dataset, `kazmirfahrierniloy/thesis-legacy-full-artifacts-epoch19`, was created from the verified local epoch-19 checkpoint tree.
 - `kazmirfahrierniloy/thesis-legacy-full-resume` version 3 failed because the main-account private epoch-19 artifact dataset could not be attached to the Niloy kernel.
 - `kazmirfahrierniloy/thesis-legacy-full-resume` version 4 reached a Tesla P100 and found the epoch-19 artifact, but failed before training because the wrapper passed an unsupported `--min-resume-epoch` argument to the bundled training script.
-- `kazmirfahrierniloy/thesis-legacy-full-resume` was repushed as version 5 with the epoch-20 guard moved into the wrapper; it is currently running.
+- `kazmirfahrierniloy/thesis-legacy-full-resume` was repushed as version 5 with the epoch-20 guard moved into the wrapper.
+- The Niloy version 5 guarded resume passed the epoch-20 guard, used a Kaggle Tesla P100, saved epochs 20 and 21, then stopped at Kaggle's max allowed execution duration.
+- Latest pooled epoch-21 validation snapshot: accuracy 0.2545, balanced accuracy 0.2563, macro F1 0.2495, MCC 0.0084, ROC-AUC 0.5062, PR-AUC 0.2586. This is not a final result.
+- Training accuracy reached 0.5190 by epoch 21, while validation remains near chance and below the 0.30/0.30 extension threshold.
+- The policy checker decision after epoch 21 is `continue_short_baseline`, with 4 epochs left before the 25-epoch patience stop if validation does not materially improve.
+- A dedicated Lover-account artifact dataset, `kazmirfahrierlover/thesis-legacy-full-artifacts-epoch21`, was created from the verified local epoch-21 checkpoint tree.
+- `kazmirfahrierlover/thesis-legacy-full-resume` was repushed as version 2 with an epoch-22 guard and is currently running.
 - Subject-wise fold 0 exists in `kazmirfahrier/thesis-7batch-artifacts`.
 - Subject-wise fold 1 completed successfully on a Kaggle Tesla P100 after two GPU-compatibility fixes: setting `CUBLAS_WORKSPACE_CONFIG=:4096:8` and using `training.deterministic: false`.
 - Subject-wise fold 2 completed successfully on a Kaggle Tesla P100.
@@ -70,7 +76,7 @@ This repository is tracking the active full-dataset thesis runs for 4-class moto
 | Experiment | Metric status |
 | --- | --- |
 | Original 9-subject pooled split | Historical baseline: accuracy 0.8522, MCC 0.8055, ROC-AUC 0.95, PR-AUC 0.88. |
-| Full-dataset pooled split | Epoch 19 validation snapshot: accuracy 0.2444, balanced accuracy 0.2468, macro F1 0.2326, MCC -0.0041. Version 5 Niloy guarded resume from epoch 20 is running. |
+| Full-dataset pooled split | Epoch 21 validation snapshot: accuracy 0.2545, balanced accuracy 0.2563, macro F1 0.2495, MCC 0.0084. Version 2 Lover guarded resume from epoch 22 is running. |
 | Full-dataset subject-wise CV + holdout | Complete. All five CV folds and final holdout are chance-level: accuracy 0.25, balanced accuracy 0.25, macro F1 0.10, MCC 0.0. |
 
 ## Why This Matters
@@ -86,8 +92,8 @@ Phase 1 is designed to separate optimistic pooled-split performance from leakage
 
 ## Next Actions
 
-- Monitor the active main-account pooled legacy resume and download outputs when it stops.
-- Refresh pooled legacy artifacts if the active run saves progress beyond epoch 17.
+- Monitor the active Lover-account pooled legacy resume and download outputs when it stops.
+- Refresh pooled legacy artifacts if the active run saves progress beyond epoch 21.
 - Evaluate every downloaded pooled run with `scripts/assess_pooled_legacy_policy.py` before launching another resume hop.
 - Treat the completed subject-wise result as evidence that the current full-dataset subject-wise setup is not learning; investigate data/model/label issues before making publication claims.
 - Download completed outputs into local status folders after each Kaggle session.
