@@ -1,6 +1,6 @@
 # Current Status
 
-Last updated: 2026-05-21 21:50 EDT.
+Last updated: 2026-05-22 15:20 EDT.
 
 This repository is tracking the active full-dataset thesis runs for 4-class motor-task fMRI classification. The unpublished manuscript and private paper PDFs are intentionally not part of this public repo.
 
@@ -8,7 +8,7 @@ This repository is tracking the active full-dataset thesis runs for 4-class moto
 
 | Experiment | Kaggle kernel | Status | Purpose |
 | --- | --- | --- | --- |
-| Full-dataset pooled legacy baseline | [`b6uejhvvnmiwb/thesis-legacy-full-resume`](https://www.kaggle.com/code/b6uejhvvnmiwb/thesis-legacy-full-resume) | Running version 2 from B6's dedicated epoch-23 artifact dataset with a local epoch-24 resume guard | Quantify the full-data pooled-split baseline for the Phase 1 leakage-gap comparison. |
+| Full-dataset pooled legacy baseline | [`b6uejhvvnmiwb/thesis-legacy-full-resume`](https://www.kaggle.com/code/b6uejhvvnmiwb/thesis-legacy-full-resume) | Stopped by controlled policy at epoch 25 | Quantify the full-data pooled-split baseline for the Phase 1 leakage-gap comparison. |
 | Full-dataset subject-wise evaluation | [`kazmirfahrier/thesis-7batch-gpucompat-runner`](https://www.kaggle.com/code/kazmirfahrier/thesis-7batch-gpucompat-runner) | Complete; final artifacts refreshed | Continue leakage-aware subject-wise 5-fold evaluation plus holdout. |
 
 ## Known Progress
@@ -66,7 +66,12 @@ This repository is tracking the active full-dataset thesis runs for 4-class moto
 - Training accuracy reached 0.5439 by epoch 23, while validation remains close to chance.
 - The controlled policy checker decision after epoch 23 is `continue_short_baseline`, with 2 epochs left before the planned patience stop check unless validation crosses the 0.30/0.30 extension threshold.
 - A dedicated B6-account artifact dataset, `b6uejhvvnmiwb/thesis-legacy-full-artifacts-epoch23`, was created from the verified local epoch-23 checkpoint tree.
-- `b6uejhvvnmiwb/thesis-legacy-full-resume` was repushed as version 2 with an epoch-24 guard and is currently running.
+- `b6uejhvvnmiwb/thesis-legacy-full-resume` was repushed as version 2 with an epoch-24 guard.
+- The B6 version 2 guarded resume passed the epoch-24 guard, used a Kaggle Tesla P100, saved epochs 24 and 25, then stopped at Kaggle's max allowed execution duration.
+- Latest pooled epoch-25 validation snapshot: accuracy 0.2629, balanced accuracy 0.2648, macro F1 0.2501, MCC 0.0206, ROC-AUC 0.5176, PR-AUC 0.2663.
+- Training accuracy reached 0.5690 by epoch 25, while validation stayed close to chance and below the 0.30 accuracy / 0.30 macro-F1 extension threshold.
+- The controlled policy checker decision after epoch 25 is `stop`: `epochs_since_best` is 25, `remaining_epochs_to_patience` is 0, and the validation extension threshold was not met.
+- A final B6-account artifact dataset, `b6uejhvvnmiwb/thesis-legacy-full-artifacts-epoch25-final`, was uploaded from the verified local epoch-25 checkpoint tree. Kaggle accepted the upload; the private dataset may briefly show size `0` while Kaggle finishes processing the uploaded zip.
 - Subject-wise fold 0 exists in `kazmirfahrier/thesis-7batch-artifacts`.
 - Subject-wise fold 1 completed successfully on a Kaggle Tesla P100 after two GPU-compatibility fixes: setting `CUBLAS_WORKSPACE_CONFIG=:4096:8` and using `training.deterministic: false`.
 - Subject-wise fold 2 completed successfully on a Kaggle Tesla P100.
@@ -83,7 +88,7 @@ This repository is tracking the active full-dataset thesis runs for 4-class moto
 | Experiment | Metric status |
 | --- | --- |
 | Original 9-subject pooled split | Historical baseline: accuracy 0.8522, MCC 0.8055, ROC-AUC 0.95, PR-AUC 0.88. |
-| Full-dataset pooled split | Epoch 23 validation snapshot: accuracy 0.2600, balanced accuracy 0.2613, macro F1 0.2564, MCC 0.0154. Version 2 B6 guarded resume from epoch 24 is running. |
+| Full-dataset pooled split | Stopped at epoch 25 by controlled policy. Final validation snapshot: accuracy 0.2629, balanced accuracy 0.2648, macro F1 0.2501, MCC 0.0206. Training accuracy reached 0.5690, so the model is fitting training data without meaningful validation generalization. |
 | Full-dataset subject-wise CV + holdout | Complete. All five CV folds and final holdout are chance-level: accuracy 0.25, balanced accuracy 0.25, macro F1 0.10, MCC 0.0. |
 
 ## Why This Matters
@@ -99,9 +104,9 @@ Phase 1 is designed to separate optimistic pooled-split performance from leakage
 
 ## Next Actions
 
-- Monitor the active B6-account pooled legacy resume and download outputs when it stops.
-- Refresh pooled legacy artifacts if the active run saves progress beyond epoch 23.
-- Evaluate every downloaded pooled run with `scripts/assess_pooled_legacy_policy.py` before launching another resume hop.
+- Do not launch another pooled legacy resume hop unless the 0.30 accuracy / 0.30 macro-F1 extension rule is explicitly overridden.
+- Treat the pooled legacy lane as complete for Phase 1 baseline purposes and pivot to diagnosis.
+- Start the dataset/label audit, preprocessing and normalization checks, leakage analysis, and simple sanity-check baselines.
 - Treat the completed subject-wise result as evidence that the current full-dataset subject-wise setup is not learning; investigate data/model/label issues before making publication claims.
 - Download completed outputs into local status folders after each Kaggle session.
 - Update `experiments/phase1_baselines/*.results.json` when new metrics or fold completions are available.

@@ -1,7 +1,7 @@
 {
   "experiment_id": "phase1_full_dataset_pooled",
-  "status": "running_from_epoch23_artifact",
-  "updated_at": "2026-05-21",
+  "status": "stopped_by_controlled_policy_epoch25",
+  "updated_at": "2026-05-22",
   "dataset": {
     "primary": "OpenNeuro ds004044 / thesis public batches",
     "batches": [
@@ -26,18 +26,18 @@
   },
   "model": {
     "name": "legacy_cnn_transformer_attention",
-    "checkpoint": "b6uejhvvnmiwb/thesis-legacy-full-artifacts-epoch23:thesis_legacy_full_dataset/train/last_checkpoint.pt",
-    "resume_from": "epoch_24"
+    "checkpoint": "b6uejhvvnmiwb/thesis-legacy-full-artifacts-epoch25-final:thesis_legacy_full_dataset/train/last_checkpoint.pt",
+    "resume_from": "stopped"
   },
   "training": {
-    "epochs_completed": 23,
+    "epochs_completed": 25,
     "epochs_target": 200,
     "early_stopping": true,
     "hardware": "kaggle_gpu"
   },
   "decision_policy": {
-    "current_decision": "continue_short_baseline_only",
-    "recommendation": "continue only until early stopping unless validation improves materially",
+    "current_decision": "stop",
+    "recommendation": "stop pooled legacy resume lane and pivot to diagnosis",
     "best_epoch_for_patience": 0,
     "early_stopping_patience": 25,
     "stop_if": "epochs_since_best >= 25 and validation thresholds are not met",
@@ -54,18 +54,18 @@
     ]
   },
   "metrics": {
-    "accuracy": 0.2599748005039899,
-    "balanced_accuracy": 0.26127163961543953,
-    "macro_f1": 0.25642555301544157,
-    "mcc": 0.015386656841392173,
-    "roc_auc": 0.5131502695026108,
-    "prc_auc": 0.2648040718511347,
+    "accuracy": 0.2629147417051659,
+    "balanced_accuracy": 0.2648261538891334,
+    "macro_f1": 0.2500725386282059,
+    "mcc": 0.02063938814163771,
+    "roc_auc": 0.5175835599375571,
+    "prc_auc": 0.266314369095807,
     "accuracy_ci95": [null, null]
   },
   "folds": [],
   "artifacts": {
     "kaggle_kernel": "b6uejhvvnmiwb/thesis-legacy-full-resume",
-    "kaggle_artifact_dataset": "b6uejhvvnmiwb/thesis-legacy-full-artifacts-epoch23",
+    "kaggle_artifact_dataset": "b6uejhvvnmiwb/thesis-legacy-full-artifacts-epoch25-final",
     "logs": [
       "/Users/USER/Documents/New project/status_2026-05-10_legacy_full_niloy_v2_duration/thesis-legacy-full-resume.log",
       "/Users/USER/Documents/New project/status_2026-05-10_legacy_full_niloy_v2_duration/thesis_session/thesis_legacy_full_dataset/session.log",
@@ -91,8 +91,10 @@
       "/Users/USER/Documents/New project/status_2026-05-20_legacy_full_niloy_v5_duration/thesis-legacy-full-resume.log",
       "/Users/USER/Documents/New project/status_2026-05-20_legacy_full_niloy_v5_duration/thesis_session/thesis_legacy_full_dataset/session.log",
       "/Users/USER/Documents/New project/status_2026-05-21_legacy_full_lover_v2_duration/thesis-legacy-full-resume.log",
-      "/Users/USER/Documents/New project/status_2026-05-21_legacy_full_lover_v2_duration/thesis_session/thesis_legacy_full_dataset/session.log"
+      "/Users/USER/Documents/New project/status_2026-05-21_legacy_full_lover_v2_duration/thesis_session/thesis_legacy_full_dataset/session.log",
+      "/Users/USER/Documents/New project/status_2026-05-22_legacy_full_b6_v2_duration/thesis-legacy-full-resume.log",
+      "/Users/USER/Documents/New project/status_2026-05-22_legacy_full_b6_v2_duration/thesis_session/thesis_legacy_full_dataset/session.log"
     ]
   },
-  "notes": "Latest completed snapshot is epoch 23 validation after the Lover version 2 guarded GPU run stopped at Kaggle's max execution duration. The run passed the epoch-22 guard, used a Tesla P100, and advanced through epochs 22-23. Epoch 22 briefly improved validation accuracy to 0.2629 and macro F1 to 0.2584, but this remains close to chance and below the 0.30/0.30 extension threshold; epoch 23 validation was accuracy 0.2600 and macro F1 0.2564. A dedicated B6-account cache-busting artifact dataset, b6uejhvvnmiwb/thesis-legacy-full-artifacts-epoch23, was created on May 21. B6 version 2 was launched from that dataset with an epoch-24 guard. The controlled policy checker decision remains continue_short_baseline with 2 epochs left before the planned patience stop check unless the extension threshold is met. Training accuracy has improved, but validation remains close to chance so far. This pooled split is a Phase 1 leakage-gap baseline, not the final publication-grade generalization result."
+  "notes": "Final completed snapshot is epoch 25 validation after the B6 version 2 guarded GPU run stopped at Kaggle's max execution duration. The run passed the epoch-24 guard, used a Tesla P100, and advanced through epochs 24-25. Epoch 25 validation was accuracy 0.2629, balanced accuracy 0.2648, macro F1 0.2501, MCC 0.0206, ROC-AUC 0.5176, and PR-AUC 0.2663. Training accuracy reached 0.5690, but validation remained close to chance and below the 0.30/0.30 extension threshold. The controlled policy checker decision is stop because 25 epochs have elapsed since the configured best epoch for patience and the extension threshold was not met. A final B6-account artifact dataset, b6uejhvvnmiwb/thesis-legacy-full-artifacts-epoch25-final, was uploaded on May 22 from the verified local epoch-25 checkpoint tree. Do not launch another pooled legacy resume hop unless this stop policy is explicitly overridden; pivot to dataset/label audit, preprocessing and normalization checks, leakage analysis, and simpler sanity-check baselines."
 }
