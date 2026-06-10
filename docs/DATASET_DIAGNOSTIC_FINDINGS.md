@@ -49,6 +49,19 @@ Current labels come from class folders and filenames. The manifest proves the fo
 
 The original notebook-style model used padded 7x7x7 convolutions and no output softmax before cross-entropy. The later legacy wrapper differs from that architecture. The old 85% number should be treated as a historical subset result until reproduced with the exact original code and data subset.
 
+## Tiny Overfit Sanity Result
+
+The first corrected tiny-overfit check ran on Kaggle CPU using one balanced subject-run block from `thesis-batch-01`:
+
+- selected block: `sub-01`, run `1`
+- samples: 64 total, 16 volumes per class
+- preprocessing: per-volume z-score, downsampled to `16 x 16 x 16`
+- model/loss: small 3D CNN with raw logits and cross-entropy
+- best training accuracy in 40 epochs: `0.9219`
+- final training accuracy: `0.8906`
+
+This is an important partial signal. A corrected tiny model can learn far above chance on one subject-run, so the class labels are unlikely to be pure noise. But it did not yet cleanly memorize the block, so this is not a full pass. The next diagnostic should use a smaller micro-overfit block or a stronger tiny model and should complete with a readable summary even if the threshold is not reached.
+
 ## What To Do Next
 
 Run these checks in this order:

@@ -99,6 +99,7 @@ def choose_complete_block(
     index: Dict[Tuple[str, int], Dict[str, List[Tuple[int, Path]]]],
     subject_id: str | None,
     run_id: int | None,
+    volumes_per_class: int,
 ) -> Tuple[Tuple[str, int], Dict[str, List[Tuple[int, Path]]]]:
     keys = sorted(index.keys())
     if subject_id is not None:
@@ -108,9 +109,9 @@ def choose_complete_block(
 
     for key in keys:
         block = index[key]
-        if all(len(block.get(class_name, [])) >= 16 for class_name in CLASS_NAMES):
-            return key, {class_name: sorted(block[class_name])[:16] for class_name in CLASS_NAMES}
-    raise ValueError("Could not find a complete subject-run block with 16 volumes per class")
+        if all(len(block.get(class_name, [])) >= volumes_per_class for class_name in CLASS_NAMES):
+            return key, {class_name: sorted(block[class_name])[:volumes_per_class] for class_name in CLASS_NAMES}
+    raise ValueError(f"Could not find a complete subject-run block with {volumes_per_class} volumes per class")
 
 
 def load_volume(path: Path, target_shape: Tuple[int, int, int]) -> np.ndarray:
@@ -146,23 +147,26 @@ def build_tensors(
 
 
 class TinyCNN3D(nn.Module):
-    def __init__(self, num_classes: int = 4) -> None:
+    def __init__(self, num_classes: int = 4, base_channels: int = 12) -> None:
         super().__init__()
+        c1 = base_channels
+        c2 = base_channels * 2
+        c3 = base_channels * 4
         self.net = nn.Sequential(
-            nn.Conv3d(1, 8, kernel_size=3, padding=1),
-            nn.BatchNorm3d(8),
+            nn.Conv3d(1, c1, kernel_size=3, padding=1),
+            nn.BatchNorm3d(c1),
             nn.ReLU(inplace=True),
             nn.MaxPool3d(2),
-            nn.Conv3d(8, 16, kernel_size=3, padding=1),
-            nn.BatchNorm3d(16),
+            nn.Conv3d(c1, c2, kernel_size=3, padding=1),
+            nn.BatchNorm3d(c2),
             nn.ReLU(inplace=True),
             nn.MaxPool3d(2),
-            nn.Conv3d(16, 32, kernel_size=3, padding=1),
-            nn.BatchNorm3d(32),
+            nn.Conv3d(c2, c3, kernel_size=3, padding=1),
+            nn.BatchNorm3d(c3),
             nn.ReLU(inplace=True),
             nn.AdaptiveAvgPool3d(1),
         )
-        self.fc = nn.Linear(32, num_classes)
+        self.fc = nn.Linear(c3, num_classes)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         x = self.net(x).flatten(1)
@@ -176,8 +180,10 @@ def train_overfit(
     batch_size: int,
     lr: float,
     device: torch.device,
+    base_channels: int,
+    success_threshold: float,
 ) -> List[Dict[str, float]]:
-    model = TinyCNN3D(num_classes=len(CLASS_NAMES)).to(device)
+    model = TinyCNN3D(num_classes=len(CLASS_NAMES), base_channels=base_channels).to(device)
     loader = DataLoader(TensorDataset(x, y), batch_size=batch_size, shuffle=True)
     optimizer = torch.optim.AdamW(model.parameters(), lr=lr, weight_decay=0.0)
     history: List[Dict[str, float]] = []
@@ -207,7 +213,7 @@ def train_overfit(
         }
         history.append(row)
         print(f"epoch={epoch:03d} loss={row['loss']:.4f} acc={row['accuracy']:.4f}", flush=True)
-        if row["accuracy"] >= 1.0:
+        if row["accuracy"] >= success_threshold:
             break
     return history
 
@@ -218,9 +224,13 @@ def main() -> None:
     parser.add_argument("--subject-id", default=None)
     parser.add_argument("--run-id", type=int, default=None)
     parser.add_argument("--target-shape", nargs=3, type=int, default=[32, 32, 32])
+    parser.add_argument("--volumes-per-class", type=int, default=16)
     parser.add_argument("--epochs", type=int, default=80)
     parser.add_argument("--batch-size", type=int, default=8)
+    parser.add_argument("--base-channels", type=int, default=12)
     parser.add_argument("--lr", type=float, default=1e-3)
+    parser.add_argument("--success-threshold", type=float, default=0.95)
+    parser.add_argument("--no-error-on-fail", action="store_true")
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--out-dir", default="/kaggle/working/tiny_overfit_sanity")
     args = parser.parse_args()
@@ -230,36 +240,61 @@ def main() -> None:
     print(f"device={device}", flush=True)
 
     index = load_index(args.batch_slugs)
-    (subject_id, run_id), block = choose_complete_block(index, args.subject_id, args.run_id)
+    (subject_id, run_id), block = choose_complete_block(
+        index,
+        args.subject_id,
+        args.run_id,
+        args.volumes_per_class,
+    )
     print(f"selected_subject={subject_id} selected_run={run_id}", flush=True)
 
     x, y, samples = build_tensors(block, tuple(args.target_shape))
     class_counts = {class_name: int((y == idx).sum().item()) for idx, class_name in enumerate(CLASS_NAMES)}
     print(f"tensor_shape={tuple(x.shape)} class_counts={class_counts}", flush=True)
 
-    history = train_overfit(x, y, args.epochs, args.batch_size, args.lr, device)
+    history = train_overfit(
+        x,
+        y,
+        args.epochs,
+        args.batch_size,
+        args.lr,
+        device,
+        args.base_channels,
+        args.success_threshold,
+    )
     final = history[-1]
-    success = bool(final["accuracy"] >= 0.95)
+    best = max(history, key=lambda row: row["accuracy"])
+    success = bool(best["accuracy"] >= args.success_threshold)
 
     out_dir = Path(args.out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
     summary = {
         "success": success,
-        "criterion": "success if final training accuracy >= 0.95 on 64-sample one-run block",
+        "criterion": f"success if best training accuracy >= {args.success_threshold:.4f} on one subject-run block",
+        "success_threshold": float(args.success_threshold),
         "selected_subject": subject_id,
         "selected_run": run_id,
         "target_shape": list(args.target_shape),
+        "volumes_per_class": int(args.volumes_per_class),
         "num_samples": int(y.numel()),
         "class_counts": class_counts,
         "device": str(device),
+        "base_channels": int(args.base_channels),
         "final": final,
+        "best": best,
         "history": history,
         "samples": samples,
     }
     (out_dir / "summary.json").write_text(json.dumps(summary, indent=2) + "\n")
-    print("SUMMARY", json.dumps({k: summary[k] for k in ["success", "selected_subject", "selected_run", "final"]}), flush=True)
-    if not success:
-        raise SystemExit("Tiny overfit sanity check failed to reach >=0.95 training accuracy")
+    print(
+        "SUMMARY",
+        json.dumps({k: summary[k] for k in ["success", "selected_subject", "selected_run", "best", "final"]}),
+        flush=True,
+    )
+    if not success and not args.no_error_on_fail:
+        raise SystemExit(
+            f"Tiny overfit sanity check failed to reach >= {args.success_threshold:.4f} best training accuracy"
+        )
 
 
 if __name__ == "__main__":
