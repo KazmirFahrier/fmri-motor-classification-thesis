@@ -62,6 +62,17 @@ The first corrected tiny-overfit check ran on Kaggle CPU using one balanced subj
 
 This is an important partial signal. A corrected tiny model can learn far above chance on one subject-run, so the class labels are unlikely to be pure noise. But it did not yet cleanly memorize the block, so this is not a full pass. The next diagnostic should use a smaller micro-overfit block or a stronger tiny model and should complete with a readable summary even if the threshold is not reached.
 
+The stronger micro-overfit check then passed cleanly:
+
+- selected block: `sub-01`, run `1`
+- samples: 32 total, 8 volumes per class
+- preprocessing: per-volume z-score, downsampled to `24 x 24 x 24`
+- model/loss: slightly wider 3D CNN with raw logits and cross-entropy
+- success target: best training accuracy at least `0.99`
+- result: `1.0000` training accuracy at epoch `35`
+
+This means the extracted class folders contain a learnable within-run signal when the model/loss/preprocessing are sane. The full-dataset failure should not be interpreted as "the data has no signal." It more likely points to the legacy wrapper configuration, temporal framing, normalization, and/or generalization split rather than totally corrupted labels.
+
 ## What To Do Next
 
 Run these checks in this order:
