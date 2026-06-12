@@ -1,6 +1,6 @@
 # Current Status
 
-Last updated: 2026-05-22 15:20 EDT.
+Last updated: 2026-06-12.
 
 This repository is tracking the active full-dataset thesis runs for 4-class motor-task fMRI classification. The unpublished manuscript and private paper PDFs are intentionally not part of this public repo.
 
@@ -10,6 +10,7 @@ This repository is tracking the active full-dataset thesis runs for 4-class moto
 | --- | --- | --- | --- |
 | Full-dataset pooled legacy baseline | [`b6uejhvvnmiwb/thesis-legacy-full-resume`](https://www.kaggle.com/code/b6uejhvvnmiwb/thesis-legacy-full-resume) | Stopped by controlled policy at epoch 25 | Quantify the full-data pooled-split baseline for the Phase 1 leakage-gap comparison. |
 | Full-dataset subject-wise evaluation | [`kazmirfahrier/thesis-7batch-gpucompat-runner`](https://www.kaggle.com/code/kazmirfahrier/thesis-7batch-gpucompat-runner) | Complete; final artifacts refreshed | Continue leakage-aware subject-wise 5-fold evaluation plus holdout. |
+| Corrected clip feature-transfer diagnostic | [`b6uejhvvnmiwb/thesis-corrected-clip-baseline`](https://www.kaggle.com/code/b6uejhvvnmiwb/thesis-corrected-clip-baseline) | Complete | Diagnose whether corrected clip features transfer across runs/subjects. |
 
 ## Known Progress
 
@@ -82,6 +83,14 @@ This repository is tracking the active full-dataset thesis runs for 4-class moto
 - The final subject-wise holdout-evaluation hop completed as `kazmirfahrier/thesis-7batch-gpucompat-runner` version 4.
 - Final subject-wise holdout metrics are chance-level: accuracy 0.25, balanced accuracy 0.25, macro F1 0.10, MCC 0.0, ROC-AUC 0.4983, PR-AUC 0.2513.
 - The subject-wise artifact dataset `kazmirfahrier/thesis-7batch-artifacts` was refreshed after holdout-evaluation completion and now has `next_stage: complete`.
+- Corrected clip-window audit confirmed that the class folders already contain two 8-volume event windows per class/run. Cleaned clip configs now use `hrf_shift: 0`; applying positive HRF shift inside `ClipDataset` only discards valid clips.
+- Corrected temporal ResNet subject-holdout and same-subject run-holdout diagnostics stayed at chance: accuracy `0.25`, balanced accuracy `0.25`, macro F1 `0.10`.
+- A BatchNorm train=validation overfit probe on `sub-01`, run `1`, reached train accuracy/F1 `1.00`, but eval-mode train=validation accuracy reached only `0.50`, indicating a train/eval mismatch under tiny batches.
+- A GroupNorm temporal ResNet follow-up did not fix the corrected clip path: train=validation eval accuracy stayed at `0.25` and macro F1 at `0.10`.
+- A no-normalization tiny temporal CNN also failed to overfit the same 24 corrected clips in eval mode, staying at `0.25` accuracy and `0.10` macro F1.
+- Non-neural corrected-clip spatial features do show local signal. On `sub-01`, run `1`, nearest-centroid on clip-mean spatial features reached `0.75` train=eval accuracy and `0.7083` leave-one-clip-out accuracy.
+- Broader corrected-clip feature-transfer diagnostic across `sub-01` through `sub-08` used 1,152 clips. Within subject-run leave-one-clip-out reached accuracy `0.7613`, balanced accuracy `0.7613`, macro F1 `0.7619`, MCC `0.6824`.
+- The same simple features did not transfer well: same-subject run holdout reached accuracy `0.2604`, macro F1 `0.2553`; subject holdout reached accuracy `0.3160`, macro F1 `0.2981`.
 
 ## Current Metrics Snapshot
 
@@ -90,6 +99,7 @@ This repository is tracking the active full-dataset thesis runs for 4-class moto
 | Original 9-subject pooled split | Historical baseline: accuracy 0.8522, MCC 0.8055, ROC-AUC 0.95, PR-AUC 0.88. |
 | Full-dataset pooled split | Stopped at epoch 25 by controlled policy. Final validation snapshot: accuracy 0.2629, balanced accuracy 0.2648, macro F1 0.2501, MCC 0.0206. Training accuracy reached 0.5690, so the model is fitting training data without meaningful validation generalization. |
 | Full-dataset subject-wise CV + holdout | Complete. All five CV folds and final holdout are chance-level: accuracy 0.25, balanced accuracy 0.25, macro F1 0.10, MCC 0.0. |
+| Corrected clip feature transfer | Local within-run signal exists: nearest-centroid leave-one-clip-out accuracy 0.7613 over 48 subject-runs. Held-out run and held-out subject transfer remain near chance: 0.2604 and 0.3160 accuracy respectively. |
 
 ## Why This Matters
 
@@ -106,7 +116,9 @@ Phase 1 is designed to separate optimistic pooled-split performance from leakage
 
 - Do not launch another pooled legacy resume hop unless the 0.30 accuracy / 0.30 macro-F1 extension rule is explicitly overridden.
 - Treat the pooled legacy lane as complete for Phase 1 baseline purposes and pivot to diagnosis.
-- Start the dataset/label audit, preprocessing and normalization checks, leakage analysis, and simple sanity-check baselines.
+- Continue dataset/label audit, preprocessing and normalization checks, leakage analysis, and simple sanity-check baselines.
+- Prioritize run/subject nuisance control and domain-alignment diagnostics because corrected clip features classify well within runs but fail across held-out runs/subjects.
+- Do not trust the current temporal ResNet corrected-clip recipe until a small eval-mode overfit probe succeeds.
 - Treat the completed subject-wise result as evidence that the current full-dataset subject-wise setup is not learning; investigate data/model/label issues before making publication claims.
 - Download completed outputs into local status folders after each Kaggle session.
 - Update `experiments/phase1_baselines/*.results.json` when new metrics or fold completions are available.

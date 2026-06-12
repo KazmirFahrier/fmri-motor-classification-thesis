@@ -175,30 +175,56 @@ The train=validation overfit check on `sub-01`, run `1`, showed that the BatchNo
 
 This points to unstable BatchNorm running statistics under tiny fMRI batches. The model code now supports `norm: group` for 3D ResNet encoders, and the corrected diagnostic configs use GroupNorm. The next overfit check should pass in evaluation mode before any broader baseline is trusted.
 
+The GroupNorm follow-up did not fix the corrected temporal model. On the same `sub-01`, run `1`, train=validation clip split:
+
+- best evaluation accuracy stayed at `0.25`
+- best evaluation macro F1 stayed at `0.10`
+- training loss converged to approximately `1.386`, consistent with uniform 4-class predictions
+- the final confusion matrix predicted only `Left leg movements`
+
+A smaller no-normalization temporal CNN probe also failed to overfit the same 24 corrected clips in eval mode, again staying at `0.25` accuracy and `0.10` macro F1. However, the same probe's non-neural nearest-centroid classifier on clip-mean spatial features reached:
+
+- `0.75` train=eval accuracy on `sub-01`, run `1`
+- `0.7083` leave-one-clip-out accuracy on `sub-01`, run `1`
+
+This shows that corrected clips contain class-related spatial structure, but the current neural training recipes are not exploiting it reliably.
+
+A broader corrected-clip feature-transfer diagnostic was then run on the first 8 subjects (`sub-01` through `sub-08`) using 1,152 clips and 13,824-dimensional clip-mean spatial features (`24 x 24 x 24`). Nearest-centroid results were:
+
+- within subject-run leave-one-clip-out: accuracy `0.7613`, balanced accuracy `0.7613`, macro F1 `0.7619`, MCC `0.6824`
+- same-subject run holdout, training runs `1-5` and validating run `6`: accuracy `0.2604`, balanced accuracy `0.2604`, macro F1 `0.2553`, MCC `0.0141`
+- subject holdout, training `sub-01` through `sub-06` and validating `sub-07`/`sub-08`: accuracy `0.3160`, balanced accuracy `0.3160`, macro F1 `0.2981`, MCC `0.0911`
+
+The interpretation is now sharper: class signal exists locally inside individual subject-runs, but the simple spatial signature does not transfer robustly across runs or subjects. The next modeling work should focus on run/subject nuisance control, normalization/domain alignment, and leakage-safe simple baselines before returning to larger neural models.
+
 ## What To Do Next
 
 Run these checks in this order:
 
-1. Tiny overfit sanity check.
+1. Run/subject transfer diagnostic.
+
+Use simple feature baselines to quantify how much class structure survives each split type: within-run, held-out-run, held-out-subject, and held-out-session if available. Treat within-run success with cross-run failure as a nuisance/domain-shift warning, not as deployable classification.
+
+2. Tiny overfit sanity check.
 
 Train on one subject-run or a tiny balanced subset. A small model should reach very high training accuracy quickly. If it cannot overfit 64-256 labeled samples, the pipeline/model/loss is broken.
 
-2. Corrected-logits sanity check.
+3. Corrected-logits sanity check.
 
 Disable output softmax for cross-entropy and disable output-level DropConnect, or move regularization before the classifier. Repeat a short pooled run with z-score normalization. This tests whether the chance-level legacy result was caused by the model/loss bug.
 
-3. Event-window audit.
+4. Event-window audit.
 
 Compare extracted filenames against original BIDS event files: class label, onset, TR, HRF shift, and expected volume window. This is the most important dataset-level check.
 
-4. Block-level pooled split.
+5. Block-level pooled split.
 
 If a pooled baseline is still needed, split by subject-run-class block or by run, not by individual volume. Random volume splits leak adjacent volumes from the same block.
 
-5. Temporal clip baseline.
+6. Temporal clip baseline.
 
 Use clips with z-score normalization rather than isolated raw volumes. For the current pre-extracted class-folder dataset, use `hrf_shift=0`; true HRF-shifted clips require rebuilding class folders from the raw continuous 4D runs.
 
 ## Current Interpretation
 
-We did not prove the full dataset is useless. We proved that the current extracted-volume plus legacy-wrapper setup does not produce defensible full-dataset learning. The next work should be diagnosis and corrected sanity checks, not more epochs of the same legacy run.
+We did not prove the full dataset is useless. We proved that the current extracted-volume plus legacy-wrapper setup does not produce defensible full-dataset learning. The corrected-clip feature diagnostics now suggest that motor-class signal is present inside runs but does not survive run/subject transfer under simple spatial features. The next work should be nuisance/domain-shift diagnosis and leakage-safe simple baselines, not more epochs of the same legacy run.
