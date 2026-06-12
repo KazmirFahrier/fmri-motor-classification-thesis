@@ -197,13 +197,23 @@ A broader corrected-clip feature-transfer diagnostic was then run on the first 8
 
 The interpretation is now sharper: class signal exists locally inside individual subject-runs, but the simple spatial signature does not transfer robustly across runs or subjects. The next modeling work should focus on run/subject nuisance control, normalization/domain alignment, and leakage-safe simple baselines before returning to larger neural models.
 
+Domain-alignment variants were then added to the same corrected-clip feature diagnostic. These variants are transductive diagnostics because they use unlabeled validation-domain statistics, such as the mean or standard deviation of a held-out run. They should not be presented as ordinary supervised baselines, but they are useful for understanding the failure mode.
+
+Best alignment results:
+
+- same-subject run holdout improved from raw nearest-centroid accuracy `0.2604` / macro F1 `0.2553` to `0.5729` accuracy / `0.5634` macro F1 with per-run standardization plus cosine nearest centroids
+- subject holdout improved from raw nearest-centroid accuracy `0.3160` / macro F1 `0.2981` to `0.4896` accuracy / `0.4807` macro F1 with per-run centering plus cosine nearest centroids
+- all-selected train=eval improved from raw nearest-centroid accuracy `0.2917` / macro F1 `0.2844` to `0.7821` accuracy / `0.7832` macro F1 with per-run standardization plus cosine nearest centroids
+
+This strongly suggests that run-specific baseline/scale effects are masking motor-class structure. The next practical modeling direction is to build non-transductive versions of this idea: estimate nuisance normalization from training runs only, use run/session-aware harmonization, add subject/run covariate controls, or train models with explicit domain-invariance objectives.
+
 ## What To Do Next
 
 Run these checks in this order:
 
 1. Run/subject transfer diagnostic.
 
-Use simple feature baselines to quantify how much class structure survives each split type: within-run, held-out-run, held-out-subject, and held-out-session if available. Treat within-run success with cross-run failure as a nuisance/domain-shift warning, not as deployable classification.
+Use simple feature baselines to quantify how much class structure survives each split type: within-run, held-out-run, held-out-subject, and held-out-session if available. Treat within-run success with cross-run failure as a nuisance/domain-shift warning, not as deployable classification. Use transductive run-normalization only as a diagnostic; any publishable model needs a non-transductive training-only normalization or a clearly defined test-time adaptation protocol.
 
 2. Tiny overfit sanity check.
 
