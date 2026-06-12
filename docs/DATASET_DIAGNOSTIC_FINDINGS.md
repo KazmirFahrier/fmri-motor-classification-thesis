@@ -152,6 +152,19 @@ Result:
 
 This means the corrected subject-wise temporal clip baseline still does not learn enough to justify scaling this exact model. Because the feature probe showed within-run separability, the next diagnostic is a same-subject run-holdout run. That will distinguish "cross-subject transfer is the main issue" from "the temporal model/training recipe is still failing."
 
+The same corrected diagnostic was then run as a same-subject run-holdout split:
+
+- selected subjects: `sub-01` through `sub-08`
+- train runs: `1-5`
+- validation run: `6`
+- best validation accuracy: `0.25`
+- best validation balanced accuracy: `0.25`
+- best validation macro F1: `0.10`
+- training accuracy stayed near chance over 5 epochs before early stopping
+- final validation confusion matrix again predicted only `Upper arm movements`
+
+This means the failure is not only cross-subject transfer. The current `temporal_resnet3d` diagnostic recipe is failing even when validating on a held-out run from the same subjects. The next required check is an intentional train=validation overfit on one subject-run using the same cleaned model path.
+
 ## What To Do Next
 
 Run these checks in this order:

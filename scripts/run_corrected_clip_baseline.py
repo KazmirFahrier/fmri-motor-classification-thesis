@@ -74,6 +74,8 @@ def make_split(
     max_subjects: int,
     val_subject_count: int,
     val_run_id: int,
+    overfit_subject_id: str,
+    overfit_run_id: int,
 ) -> tuple[List[int], List[int], dict]:
     subjects = sorted(manifest_df["subject_id"].unique().tolist())
     if split_mode == "subject_holdout":
@@ -113,6 +115,28 @@ def make_split(
         }
         return train_ids, val_ids, split_summary
 
+    if split_mode == "overfit_subject_run":
+        selected = manifest_df.loc[
+            (manifest_df["subject_id"] == overfit_subject_id)
+            & (manifest_df["run_id"].astype(int) == int(overfit_run_id))
+        ]
+        if selected.empty:
+            raise ValueError(f"No samples found for {overfit_subject_id} run {overfit_run_id}")
+        ids = selected["sample_id"].astype(int).tolist()
+        split_summary = {
+            "split_mode": split_mode,
+            "all_subject_count": len(subjects),
+            "selected_subjects": [overfit_subject_id],
+            "train_subjects": [overfit_subject_id],
+            "val_subjects": [overfit_subject_id],
+            "train_run_ids": [int(overfit_run_id)],
+            "val_run_ids": [int(overfit_run_id)],
+            "train_sample_count": len(ids),
+            "val_sample_count": len(ids),
+            "note": "Intentional train=val overfit sanity check for the cleaned temporal model path.",
+        }
+        return ids, ids, split_summary
+
     raise ValueError(f"Unsupported split_mode: {split_mode}")
 
 
@@ -122,8 +146,14 @@ def main() -> None:
     parser.add_argument("--batch-slugs", nargs="+", default=[f"thesis-batch-{i:02d}" for i in range(1, 8)])
     parser.add_argument("--max-subjects", type=int, default=8)
     parser.add_argument("--val-subject-count", type=int, default=2)
-    parser.add_argument("--split-mode", choices=["subject_holdout", "run_holdout"], default="subject_holdout")
+    parser.add_argument(
+        "--split-mode",
+        choices=["subject_holdout", "run_holdout", "overfit_subject_run"],
+        default="subject_holdout",
+    )
     parser.add_argument("--val-run-id", type=int, default=6)
+    parser.add_argument("--overfit-subject-id", default="sub-01")
+    parser.add_argument("--overfit-run-id", type=int, default=1)
     parser.add_argument("--run-name", default="corrected_clip_diagnostic")
     parser.add_argument("--out-dir", default="/kaggle/working/corrected_clip_baseline")
     args = parser.parse_args()
@@ -148,6 +178,8 @@ def main() -> None:
         max_subjects=args.max_subjects,
         val_subject_count=args.val_subject_count,
         val_run_id=args.val_run_id,
+        overfit_subject_id=args.overfit_subject_id,
+        overfit_run_id=args.overfit_run_id,
     )
     write_json(split_summary, out_dir / "split_summary.json")
     logger.info("Diagnostic split: %s", split_summary)
