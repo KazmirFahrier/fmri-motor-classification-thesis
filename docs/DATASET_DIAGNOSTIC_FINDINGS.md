@@ -128,6 +128,30 @@ A full filename-level audit across all seven extracted batch datasets found:
 
 This confirms that the extracted class folders contain two 8-volume event windows per class/run. Applying a positive HRF shift inside `ClipDataset` does not create true HRF-delayed samples; it only crops within those already-extracted windows and discards valid clips. The cleaned configs now use `hrf_shift: 0` for the pre-extracted dataset. True HRF-shifted windows should be created during extraction from raw continuous 4D BIDS runs.
 
+## Corrected Clip Baseline Result
+
+A short corrected temporal-clip baseline was run on Kaggle with:
+
+- `hrf_shift=0`
+- per-volume z-score normalization
+- no random spatial flips
+- raw logits with cross-entropy
+- 8 selected subjects: `sub-01` through `sub-08`
+- subject-holdout split: train `sub-01` through `sub-06`, validate `sub-07` and `sub-08`
+- diagnostic model: small `temporal_resnet3d`, target shape `32 x 32 x 32`, clip length `6`
+
+Result:
+
+- best validation accuracy: `0.25`
+- best validation balanced accuracy: `0.25`
+- best validation macro F1: `0.10`
+- best validation MCC: `0.0`
+- training accuracy stayed near chance over 5 epochs before early stopping
+- final validation confusion matrix predicted only `Upper arm movements`
+- Kaggle attached a Tesla P100, but the installed PyTorch build did not support P100 compute capability, so the run fell back to CPU
+
+This means the corrected subject-wise temporal clip baseline still does not learn enough to justify scaling this exact model. Because the feature probe showed within-run separability, the next diagnostic is a same-subject run-holdout run. That will distinguish "cross-subject transfer is the main issue" from "the temporal model/training recipe is still failing."
+
 ## What To Do Next
 
 Run these checks in this order:
