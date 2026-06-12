@@ -73,6 +73,22 @@ The stronger micro-overfit check then passed cleanly:
 
 This means the extracted class folders contain a learnable within-run signal when the model/loss/preprocessing are sane. The full-dataset failure should not be interpreted as "the data has no signal." It more likely points to the legacy wrapper configuration, temporal framing, normalization, and/or generalization split rather than totally corrupted labels.
 
+## Feature Separability Result
+
+A feature-separability probe ran on `thesis-batch-01`, using 12 subject-run blocks from `sub-01` and `sub-02`:
+
+- samples analyzed: 768 total, balanced across the 4 classes
+- target shape: `16 x 16 x 16`
+- volumes per class per block: 16
+- raw global mean/std nearest-centroid accuracy: `0.2643`
+- mean within-block spatial-template accuracy: `0.7109`
+- within-block range: `0.5156` to `0.8750`
+- leave-one-block-out spatial-template accuracy: `0.2565`
+
+This tells us the input data does contain class-related differences inside individual subject-runs, but those differences do not transfer across runs/subjects in the current extracted-volume representation. Global intensity is not the explanation: the raw mean/std classifier is essentially chance. The class centroids are also extremely similar globally, so the usable signal is small, spatial, and probably sensitive to timing, run normalization, and subject anatomy.
+
+Practical meaning: the next model should not simply be a bigger version of the legacy volume classifier. It should use corrected logits/loss, z-score normalization, temporal context around events, and a split strategy that measures run/subject generalization honestly. Before large training, the event-window audit should confirm that each class folder really matches the expected BIDS event timings and HRF-shifted volume windows.
+
 ## What To Do Next
 
 Run these checks in this order:

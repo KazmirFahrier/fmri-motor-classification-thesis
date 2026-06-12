@@ -419,7 +419,8 @@ def main() -> None:
         "within_block_template_accuracy_min": float(min(row["within_block_loo_template_accuracy"] for row in within_rows)),
         "within_block_template_accuracy_max": float(max(row["within_block_loo_template_accuracy"] for row in within_rows)),
         "leave_one_block_out_template_accuracy": cross_block_acc,
-        "within_block_loo_confusion": confusion_from_leave_one_out(x, y),
+        "all_sample_loo_template_accuracy": leave_one_out_accuracy(x, y),
+        "all_sample_loo_template_confusion": confusion_from_leave_one_out(x, y),
         "interpretation": interpret(raw_acc, within_acc, cross_block_acc),
     }
     (out_dir / "summary.json").write_text(json.dumps(summary, indent=2) + "\n")
