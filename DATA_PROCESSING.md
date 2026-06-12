@@ -23,10 +23,15 @@ Data is organized as class folders under batch roots, with filenames:
 ## Temporal Clip Construction
 - Group by `(subject_id, run_id, class_id)`.
 - Build clips from contiguous volume IDs with parameters:
-  - `hrf_shift` (default +2 TR)
+  - `hrf_shift` (default `0` for the pre-extracted class-folder dataset)
   - `clip_length` (default one of 4/6/8)
   - `clip_stride`
   - `clip_window_stride`
+
+Important: the current class-folder datasets already contain cropped event-window volumes. A positive
+`hrf_shift` applied at `ClipDataset` time shifts only within those cropped class windows; it cannot
+include post-event volumes from the original continuous 4D run. True HRF-shifted extraction must be
+performed when rebuilding class folders from the raw BIDS runs.
 
 ## Transform Policy
 - Resize to `target_shape`
