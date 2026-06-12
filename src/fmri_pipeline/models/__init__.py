@@ -16,6 +16,8 @@ def build_model(model_cfg: Dict[str, Any]) -> nn.Module:
         "num_classes": int(model_cfg["num_classes"]),
         "base_channels": int(model_cfg.get("base_channels", 32)),
         "dropout": float(model_cfg.get("dropout", 0.3)),
+        "norm": str(model_cfg.get("norm", "batch")),
+        "group_norm_groups": int(model_cfg.get("group_norm_groups", 4)),
     }
 
     if name == "resnet3d":

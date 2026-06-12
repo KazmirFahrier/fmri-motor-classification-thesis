@@ -165,6 +165,16 @@ The same corrected diagnostic was then run as a same-subject run-holdout split:
 
 This means the failure is not only cross-subject transfer. The current `temporal_resnet3d` diagnostic recipe is failing even when validating on a held-out run from the same subjects. The next required check is an intentional train=validation overfit on one subject-run using the same cleaned model path.
 
+The train=validation overfit check on `sub-01`, run `1`, showed that the BatchNorm temporal model can fit the training batches but does not evaluate cleanly:
+
+- train accuracy reached `1.00`
+- train macro F1 reached `1.00`
+- best train=validation evaluation accuracy reached only `0.50`
+- best train=validation macro F1 reached only `0.375`
+- evaluation repeatedly collapsed to a subset of classes despite train=validation
+
+This points to unstable BatchNorm running statistics under tiny fMRI batches. The model code now supports `norm: group` for 3D ResNet encoders, and the corrected diagnostic configs use GroupNorm. The next overfit check should pass in evaluation mode before any broader baseline is trusted.
+
 ## What To Do Next
 
 Run these checks in this order:

@@ -17,11 +17,15 @@ class TemporalResNet3D(nn.Module):
         num_layers: int = 2,
         num_heads: int = 4,
         max_clip_length: int = 16,
+        norm: str = "batch",
+        group_norm_groups: int = 4,
     ) -> None:
         super().__init__()
         self.frame_encoder = ResNet3DEncoder(
             in_channels=in_channels,
             base_channels=base_channels,
+            norm=norm,
+            group_norm_groups=group_norm_groups,
         )
         self.proj = nn.Linear(self.frame_encoder.out_dim, hidden_dim)
         self.pos_embed = nn.Parameter(torch.zeros(1, max_clip_length, hidden_dim))

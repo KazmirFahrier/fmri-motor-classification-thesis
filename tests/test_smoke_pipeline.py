@@ -5,9 +5,34 @@ from pathlib import Path
 import nibabel as nib
 import numpy as np
 import pandas as pd
+import torch
 
+from fmri_pipeline.models import build_model
 from fmri_pipeline.training.pipeline import train_fold
 from fmri_pipeline.utils.log_utils import setup_logger
+
+
+def test_temporal_resnet3d_groupnorm_forward():
+    model = build_model(
+        {
+            "name": "temporal_resnet3d",
+            "in_channels": 1,
+            "num_classes": 4,
+            "base_channels": 4,
+            "dropout": 0.0,
+            "norm": "group",
+            "group_norm_groups": 2,
+            "temporal": {
+                "hidden_dim": 16,
+                "num_layers": 1,
+                "num_heads": 4,
+                "max_clip_length": 6,
+            },
+        }
+    )
+    x = torch.randn(2, 6, 1, 16, 16, 16)
+    y = model(x)
+    assert y.shape == (2, 4)
 
 
 def test_smoke_train_fold(tmp_path: Path):
