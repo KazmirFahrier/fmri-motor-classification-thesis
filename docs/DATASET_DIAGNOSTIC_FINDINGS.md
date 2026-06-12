@@ -113,6 +113,21 @@ For `sub-01`, run `1`, the extracted volume IDs match the original BIDS event sc
 
 This does not prove every subject/run is correct, but it is a useful negative check: the representative run that passed the micro-overfit test is not obviously mislabeled by event timing. A full BIDS-events audit is still needed if all event files are mounted or downloaded.
 
+## Clip HRF Window Policy Audit
+
+A full filename-level audit across all seven extracted batch datasets found:
+
+- subject-run-class groups: 1,488
+- group length counts: every group has exactly 16 volumes
+- contiguous segment counts: 2,976 segments of exactly 8 volumes
+- with `clip_length=6`, `clip_stride=1`, `clip_window_stride=1`:
+  - `hrf_shift=0` produces 8,928 clips
+  - `hrf_shift=1` produces 5,952 clips
+  - `hrf_shift=2` produces 2,976 clips
+  - `hrf_shift=3` produces 0 clips
+
+This confirms that the extracted class folders contain two 8-volume event windows per class/run. Applying a positive HRF shift inside `ClipDataset` does not create true HRF-delayed samples; it only crops within those already-extracted windows and discards valid clips. The cleaned configs now use `hrf_shift: 0` for the pre-extracted dataset. True HRF-shifted windows should be created during extraction from raw continuous 4D BIDS runs.
+
 ## What To Do Next
 
 Run these checks in this order:
@@ -135,7 +150,7 @@ If a pooled baseline is still needed, split by subject-run-class block or by run
 
 5. Temporal clip baseline.
 
-Use clips with HRF shift and z-score normalization rather than isolated raw volumes. Motor fMRI labels are block/trial-level signals; the model should see the temporal context that defines the event.
+Use clips with z-score normalization rather than isolated raw volumes. For the current pre-extracted class-folder dataset, use `hrf_shift=0`; true HRF-shifted clips require rebuilding class folders from the raw continuous 4D runs.
 
 ## Current Interpretation
 
