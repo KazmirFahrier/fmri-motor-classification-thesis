@@ -121,6 +121,47 @@ def nearest_centroid_predict(x_train: np.ndarray, y_train: np.ndarray, x_val: np
     return dist.argmin(axis=1).astype(np.int64)
 
 
+def l2_normalize(x: np.ndarray) -> np.ndarray:
+    return x / np.maximum(np.linalg.norm(x, axis=1, keepdims=True), 1e-8)
+
+
+def nearest_centroid_cosine_predict(
+    x_train: np.ndarray,
+    y_train: np.ndarray,
+    x_val: np.ndarray,
+) -> np.ndarray:
+    x_train_norm = l2_normalize(x_train)
+    x_val_norm = l2_normalize(x_val)
+    centroids = []
+    for class_id in range(len(CLASS_NAMES)):
+        mask = y_train == class_id
+        if not np.any(mask):
+            raise ValueError(f"Training split is missing class_id={class_id}")
+        centroids.append(x_train_norm[mask].mean(axis=0))
+    centroid_arr = l2_normalize(np.stack(centroids, axis=0))
+    return (x_val_norm @ centroid_arr.T).argmax(axis=1).astype(np.int64)
+
+
+def center_by_group(x: np.ndarray, keys: Sequence[str]) -> np.ndarray:
+    key_arr = np.asarray(keys)
+    out = x.copy()
+    for key in sorted(set(key_arr.tolist())):
+        mask = key_arr == key
+        out[mask] -= out[mask].mean(axis=0)
+    return out
+
+
+def standardize_by_group(x: np.ndarray, keys: Sequence[str]) -> np.ndarray:
+    key_arr = np.asarray(keys)
+    out = x.copy()
+    for key in sorted(set(key_arr.tolist())):
+        mask = key_arr == key
+        mean = out[mask].mean(axis=0)
+        std = out[mask].std(axis=0)
+        out[mask] = (out[mask] - mean) / np.where(std < 1e-6, 1.0, std)
+    return out
+
+
 def score_split(name: str, x: np.ndarray, y: np.ndarray, train_idx: Sequence[int], val_idx: Sequence[int]) -> dict:
     train_arr = np.asarray(train_idx, dtype=np.int64)
     val_arr = np.asarray(val_idx, dtype=np.int64)
@@ -133,6 +174,68 @@ def score_split(name: str, x: np.ndarray, y: np.ndarray, train_idx: Sequence[int
         "metrics": metrics,
         "confusion_matrix": cm.tolist(),
     }
+
+
+def score_split_with_classifier(
+    name: str,
+    x: np.ndarray,
+    y: np.ndarray,
+    train_idx: Sequence[int],
+    val_idx: Sequence[int],
+    classifier: str,
+) -> dict:
+    train_arr = np.asarray(train_idx, dtype=np.int64)
+    val_arr = np.asarray(val_idx, dtype=np.int64)
+    if classifier == "euclidean":
+        pred = nearest_centroid_predict(x[train_arr], y[train_arr], x[val_arr])
+    elif classifier == "cosine":
+        pred = nearest_centroid_cosine_predict(x[train_arr], y[train_arr], x[val_arr])
+    else:
+        raise ValueError(f"Unsupported classifier: {classifier}")
+    metrics, cm = compute_classification_metrics(y[val_arr], pred, None, CLASS_NAMES)
+    return {
+        "name": name,
+        "classifier": classifier,
+        "train_count": int(len(train_arr)),
+        "val_count": int(len(val_arr)),
+        "metrics": metrics,
+        "confusion_matrix": cm.tolist(),
+    }
+
+
+def score_alignment_variants(
+    x: np.ndarray,
+    y: np.ndarray,
+    records: List[Dict[str, object]],
+    splits: Dict[str, tuple[np.ndarray, np.ndarray]],
+) -> List[dict]:
+    subjects = np.asarray([str(r["subject_id"]) for r in records])
+    run_keys = np.asarray([f'{r["subject_id"]}|run-{int(r["run_id"])}' for r in records])
+    transforms = {
+        "raw": x,
+        "sample_l2": l2_normalize(x),
+        # These use unlabeled validation-domain statistics, so treat them as diagnostic/domain-adaptation probes.
+        "run_center_transductive": center_by_group(x, run_keys),
+        "run_standardize_transductive": standardize_by_group(x, run_keys),
+        "subject_center_transductive": center_by_group(x, subjects),
+        "subject_standardize_transductive": standardize_by_group(x, subjects),
+    }
+
+    rows: List[dict] = []
+    for split_name, (train_idx, val_idx) in splits.items():
+        for transform_name, x_variant in transforms.items():
+            for classifier in ("euclidean", "cosine"):
+                row = score_split_with_classifier(
+                    name=split_name,
+                    x=x_variant,
+                    y=y,
+                    train_idx=train_idx,
+                    val_idx=val_idx,
+                    classifier=classifier,
+                )
+                row["transform"] = transform_name
+                rows.append(row)
+    return rows
 
 
 def within_group_leave_one_out(x: np.ndarray, y: np.ndarray, records: List[Dict[str, object]]) -> dict:
@@ -229,11 +332,18 @@ def main() -> None:
     subject_train_idx = all_idx[np.isin(rec_subjects, train_subjects)]
     subject_val_idx = all_idx[np.isin(rec_subjects, val_subjects)]
 
+    split_indices = {
+        "train_eval_all_selected": (all_idx, all_idx),
+        "same_subject_run_holdout": (run_train_idx, run_val_idx),
+        "subject_holdout": (subject_train_idx, subject_val_idx),
+    }
+
     splits = [
         score_split("train_eval_all_selected", x, y, all_idx, all_idx),
         score_split("same_subject_run_holdout", x, y, run_train_idx, run_val_idx),
         score_split("subject_holdout", x, y, subject_train_idx, subject_val_idx),
     ]
+    alignment_variants = score_alignment_variants(x, y, records, split_indices)
 
     summary = {
         "class_names": CLASS_NAMES,
@@ -248,6 +358,11 @@ def main() -> None:
         "val_run_id": int(args.val_run_id),
         "within_run_leave_one_clip_out": within_group_leave_one_out(x, y, records),
         "splits": splits,
+        "alignment_variants": alignment_variants,
+        "alignment_note": (
+            "Transforms ending in _transductive use unlabeled validation run/subject statistics. "
+            "They are diagnostic domain-adaptation probes, not ordinary supervised baselines."
+        ),
     }
     (out_dir / "summary.json").write_text(json.dumps(summary, indent=2))
     print("SUMMARY", json.dumps(summary, indent=2), flush=True)
