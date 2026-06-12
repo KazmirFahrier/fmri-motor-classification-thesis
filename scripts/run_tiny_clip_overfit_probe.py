@@ -24,6 +24,7 @@ if str(SRC) not in sys.path:
 
 from fmri_pipeline.data.datasets import ClipDataset, TransformConfig
 from fmri_pipeline.data.manifest import build_manifest
+from fmri_pipeline.utils.device import resolve_device
 from fmri_pipeline.utils.metrics import compute_classification_metrics
 
 
@@ -290,7 +291,7 @@ def main() -> None:
         flush=True,
     )
 
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    device = resolve_device()
     print(f"device={device}", flush=True)
     model = TinyClipCNN3D(num_classes=len(CLASS_NAMES), base_channels=args.base_channels).to(device)
     train_loader = DataLoader(train_tensor_ds, batch_size=args.batch_size, shuffle=True, num_workers=0)
