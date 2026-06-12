@@ -89,6 +89,17 @@ This tells us the input data does contain class-related differences inside indiv
 
 Practical meaning: the next model should not simply be a bigger version of the legacy volume classifier. It should use corrected logits/loss, z-score normalization, temporal context around events, and a split strategy that measures run/subject generalization honestly. Before large training, the event-window audit should confirm that each class folder really matches the expected BIDS event timings and HRF-shifted volume windows.
 
+## Representative Event-Window Check
+
+For `sub-01`, run `1`, the extracted volume IDs match the original BIDS event schedule exactly for all four target classes:
+
+- `Right leg movements`: expected and extracted `8-15` plus `216-223`
+- `Upper arm movements`: expected and extracted `32-39` plus `192-199`
+- `Left leg movements`: expected and extracted `72-79` plus `152-159`
+- `Forearm movements`: expected and extracted `104-111` plus `120-127`
+
+This does not prove every subject/run is correct, but it is a useful negative check: the representative run that passed the micro-overfit test is not obviously mislabeled by event timing. A full BIDS-events audit is still needed if all event files are mounted or downloaded.
+
 ## What To Do Next
 
 Run these checks in this order:
