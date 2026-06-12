@@ -12,7 +12,7 @@ import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from torch.utils.data import DataLoader
+from torch.utils.data import DataLoader, TensorDataset
 
 try:
     ROOT = Path(__file__).resolve().parents[1]
@@ -172,6 +172,16 @@ def evaluate_model(model, loader, device) -> dict:
     }
 
 
+def materialize_dataset(dataset: ClipDataset) -> TensorDataset:
+    xs: List[torch.Tensor] = []
+    ys: List[int] = []
+    for idx in range(len(dataset)):
+        x, y = dataset[idx]
+        xs.append(x)
+        ys.append(int(y.item()))
+    return TensorDataset(torch.stack(xs, dim=0), torch.tensor(ys, dtype=torch.long))
+
+
 def extract_clip_mean_features(dataset: ClipDataset) -> tuple[np.ndarray, np.ndarray]:
     xs: List[np.ndarray] = []
     ys: List[int] = []
@@ -272,11 +282,19 @@ def main() -> None:
     centroid = nearest_centroid_probe(x_feat, y_feat)
     (out_dir / "nearest_centroid_probe.json").write_text(json.dumps(centroid, indent=2))
 
+    train_tensor_ds = materialize_dataset(train_ds)
+    eval_tensor_ds = materialize_dataset(eval_ds)
+    print(
+        f"materialized_train_shape={tuple(train_tensor_ds.tensors[0].shape)} "
+        f"materialized_eval_shape={tuple(eval_tensor_ds.tensors[0].shape)}",
+        flush=True,
+    )
+
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f"device={device}", flush=True)
     model = TinyClipCNN3D(num_classes=len(CLASS_NAMES), base_channels=args.base_channels).to(device)
-    train_loader = DataLoader(train_ds, batch_size=args.batch_size, shuffle=True, num_workers=0)
-    eval_loader = DataLoader(eval_ds, batch_size=args.batch_size, shuffle=False, num_workers=0)
+    train_loader = DataLoader(train_tensor_ds, batch_size=args.batch_size, shuffle=True, num_workers=0)
+    eval_loader = DataLoader(eval_tensor_ds, batch_size=args.batch_size, shuffle=False, num_workers=0)
     optimizer = torch.optim.AdamW(model.parameters(), lr=args.lr, weight_decay=0.0)
 
     history = []
