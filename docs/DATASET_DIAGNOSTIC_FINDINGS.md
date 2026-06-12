@@ -75,7 +75,9 @@ This means the extracted class folders contain a learnable within-run signal whe
 
 ## Feature Separability Result
 
-A feature-separability probe ran on `thesis-batch-01`, using 12 subject-run blocks from `sub-01` and `sub-02`:
+Feature-separability probes were run on Kaggle to ask what separates the input volumes before training a large model.
+
+The first probe used `thesis-batch-01`, with 12 subject-run blocks from `sub-01` and `sub-02`:
 
 - samples analyzed: 768 total, balanced across the 4 classes
 - target shape: `16 x 16 x 16`
@@ -85,7 +87,18 @@ A feature-separability probe ran on `thesis-batch-01`, using 12 subject-run bloc
 - within-block range: `0.5156` to `0.8750`
 - leave-one-block-out spatial-template accuracy: `0.2565`
 
-This tells us the input data does contain class-related differences inside individual subject-runs, but those differences do not transfer across runs/subjects in the current extracted-volume representation. Global intensity is not the explanation: the raw mean/std classifier is essentially chance. The class centroids are also extremely similar globally, so the usable signal is small, spatial, and probably sensitive to timing, run normalization, and subject anatomy.
+The expanded probe used all seven batch datasets, with 42 subject-run blocks from `sub-01` through `sub-07`:
+
+- samples analyzed: 2,688 total, balanced across the 4 classes
+- target shape: `16 x 16 x 16`
+- volumes per class per block: 16
+- raw global mean/std nearest-centroid accuracy: `0.1678`
+- mean within-block spatial-template accuracy: `0.6775`
+- within-block range: `0.4844` to `0.8750`
+- leave-one-block-out spatial-template accuracy: `0.2742`
+- pairwise whole-slice class-template cosine similarities: all above `0.99996`
+
+This tells us the input data does contain class-related differences inside individual subject-runs, but those differences do not transfer across runs/subjects in the current extracted-volume representation. Global intensity is not the explanation: the raw mean/std classifier is at or below chance. The class centroids are also extremely similar globally, so the usable signal is small, spatial, and probably sensitive to timing, run normalization, and subject anatomy.
 
 Practical meaning: the next model should not simply be a bigger version of the legacy volume classifier. It should use corrected logits/loss, z-score normalization, temporal context around events, and a split strategy that measures run/subject generalization honestly. Before large training, the event-window audit should confirm that each class folder really matches the expected BIDS event timings and HRF-shifted volume windows.
 
