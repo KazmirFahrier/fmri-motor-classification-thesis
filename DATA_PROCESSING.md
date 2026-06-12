@@ -38,6 +38,10 @@ performed when rebuilding class folders from the raw BIDS runs.
 - Optional train-time random crop and flips
 - Z-score normalization
 
+For motor laterality labels, spatial flips should be treated carefully. Left-right flips can invalidate
+labels such as `Left leg movements` versus `Right leg movements`; corrected diagnostic baselines disable
+random flips by default.
+
 ## QC Rules
 - Fail on missing expected classes.
 - Fail on filename parse errors in strict mode.

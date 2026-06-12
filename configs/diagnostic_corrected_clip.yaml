@@ -1,0 +1,65 @@
+task: clip
+classes:
+  names:
+    - Left leg movements
+    - Right leg movements
+    - Forearm movements
+    - Upper arm movements
+input:
+  target_shape: [32, 32, 32]
+  normalization: zscore
+  hrf_shift: 0
+loader:
+  batch_size: 4
+  num_workers: 0
+  pin_memory: true
+  clip_lengths: [6]
+  clip_length: 6
+  clip_stride: 1
+  clip_window_stride: 1
+  augment:
+    random_flip: false
+model:
+  name: temporal_resnet3d
+  in_channels: 1
+  num_classes: 4
+  base_channels: 8
+  dropout: 0.20
+  temporal:
+    hidden_dim: 64
+    num_layers: 1
+    num_heads: 4
+    max_clip_length: 8
+optimizer:
+  name: adamw
+  lr: 0.001
+  weight_decay: 0.0001
+scheduler:
+  name: cosine
+  warmup_epochs: 1
+  min_lr: 1.0e-6
+training:
+  epochs: 8
+  sweep_epochs: 4
+  gradient_accumulation_steps: 1
+  early_stopping_patience: 4
+  monitor: macro_f1
+  monitor_mode: max
+  amp: true
+  max_grad_norm: 1.0
+  label_smoothing: 0.0
+  deterministic: false
+evaluation:
+  bootstrap_samples: 200
+  ci_alpha: 0.95
+  metrics:
+    - top1_accuracy
+    - balanced_accuracy
+    - macro_f1
+    - mcc
+    - roc_auc_ovr_macro
+    - pr_auc_macro
+seed: 42
+paths:
+  artifacts_root: artifacts
+  cache_root: cache
