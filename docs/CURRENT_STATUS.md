@@ -106,6 +106,7 @@ This repository is tracking the active full-dataset thesis runs for 4-class moto
 - Event-window voting over overlapping clips improved the same target-run adaptation to trial-level mean accuracy `0.5833` for held-out runs and `0.5312` for subject folds.
 - Dense train-only alignment remained weak: same-subject held-out-run train-subject centering reached about `0.3212` accuracy, while subject holdout remained around chance.
 - A local subject-run centering shrinkage sweep on version 14 peaked sharply at `alpha=1.0`; partial centering at `alpha=0.9` and over-centering at `alpha=1.1` both collapsed back near `0.34-0.37` trial-level accuracy. This supports the hypothesis that the dominant nuisance is an additive subject-run offset.
+- Version 14 subject-difficulty analysis showed wide subject-level variation after target-run centering: worst subject-fold trial accuracies included `sub-52` at `0.1875` and `sub-42` at `0.2083`, while best subjects included `sub-30` at `0.8125`. Run-level variation was much smaller, suggesting the remaining blocker is subject robustness.
 - The corrected clip feature-transfer kernel was relaunched as version 15 with target shape `24 x 24 x 24`, `clip_window_stride=1`, and output directory `/kaggle/working/clip_domain_alignment_full24_stride1`. This tests whether the remaining gap is partly due to losing spatial detail at `16³`.
 
 ## Current Metrics Snapshot

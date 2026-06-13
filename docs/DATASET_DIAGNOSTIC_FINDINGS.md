@@ -254,6 +254,8 @@ This sharpens the problem statement. The extracted data has enough class informa
 
 A local shrinkage sweep on version 14 tested subtracting `alpha * subject_run_mean` before cosine nearest-centroid classification. Performance peaked sharply at full centering (`alpha=1.0`): trial-level held-out-run accuracy `0.5833` and subject-fold accuracy `0.5312`. Partial centering (`alpha=0.9`) dropped to `0.3730` / `0.3441`, and over-centering (`alpha=1.1`) similarly dropped to `0.3683` / `0.3446`. This suggests the dominant nuisance is close to an additive subject-run offset in the clip-mean feature space.
 
+A subject-difficulty pass on the version 14 dense target-run adaptation predictions found wide subject-level variation at event-window voting level. Overall subject-fold trial accuracy was `0.5306`, but the worst subjects were far below chance or near chance (`sub-52`: `0.1875`, `sub-42`: `0.2083`, `sub-17`: `0.2708`), while the best subjects were much stronger (`sub-30`: `0.8125`, `sub-62`: `0.7292`, `sub-10`: `0.7083`). Held-out run difficulty was much less variable, ranging from `0.4819` to `0.5605`. After run centering, the remaining bottleneck appears to be subject-level robustness rather than a single bad run.
+
 The next active run is a full-cohort `24 x 24 x 24`, `clip_window_stride=1` diagnostic, launched as Kaggle version 15. It keeps the dense overlapping clip policy from version 14 but restores more spatial detail. If `24³` improves target-run adaptation or train-only alignment, spatial detail is part of the bottleneck. If it does not, the evidence points even more strongly toward domain shift rather than spatial downsampling.
 
 ## What To Do Next
