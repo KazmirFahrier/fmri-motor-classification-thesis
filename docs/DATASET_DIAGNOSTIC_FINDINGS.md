@@ -252,6 +252,8 @@ The denser full-cohort run using `clip_window_stride=1` at `16 x 16 x 16` comple
 
 This sharpens the problem statement. The extracted data has enough class information to classify clips within subject-runs, and target-run adaptation recovers a substantial fraction of that signal across domains. But supervised train-only alignment remains weak, especially for unseen subjects, so the next serious modeling work should either define a legitimate unlabeled target-run adaptation protocol or train an explicitly domain-invariant representation.
 
+The next active run is a full-cohort `24 x 24 x 24`, `clip_window_stride=1` diagnostic, launched as Kaggle version 15. It keeps the dense overlapping clip policy from version 14 but restores more spatial detail. If `24³` improves target-run adaptation or train-only alignment, spatial detail is part of the bottleneck. If it does not, the evidence points even more strongly toward domain shift rather than spatial downsampling.
+
 ## What To Do Next
 
 Run these checks in this order:

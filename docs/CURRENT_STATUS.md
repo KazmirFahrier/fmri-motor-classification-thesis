@@ -10,7 +10,7 @@ This repository is tracking the active full-dataset thesis runs for 4-class moto
 | --- | --- | --- | --- |
 | Full-dataset pooled legacy baseline | [`b6uejhvvnmiwb/thesis-legacy-full-resume`](https://www.kaggle.com/code/b6uejhvvnmiwb/thesis-legacy-full-resume) | Stopped by controlled policy at epoch 25 | Quantify the full-data pooled-split baseline for the Phase 1 leakage-gap comparison. |
 | Full-dataset subject-wise evaluation | [`kazmirfahrier/thesis-7batch-gpucompat-runner`](https://www.kaggle.com/code/kazmirfahrier/thesis-7batch-gpucompat-runner) | Complete; final artifacts refreshed | Continue leakage-aware subject-wise 5-fold evaluation plus holdout. |
-| Corrected clip feature-transfer diagnostic | [`b6uejhvvnmiwb/thesis-corrected-clip-baseline`](https://www.kaggle.com/code/b6uejhvvnmiwb/thesis-corrected-clip-baseline) | Version 14 complete | Dense full-cohort `16³`, `clip_window_stride=1` diagnostic confirms stronger target-run adaptation but weak raw/train-only transfer. |
+| Corrected clip feature-transfer diagnostic | [`b6uejhvvnmiwb/thesis-corrected-clip-baseline`](https://www.kaggle.com/code/b6uejhvvnmiwb/thesis-corrected-clip-baseline) | Version 15 running | Full-cohort `24³`, `clip_window_stride=1` diagnostic tests whether higher spatial resolution improves transfer/adaptation. |
 
 ## Known Progress
 
@@ -105,6 +105,7 @@ This repository is tracking the active full-dataset thesis runs for 4-class moto
 - Dense target-run adaptation improved over the sparse run: per-subject-run centering plus cosine reached rotating held-out-run mean accuracy `0.5691` / macro F1 `0.5679`, and rotating subject-fold mean accuracy `0.5201` / macro F1 `0.5171`.
 - Event-window voting over overlapping clips improved the same target-run adaptation to trial-level mean accuracy `0.5833` for held-out runs and `0.5312` for subject folds.
 - Dense train-only alignment remained weak: same-subject held-out-run train-subject centering reached about `0.3212` accuracy, while subject holdout remained around chance.
+- The corrected clip feature-transfer kernel was relaunched as version 15 with target shape `24 x 24 x 24`, `clip_window_stride=1`, and output directory `/kaggle/working/clip_domain_alignment_full24_stride1`. This tests whether the remaining gap is partly due to losing spatial detail at `16³`.
 
 ## Current Metrics Snapshot
 
