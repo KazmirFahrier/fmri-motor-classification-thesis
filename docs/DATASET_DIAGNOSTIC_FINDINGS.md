@@ -234,6 +234,10 @@ The diagnostic script now writes rotating held-out-run and subject-fold summarie
 
 The script also includes train-only alignment probes. These estimate global, subject-level, run-id-level, or subject-run-level centering/standardization statistics only from the training split, with validation samples falling back to training-derived statistics when their domain key was unseen. Kaggle version 13 is running this updated code. This is the next decision point: if train-only alignment recovers a useful fraction of the transductive gain, the project can define a conventional preprocessing baseline; if it does not, the alignment result should be framed as evidence for test-time adaptation or domain-invariant modeling rather than as a standard supervised classifier.
 
+A preliminary local pass using the downloaded version 12 feature matrix suggests train-only alignment is not enough. Same-subject held-out-run cosine nearest-centroid accuracy moved from `0.2641` raw to only `0.3044` with train-subject centering and `0.3185` with train-subject standardization. Subject holdout remained near chance, with the best checked cosine result around `0.2646` after train-global centering. The large `0.48-0.52` aligned accuracies therefore appear to depend mostly on validation-domain run statistics, not on a simple supervised training-only centering recipe.
+
+This does not make the result useless; it clarifies the result. The dataset appears to contain motor-class signal, but robust recovery across runs/subjects likely needs either an explicit test-time adaptation protocol that uses unlabeled target-run statistics, or a model trained to remove run/domain nuisance structure rather than a static train-only nearest-centroid baseline.
+
 ## What To Do Next
 
 Run these checks in this order:

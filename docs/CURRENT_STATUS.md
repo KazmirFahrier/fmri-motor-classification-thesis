@@ -98,6 +98,7 @@ This repository is tracking the active full-dataset thesis runs for 4-class moto
 - The corrected clip feature-transfer kernel version 12 completed and reproduced the rotating full-cohort reduced results from repo commit `2a7bbbe`: all six held-out-run splits averaged `0.5228` accuracy / `0.5216` macro F1 after per-run centering plus cosine; six subject folds averaged `0.4818` accuracy / `0.4783` macro F1 after the same alignment. Outputs were downloaded to `/Users/USER/Documents/New project/status_2026-06-13_clip_domain_alignment_v12_complete/`.
 - The corrected clip feature-transfer kernel was relaunched as version 13 after adding class-wise and train-only alignment summaries; it is currently running.
 - The diagnostic script now also includes train-only alignment probes that estimate centering/standardization statistics from training data only. These are the next key check for whether the run-centering effect can become a publishable supervised baseline rather than only a transductive test-time adaptation diagnostic.
+- A preliminary local train-only alignment pass on the downloaded version 12 feature matrix found only small gains: same-subject held-out-run cosine nearest-centroid accuracy rose from `0.2641` raw to at most `0.3185` with train-subject standardization, while subject holdout stayed near chance at roughly `0.2646` best. This suggests the large transductive gains mostly require validation-domain run statistics.
 
 ## Current Metrics Snapshot
 
@@ -106,7 +107,7 @@ This repository is tracking the active full-dataset thesis runs for 4-class moto
 | Original 9-subject pooled split | Historical baseline: accuracy 0.8522, MCC 0.8055, ROC-AUC 0.95, PR-AUC 0.88. |
 | Full-dataset pooled split | Stopped at epoch 25 by controlled policy. Final validation snapshot: accuracy 0.2629, balanced accuracy 0.2648, macro F1 0.2501, MCC 0.0206. Training accuracy reached 0.5690, so the model is fitting training data without meaningful validation generalization. |
 | Full-dataset subject-wise CV + holdout | Complete. All five CV folds and final holdout are chance-level: accuracy 0.25, balanced accuracy 0.25, macro F1 0.10, MCC 0.0. |
-| Corrected clip feature transfer | Local within-run signal exists in the denser 8-subject `24³` run: nearest-centroid leave-one-clip-out accuracy 0.7613 over 48 subject-runs. Raw held-out run/subject transfer is weak in both the 8-subject and reduced 62-subject diagnostics. Transductive run alignment improves 8-subject transfer to 0.5729/0.4896 and reduced full-cohort transfer to 0.5565/0.4667; rotating full-cohort splits average 0.5228 run-holdout and 0.4818 subject-holdout accuracy after alignment. |
+| Corrected clip feature transfer | Local within-run signal exists in the denser 8-subject `24³` run: nearest-centroid leave-one-clip-out accuracy 0.7613 over 48 subject-runs. Raw held-out run/subject transfer is weak in both the 8-subject and reduced 62-subject diagnostics. Transductive run alignment improves 8-subject transfer to 0.5729/0.4896 and reduced full-cohort transfer to 0.5565/0.4667; rotating full-cohort splits average 0.5228 run-holdout and 0.4818 subject-holdout accuracy after alignment. Preliminary train-only alignment does not recover most of this gain. |
 
 ## Why This Matters
 
