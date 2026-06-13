@@ -94,6 +94,35 @@ def nearest_centroid_predict(
     raise ValueError(f"Unsupported classifier: {classifier}")
 
 
+def event_window_key(record: dict) -> str:
+    vol_start = min(int(vol_id) for vol_id in record["vol_ids"])
+    # The extracted class-folder dataset contains 8-volume event windows. With 6-volume
+    # clips and stride 1, starts base/base+1/base+2 belong to the same event window.
+    event_start = vol_start - (vol_start % 8)
+    return f'{record["subject_id"]}|run-{int(record["run_id"])}|event-{event_start}'
+
+
+def aggregate_event_predictions(
+    y_true: np.ndarray,
+    y_pred: np.ndarray,
+    val_idx: np.ndarray,
+    records: List[dict],
+) -> tuple[np.ndarray, np.ndarray]:
+    grouped: Dict[str, List[int]] = defaultdict(list)
+    for local_pos, record_idx in enumerate(val_idx):
+        grouped[event_window_key(records[int(record_idx)])].append(local_pos)
+
+    trial_true = []
+    trial_pred = []
+    for positions in grouped.values():
+        true_labels = y_true[positions]
+        pred_labels = y_pred[positions]
+        pred_counts = np.bincount(pred_labels, minlength=len(CLASS_NAMES))
+        trial_true.append(int(true_labels[0]))
+        trial_pred.append(int(pred_counts.argmax()))
+    return np.asarray(trial_true, dtype=np.int64), np.asarray(trial_pred, dtype=np.int64)
+
+
 def center_by_group(x: np.ndarray, keys: Sequence[str]) -> np.ndarray:
     key_arr = np.asarray(keys)
     out = x.copy()
@@ -167,6 +196,7 @@ def split_rows(
         x_train, x_val = transform_fn()
         for classifier in ("euclidean", "cosine", "weighted_euclidean"):
             pred = nearest_centroid_predict(x_train, y[train_idx], x_val, classifier)
+            trial_y, trial_pred = aggregate_event_predictions(y[val_idx], pred, val_idx, records)
             row = {
                 "split": split_name,
                 "transform": transform_name,
@@ -174,6 +204,8 @@ def split_rows(
                 "train_count": int(len(train_idx)),
                 "val_count": int(len(val_idx)),
                 "metrics": metrics(y[val_idx], pred),
+                "trial_count": int(len(trial_y)),
+                "trial_metrics": metrics(trial_y, trial_pred),
             }
             rows.append(row)
     return rows
@@ -198,6 +230,18 @@ def summarize(rows: List[dict]) -> List[dict]:
                 "mean_macro_f1": float(np.mean([m["macro_f1"] for m in metric_rows])),
                 "min_top1_accuracy": float(np.min([m["top1_accuracy"] for m in metric_rows])),
                 "max_top1_accuracy": float(np.max([m["top1_accuracy"] for m in metric_rows])),
+                "mean_trial_top1_accuracy": float(
+                    np.mean([row["trial_metrics"]["top1_accuracy"] for row in group_rows])
+                ),
+                "mean_trial_macro_f1": float(
+                    np.mean([row["trial_metrics"]["macro_f1"] for row in group_rows])
+                ),
+                "min_trial_top1_accuracy": float(
+                    np.min([row["trial_metrics"]["top1_accuracy"] for row in group_rows])
+                ),
+                "max_trial_top1_accuracy": float(
+                    np.max([row["trial_metrics"]["top1_accuracy"] for row in group_rows])
+                ),
             }
         )
     return summaries

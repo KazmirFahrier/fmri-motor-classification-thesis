@@ -240,7 +240,17 @@ This does not make the result useless; it clarifies the result. The dataset appe
 
 A local variance decomposition on the same full-cohort reduced feature matrix supports this interpretation. In the raw clip-mean feature space, class identity explained effectively `0.0000` of total variance, while subject explained about `0.9851` and subject-run explained about `0.9971`. After subject-run centering, the subject/run components were removed by construction and class variance rose to `0.0068`. That is still a small signal, but it is no longer buried under subject anatomy and run-offset structure. The diagnostic script now writes this decomposition into `summary.json` for future runs.
 
-The next active diagnostic is a denser full-cohort run using `clip_window_stride=1` at `16 x 16 x 16`, launched as Kaggle version 14. The earlier full-cohort run used `clip_window_stride=8`, meaning only one non-overlapping clip per extracted 8-volume event window. The denser run asks whether overlapping clips restore within-run structure and whether train-only or target-run adaptation behaves differently when each subject-run-class block contributes more samples.
+The denser full-cohort run using `clip_window_stride=1` at `16 x 16 x 16` completed as Kaggle version 14. The earlier full-cohort run used `clip_window_stride=8`, meaning only one non-overlapping clip per extracted 8-volume event window. The denser run shows that overlapping clips restore strong within-run structure but do not fix raw cross-run/subject transfer:
+
+- clips analyzed: `8,928`
+- within subject-run leave-one-clip-out: accuracy `0.7478`, macro F1 `0.7478`
+- rotating held-out-run raw cosine: mean accuracy `0.2631`, macro F1 `0.2571`
+- rotating subject-fold raw cosine: mean accuracy `0.2611`, macro F1 `0.2422`
+- rotating held-out-run per-subject-run centering plus cosine: mean accuracy `0.5691`, macro F1 `0.5679`
+- rotating subject-fold per-subject-run centering plus cosine: mean accuracy `0.5201`, macro F1 `0.5171`
+- event-window voting over the overlapping clips improves the same adaptation protocol to `0.5833` held-out-run accuracy and `0.5312` subject-fold accuracy
+
+This sharpens the problem statement. The extracted data has enough class information to classify clips within subject-runs, and target-run adaptation recovers a substantial fraction of that signal across domains. But supervised train-only alignment remains weak, especially for unseen subjects, so the next serious modeling work should either define a legitimate unlabeled target-run adaptation protocol or train an explicitly domain-invariant representation.
 
 ## What To Do Next
 
