@@ -219,6 +219,15 @@ Full-cohort reduced results:
 
 This full-cohort reduced run is not directly comparable to the denser 8-subject `24 x 24 x 24` run because it uses lower spatial resolution and far fewer overlapping clips. Still, it independently confirms the main pattern: raw transfer remains chance-like, while transductive run-level alignment recovers substantial class structure.
 
+Additional local sweeps on the downloaded full-cohort reduced feature matrix confirmed that this was not specific to the chosen run-6 or last-10-subject split:
+
+- rotating the held-out run across all six runs gave raw nearest-centroid mean accuracy `0.2655` / mean macro F1 `0.2599`
+- the same all-run sweep with per-run centering plus cosine nearest centroids gave mean accuracy `0.5228` / mean macro F1 `0.5216`
+- six rotating subject folds gave raw nearest-centroid mean accuracy `0.2609` / mean macro F1 `0.2426`
+- the same six subject folds with per-run centering plus cosine nearest centroids gave mean accuracy `0.4818` / mean macro F1 `0.4783`
+
+These rotational checks strengthen the conclusion that run-level nuisance structure is systematic across the dataset, not an artifact of one chosen validation run or subject subset.
+
 ## What To Do Next
 
 Run these checks in this order:
