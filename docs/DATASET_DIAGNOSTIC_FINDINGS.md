@@ -230,7 +230,7 @@ These rotational checks strengthen the conclusion that run-level nuisance struct
 
 Class-wise inspection of the aligned full-cohort sweeps shows that the gain is not simply a new one-class shortcut. With per-run centering plus cosine nearest centroids, every class has above-chance recall across rotating held-out runs and subject folds. Forearm movements are consistently easiest, while left-leg and upper-arm movements are weaker and more variable. This suggests the input data carries distributed motor-class information, but it is partially masked by subject/run offsets and class-specific ambiguity.
 
-The diagnostic script now writes rotating held-out-run and subject-fold summaries directly, including mean per-class recall and precision. The current Kaggle version 12 rerun of `b6uejhvvnmiwb/thesis-corrected-clip-baseline` should reproduce these summaries from the public repo code.
+The diagnostic script now writes rotating held-out-run and subject-fold summaries directly, including mean per-class recall and precision. Kaggle version 12 of `b6uejhvvnmiwb/thesis-corrected-clip-baseline` was launched after the rotating-sweep code landed; a later clean rerun may be needed for the newest per-class summary fields if version 12 cloned before this final summary update.
 
 ## What To Do Next
 
