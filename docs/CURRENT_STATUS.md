@@ -10,7 +10,7 @@ This repository is tracking the active full-dataset thesis runs for 4-class moto
 | --- | --- | --- | --- |
 | Full-dataset pooled legacy baseline | [`b6uejhvvnmiwb/thesis-legacy-full-resume`](https://www.kaggle.com/code/b6uejhvvnmiwb/thesis-legacy-full-resume) | Stopped by controlled policy at epoch 25 | Quantify the full-data pooled-split baseline for the Phase 1 leakage-gap comparison. |
 | Full-dataset subject-wise evaluation | [`kazmirfahrier/thesis-7batch-gpucompat-runner`](https://www.kaggle.com/code/kazmirfahrier/thesis-7batch-gpucompat-runner) | Complete; final artifacts refreshed | Continue leakage-aware subject-wise 5-fold evaluation plus holdout. |
-| Corrected clip feature-transfer diagnostic | [`b6uejhvvnmiwb/thesis-corrected-clip-baseline`](https://www.kaggle.com/code/b6uejhvvnmiwb/thesis-corrected-clip-baseline) | Version 12 running | Regenerate the full-cohort domain-alignment diagnostic with rotating run and subject-fold summaries from the repo script. |
+| Corrected clip feature-transfer diagnostic | [`b6uejhvvnmiwb/thesis-corrected-clip-baseline`](https://www.kaggle.com/code/b6uejhvvnmiwb/thesis-corrected-clip-baseline) | Version 13 running | Regenerate the full-cohort domain-alignment diagnostic with class-wise and train-only alignment summaries from the latest repo script. |
 
 ## Known Progress
 
@@ -95,7 +95,8 @@ This repository is tracking the active full-dataset thesis runs for 4-class moto
 - A reduced full-cohort 62-subject diagnostic at `16 x 16 x 16` with one non-overlapping clip per event window produced the same pattern: raw run holdout accuracy `0.2621`, raw subject holdout accuracy `0.2542`; per-run centering plus cosine improved these to `0.5565` and `0.4667` respectively.
 - Local rotation sweeps on the downloaded full-cohort reduced feature matrix confirmed the effect: all six held-out-run splits averaged `0.2655` raw accuracy vs `0.5228` after per-run centering plus cosine; six subject folds averaged `0.2609` raw accuracy vs `0.4818` after the same alignment.
 - Class-wise inspection of the aligned full-cohort sweeps shows that the gain is not only one-class collapse: all four classes are above chance after per-run centering plus cosine. Forearm movements are usually the easiest class, while left-leg and upper-arm movements remain weaker and more variable.
-- The corrected clip feature-transfer kernel was relaunched as version 12 after adding rotating held-out-run and subject-fold summaries to `scripts/analyze_clip_feature_transfer.py`; it is currently running and should produce these summaries directly in `summary.json`.
+- The corrected clip feature-transfer kernel version 12 completed and reproduced the rotating full-cohort reduced results from repo commit `2a7bbbe`: all six held-out-run splits averaged `0.5228` accuracy / `0.5216` macro F1 after per-run centering plus cosine; six subject folds averaged `0.4818` accuracy / `0.4783` macro F1 after the same alignment. Outputs were downloaded to `/Users/USER/Documents/New project/status_2026-06-13_clip_domain_alignment_v12_complete/`.
+- The corrected clip feature-transfer kernel was relaunched as version 13 after adding class-wise and train-only alignment summaries; it is currently running.
 - The diagnostic script now also includes train-only alignment probes that estimate centering/standardization statistics from training data only. These are the next key check for whether the run-centering effect can become a publishable supervised baseline rather than only a transductive test-time adaptation diagnostic.
 
 ## Current Metrics Snapshot
