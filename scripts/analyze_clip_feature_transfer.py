@@ -238,6 +238,108 @@ def score_alignment_variants(
     return rows
 
 
+def score_rotating_run_holdouts(
+    x: np.ndarray,
+    y: np.ndarray,
+    records: List[Dict[str, object]],
+) -> List[dict]:
+    rec_runs = np.asarray([int(r["run_id"]) for r in records])
+    run_keys = np.asarray([f'{r["subject_id"]}|run-{int(r["run_id"])}' for r in records])
+    transforms = {
+        "raw": x,
+        "run_center_transductive": center_by_group(x, run_keys),
+        "run_standardize_transductive": standardize_by_group(x, run_keys),
+    }
+
+    rows: List[dict] = []
+    all_idx = np.arange(len(records), dtype=np.int64)
+    for holdout_run in sorted(set(rec_runs.tolist())):
+        train_idx = all_idx[rec_runs != holdout_run]
+        val_idx = all_idx[rec_runs == holdout_run]
+        for transform_name, x_variant in transforms.items():
+            for classifier in ("euclidean", "cosine"):
+                row = score_split_with_classifier(
+                    name="rotating_run_holdout",
+                    x=x_variant,
+                    y=y,
+                    train_idx=train_idx,
+                    val_idx=val_idx,
+                    classifier=classifier,
+                )
+                row["holdout_run"] = int(holdout_run)
+                row["transform"] = transform_name
+                rows.append(row)
+    return rows
+
+
+def score_rotating_subject_folds(
+    x: np.ndarray,
+    y: np.ndarray,
+    records: List[Dict[str, object]],
+    fold_count: int,
+) -> List[dict]:
+    rec_subjects = np.asarray([str(r["subject_id"]) for r in records])
+    run_keys = np.asarray([f'{r["subject_id"]}|run-{int(r["run_id"])}' for r in records])
+    subjects = sorted(set(rec_subjects.tolist()))
+    folds = [subjects[i::fold_count] for i in range(fold_count)]
+    transforms = {
+        "raw": x,
+        "run_center_transductive": center_by_group(x, run_keys),
+        "run_standardize_transductive": standardize_by_group(x, run_keys),
+    }
+
+    rows: List[dict] = []
+    all_idx = np.arange(len(records), dtype=np.int64)
+    for fold_idx, fold_subjects in enumerate(folds):
+        val_mask = np.isin(rec_subjects, fold_subjects)
+        val_idx = all_idx[val_mask]
+        train_idx = all_idx[~val_mask]
+        if len(train_idx) == 0 or len(val_idx) == 0:
+            continue
+        for transform_name, x_variant in transforms.items():
+            for classifier in ("euclidean", "cosine"):
+                row = score_split_with_classifier(
+                    name="rotating_subject_fold",
+                    x=x_variant,
+                    y=y,
+                    train_idx=train_idx,
+                    val_idx=val_idx,
+                    classifier=classifier,
+                )
+                row["fold_idx"] = int(fold_idx)
+                row["fold_count"] = int(fold_count)
+                row["val_subjects"] = fold_subjects
+                row["transform"] = transform_name
+                rows.append(row)
+    return rows
+
+
+def summarize_rows(rows: List[dict], group_keys: Sequence[str]) -> List[dict]:
+    grouped: Dict[tuple[str, ...], List[dict]] = defaultdict(list)
+    for row in rows:
+        key = tuple(str(row[k]) for k in group_keys)
+        grouped[key].append(row)
+
+    summaries = []
+    for key, group_rows in sorted(grouped.items()):
+        metrics = [row["metrics"] for row in group_rows]
+        summary = {
+            group_key: key[idx] for idx, group_key in enumerate(group_keys)
+        }
+        summary.update(
+            {
+                "count": int(len(group_rows)),
+                "mean_top1_accuracy": float(np.mean([m["top1_accuracy"] for m in metrics])),
+                "mean_balanced_accuracy": float(np.mean([m["balanced_accuracy"] for m in metrics])),
+                "mean_macro_f1": float(np.mean([m["macro_f1"] for m in metrics])),
+                "min_top1_accuracy": float(np.min([m["top1_accuracy"] for m in metrics])),
+                "max_top1_accuracy": float(np.max([m["top1_accuracy"] for m in metrics])),
+            }
+        )
+        summaries.append(summary)
+    return summaries
+
+
 def within_group_leave_one_out(x: np.ndarray, y: np.ndarray, records: List[Dict[str, object]]) -> dict:
     grouped: Dict[tuple[str, int], List[int]] = defaultdict(list)
     for i, rec in enumerate(records):
@@ -289,6 +391,7 @@ def main() -> None:
     parser.add_argument("--clip-stride", type=int, default=1)
     parser.add_argument("--clip-window-stride", type=int, default=1)
     parser.add_argument("--hrf-shift", type=int, default=0)
+    parser.add_argument("--subject-fold-count", type=int, default=6)
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--out-dir", default="/kaggle/working/clip_feature_transfer")
     args = parser.parse_args()
@@ -344,6 +447,13 @@ def main() -> None:
         score_split("subject_holdout", x, y, subject_train_idx, subject_val_idx),
     ]
     alignment_variants = score_alignment_variants(x, y, records, split_indices)
+    rotating_run_holdouts = score_rotating_run_holdouts(x, y, records)
+    rotating_subject_folds = score_rotating_subject_folds(
+        x,
+        y,
+        records,
+        fold_count=int(args.subject_fold_count),
+    )
 
     summary = {
         "class_names": CLASS_NAMES,
@@ -362,6 +472,16 @@ def main() -> None:
         "alignment_note": (
             "Transforms ending in _transductive use unlabeled validation run/subject statistics. "
             "They are diagnostic domain-adaptation probes, not ordinary supervised baselines."
+        ),
+        "rotating_run_holdouts": rotating_run_holdouts,
+        "rotating_run_holdout_summary": summarize_rows(
+            rotating_run_holdouts,
+            group_keys=("transform", "classifier"),
+        ),
+        "rotating_subject_folds": rotating_subject_folds,
+        "rotating_subject_fold_summary": summarize_rows(
+            rotating_subject_folds,
+            group_keys=("transform", "classifier"),
         ),
     }
     (out_dir / "summary.json").write_text(json.dumps(summary, indent=2))
