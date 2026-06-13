@@ -142,6 +142,19 @@ def nearest_centroid_cosine_predict(
     return (x_val_norm @ centroid_arr.T).argmax(axis=1).astype(np.int64)
 
 
+def predict_with_classifier(
+    x_train: np.ndarray,
+    y_train: np.ndarray,
+    x_val: np.ndarray,
+    classifier: str,
+) -> np.ndarray:
+    if classifier == "euclidean":
+        return nearest_centroid_predict(x_train, y_train, x_val)
+    if classifier == "cosine":
+        return nearest_centroid_cosine_predict(x_train, y_train, x_val)
+    raise ValueError(f"Unsupported classifier: {classifier}")
+
+
 def center_by_group(x: np.ndarray, keys: Sequence[str]) -> np.ndarray:
     key_arr = np.asarray(keys)
     out = x.copy()
@@ -160,6 +173,55 @@ def standardize_by_group(x: np.ndarray, keys: Sequence[str]) -> np.ndarray:
         std = out[mask].std(axis=0)
         out[mask] = (out[mask] - mean) / np.where(std < 1e-6, 1.0, std)
     return out
+
+
+def train_only_center_split(
+    x: np.ndarray,
+    train_idx: np.ndarray,
+    val_idx: np.ndarray,
+    keys: Sequence[str],
+) -> tuple[np.ndarray, np.ndarray]:
+    key_arr = np.asarray(keys)
+    train_global = x[train_idx].mean(axis=0)
+    group_means = {}
+    for key in sorted(set(key_arr[train_idx].tolist())):
+        group_train_idx = train_idx[key_arr[train_idx] == key]
+        group_means[key] = x[group_train_idx].mean(axis=0)
+
+    def transform(indices: np.ndarray) -> np.ndarray:
+        rows = []
+        for idx in indices:
+            center = group_means.get(key_arr[idx], train_global)
+            rows.append(x[idx] - center)
+        return np.asarray(rows, dtype=np.float32)
+
+    return transform(train_idx), transform(val_idx)
+
+
+def train_only_standardize_split(
+    x: np.ndarray,
+    train_idx: np.ndarray,
+    val_idx: np.ndarray,
+    keys: Sequence[str],
+) -> tuple[np.ndarray, np.ndarray]:
+    key_arr = np.asarray(keys)
+    train_global_mean = x[train_idx].mean(axis=0)
+    train_global_std = np.where(x[train_idx].std(axis=0) < 1e-6, 1.0, x[train_idx].std(axis=0))
+    group_stats = {}
+    for key in sorted(set(key_arr[train_idx].tolist())):
+        group_train_idx = train_idx[key_arr[train_idx] == key]
+        mean = x[group_train_idx].mean(axis=0)
+        std = x[group_train_idx].std(axis=0)
+        group_stats[key] = (mean, np.where(std < 1e-6, 1.0, std))
+
+    def transform(indices: np.ndarray) -> np.ndarray:
+        rows = []
+        for idx in indices:
+            mean, std = group_stats.get(key_arr[idx], (train_global_mean, train_global_std))
+            rows.append((x[idx] - mean) / std)
+        return np.asarray(rows, dtype=np.float32)
+
+    return transform(train_idx), transform(val_idx)
 
 
 def score_split(name: str, x: np.ndarray, y: np.ndarray, train_idx: Sequence[int], val_idx: Sequence[int]) -> dict:
@@ -186,18 +248,33 @@ def score_split_with_classifier(
 ) -> dict:
     train_arr = np.asarray(train_idx, dtype=np.int64)
     val_arr = np.asarray(val_idx, dtype=np.int64)
-    if classifier == "euclidean":
-        pred = nearest_centroid_predict(x[train_arr], y[train_arr], x[val_arr])
-    elif classifier == "cosine":
-        pred = nearest_centroid_cosine_predict(x[train_arr], y[train_arr], x[val_arr])
-    else:
-        raise ValueError(f"Unsupported classifier: {classifier}")
+    pred = predict_with_classifier(x[train_arr], y[train_arr], x[val_arr], classifier)
     metrics, cm = compute_classification_metrics(y[val_arr], pred, None, CLASS_NAMES)
     return {
         "name": name,
         "classifier": classifier,
         "train_count": int(len(train_arr)),
         "val_count": int(len(val_arr)),
+        "metrics": metrics,
+        "confusion_matrix": cm.tolist(),
+    }
+
+
+def score_split_arrays(
+    name: str,
+    x_train: np.ndarray,
+    y_train: np.ndarray,
+    x_val: np.ndarray,
+    y_val: np.ndarray,
+    classifier: str,
+) -> dict:
+    pred = predict_with_classifier(x_train, y_train, x_val, classifier)
+    metrics, cm = compute_classification_metrics(y_val, pred, None, CLASS_NAMES)
+    return {
+        "name": name,
+        "classifier": classifier,
+        "train_count": int(len(y_train)),
+        "val_count": int(len(y_val)),
         "metrics": metrics,
         "confusion_matrix": cm.tolist(),
     }
@@ -231,6 +308,74 @@ def score_alignment_variants(
                     y=y,
                     train_idx=train_idx,
                     val_idx=val_idx,
+                    classifier=classifier,
+                )
+                row["transform"] = transform_name
+                rows.append(row)
+    return rows
+
+
+def score_train_only_alignment_variants(
+    x: np.ndarray,
+    y: np.ndarray,
+    records: List[Dict[str, object]],
+    splits: Dict[str, tuple[np.ndarray, np.ndarray]],
+) -> List[dict]:
+    subjects = np.asarray([str(r["subject_id"]) for r in records])
+    run_ids = np.asarray([f'run-{int(r["run_id"])}' for r in records])
+    run_keys = np.asarray([f'{r["subject_id"]}|run-{int(r["run_id"])}' for r in records])
+    split_transforms = {
+        "train_global_center": lambda train_idx, val_idx: train_only_center_split(
+            x,
+            train_idx,
+            val_idx,
+            ["global"] * len(records),
+        ),
+        "train_subject_center": lambda train_idx, val_idx: train_only_center_split(
+            x,
+            train_idx,
+            val_idx,
+            subjects,
+        ),
+        "train_subject_standardize": lambda train_idx, val_idx: train_only_standardize_split(
+            x,
+            train_idx,
+            val_idx,
+            subjects,
+        ),
+        "train_runid_center": lambda train_idx, val_idx: train_only_center_split(
+            x,
+            train_idx,
+            val_idx,
+            run_ids,
+        ),
+        "train_runid_standardize": lambda train_idx, val_idx: train_only_standardize_split(
+            x,
+            train_idx,
+            val_idx,
+            run_ids,
+        ),
+        "train_subject_run_center": lambda train_idx, val_idx: train_only_center_split(
+            x,
+            train_idx,
+            val_idx,
+            run_keys,
+        ),
+    }
+
+    rows: List[dict] = []
+    for split_name, (train_idx, val_idx) in splits.items():
+        train_arr = np.asarray(train_idx, dtype=np.int64)
+        val_arr = np.asarray(val_idx, dtype=np.int64)
+        for transform_name, transform_fn in split_transforms.items():
+            x_train, x_val = transform_fn(train_arr, val_arr)
+            for classifier in ("euclidean", "cosine"):
+                row = score_split_arrays(
+                    name=split_name,
+                    x_train=x_train,
+                    y_train=y[train_arr],
+                    x_val=x_val,
+                    y_val=y[val_arr],
                     classifier=classifier,
                 )
                 row["transform"] = transform_name
@@ -465,6 +610,7 @@ def main() -> None:
         score_split("subject_holdout", x, y, subject_train_idx, subject_val_idx),
     ]
     alignment_variants = score_alignment_variants(x, y, records, split_indices)
+    train_only_alignment_variants = score_train_only_alignment_variants(x, y, records, split_indices)
     rotating_run_holdouts = score_rotating_run_holdouts(x, y, records)
     rotating_subject_folds = score_rotating_subject_folds(
         x,
@@ -490,6 +636,11 @@ def main() -> None:
         "alignment_note": (
             "Transforms ending in _transductive use unlabeled validation run/subject statistics. "
             "They are diagnostic domain-adaptation probes, not ordinary supervised baselines."
+        ),
+        "train_only_alignment_variants": train_only_alignment_variants,
+        "train_only_alignment_summary": summarize_rows(
+            train_only_alignment_variants,
+            group_keys=("name", "transform", "classifier"),
         ),
         "rotating_run_holdouts": rotating_run_holdouts,
         "rotating_run_holdout_summary": summarize_rows(
