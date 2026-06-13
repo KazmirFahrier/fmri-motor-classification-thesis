@@ -238,6 +238,8 @@ A preliminary local pass using the downloaded version 12 feature matrix suggests
 
 This does not make the result useless; it clarifies the result. The dataset appears to contain motor-class signal, but robust recovery across runs/subjects likely needs either an explicit test-time adaptation protocol that uses unlabeled target-run statistics, or a model trained to remove run/domain nuisance structure rather than a static train-only nearest-centroid baseline.
 
+A local variance decomposition on the same full-cohort reduced feature matrix supports this interpretation. In the raw clip-mean feature space, class identity explained effectively `0.0000` of total variance, while subject explained about `0.9851` and subject-run explained about `0.9971`. After subject-run centering, the subject/run components were removed by construction and class variance rose to `0.0068`. That is still a small signal, but it is no longer buried under subject anatomy and run-offset structure. The diagnostic script now writes this decomposition into `summary.json` for future runs.
+
 ## What To Do Next
 
 Run these checks in this order:

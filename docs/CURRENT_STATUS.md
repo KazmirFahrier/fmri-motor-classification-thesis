@@ -99,6 +99,7 @@ This repository is tracking the active full-dataset thesis runs for 4-class moto
 - The corrected clip feature-transfer kernel was relaunched as version 13 after adding class-wise and train-only alignment summaries; it is currently running.
 - The diagnostic script now also includes train-only alignment probes that estimate centering/standardization statistics from training data only. These are the next key check for whether the run-centering effect can become a publishable supervised baseline rather than only a transductive test-time adaptation diagnostic.
 - A preliminary local train-only alignment pass on the downloaded version 12 feature matrix found only small gains: same-subject held-out-run cosine nearest-centroid accuracy rose from `0.2641` raw to at most `0.3185` with train-subject standardization, while subject holdout stayed near chance at roughly `0.2646` best. This suggests the large transductive gains mostly require validation-domain run statistics.
+- A local variance decomposition on the same full-cohort reduced feature matrix found that raw feature variance is overwhelmingly dominated by subject and subject-run identity: class eta-squared was effectively `0.0000`, subject was about `0.9851`, and subject-run was about `0.9971`. After subject-run centering, class eta-squared rose to `0.0068`, supporting the run/subject nuisance interpretation.
 
 ## Current Metrics Snapshot
 

@@ -503,6 +503,54 @@ def summarize_rows(rows: List[dict], group_keys: Sequence[str]) -> List[dict]:
     return summaries
 
 
+def variance_explained_by_group(x: np.ndarray, keys: Sequence[str]) -> float:
+    key_arr = np.asarray(keys)
+    global_mean = x.mean(axis=0)
+    total = float(((x - global_mean) ** 2).sum())
+    if total <= 0.0:
+        return 0.0
+    between = 0.0
+    for key in sorted(set(key_arr.tolist())):
+        mask = key_arr == key
+        diff = x[mask].mean(axis=0) - global_mean
+        between += int(mask.sum()) * float((diff ** 2).sum())
+    return float(between / total)
+
+
+def feature_variance_decomposition(
+    x: np.ndarray,
+    y: np.ndarray,
+    records: List[Dict[str, object]],
+) -> dict:
+    subjects = np.asarray([str(r["subject_id"]) for r in records])
+    run_ids = np.asarray([f'run-{int(r["run_id"])}' for r in records])
+    run_keys = np.asarray([f'{r["subject_id"]}|run-{int(r["run_id"])}' for r in records])
+    class_keys = np.asarray([CLASS_NAMES[int(label)] for label in y])
+    subject_run_class = np.asarray(
+        [f'{r["subject_id"]}|run-{int(r["run_id"])}|class-{int(r["class_id"])}' for r in records]
+    )
+    group_keys = {
+        "class": class_keys,
+        "subject": subjects,
+        "run_id": run_ids,
+        "subject_run": run_keys,
+        "subject_run_class": subject_run_class,
+    }
+    variants = {
+        "raw": x,
+        "subject_centered": center_by_group(x, subjects),
+        "run_id_centered": center_by_group(x, run_ids),
+        "subject_run_centered": center_by_group(x, run_keys),
+    }
+    return {
+        variant_name: {
+            group_name: variance_explained_by_group(x_variant, keys)
+            for group_name, keys in group_keys.items()
+        }
+        for variant_name, x_variant in variants.items()
+    }
+
+
 def within_group_leave_one_out(x: np.ndarray, y: np.ndarray, records: List[Dict[str, object]]) -> dict:
     grouped: Dict[tuple[str, int], List[int]] = defaultdict(list)
     for i, rec in enumerate(records):
@@ -633,6 +681,7 @@ def main() -> None:
         "within_run_leave_one_clip_out": within_group_leave_one_out(x, y, records),
         "splits": splits,
         "alignment_variants": alignment_variants,
+        "feature_variance_decomposition": feature_variance_decomposition(x, y, records),
         "alignment_note": (
             "Transforms ending in _transductive use unlabeled validation run/subject statistics. "
             "They are diagnostic domain-adaptation probes, not ordinary supervised baselines."
