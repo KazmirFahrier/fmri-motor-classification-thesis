@@ -232,6 +232,8 @@ Class-wise inspection of the aligned full-cohort sweeps shows that the gain is n
 
 The diagnostic script now writes rotating held-out-run and subject-fold summaries directly, including mean per-class recall and precision. Kaggle version 12 of `b6uejhvvnmiwb/thesis-corrected-clip-baseline` was launched after the rotating-sweep code landed; a later clean rerun may be needed for the newest per-class summary fields if version 12 cloned before this final summary update.
 
+The script also includes train-only alignment probes. These estimate global, subject-level, run-id-level, or subject-run-level centering/standardization statistics only from the training split, with validation samples falling back to training-derived statistics when their domain key was unseen. This is the next decision point: if train-only alignment recovers a useful fraction of the transductive gain, the project can define a conventional preprocessing baseline; if it does not, the alignment result should be framed as evidence for test-time adaptation or domain-invariant modeling rather than as a standard supervised classifier.
+
 ## What To Do Next
 
 Run these checks in this order:
@@ -239,6 +241,8 @@ Run these checks in this order:
 1. Run/subject transfer diagnostic.
 
 Use simple feature baselines to quantify how much class structure survives each split type: within-run, held-out-run, held-out-subject, and held-out-session if available. Treat within-run success with cross-run failure as a nuisance/domain-shift warning, not as deployable classification. Use transductive run-normalization only as a diagnostic; any publishable model needs a non-transductive training-only normalization or a clearly defined test-time adaptation protocol.
+
+Use the train-only alignment summaries to decide whether run/subject centering can be a standard supervised preprocessing step. If train-only centering remains near chance while transductive centering stays high, report the finding as a domain-shift/test-time-adaptation result and move to domain-invariant modeling.
 
 2. Tiny overfit sanity check.
 

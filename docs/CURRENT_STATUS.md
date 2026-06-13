@@ -96,6 +96,7 @@ This repository is tracking the active full-dataset thesis runs for 4-class moto
 - Local rotation sweeps on the downloaded full-cohort reduced feature matrix confirmed the effect: all six held-out-run splits averaged `0.2655` raw accuracy vs `0.5228` after per-run centering plus cosine; six subject folds averaged `0.2609` raw accuracy vs `0.4818` after the same alignment.
 - Class-wise inspection of the aligned full-cohort sweeps shows that the gain is not only one-class collapse: all four classes are above chance after per-run centering plus cosine. Forearm movements are usually the easiest class, while left-leg and upper-arm movements remain weaker and more variable.
 - The corrected clip feature-transfer kernel was relaunched as version 12 after adding rotating held-out-run and subject-fold summaries to `scripts/analyze_clip_feature_transfer.py`; it is currently running and should produce these summaries directly in `summary.json`.
+- The diagnostic script now also includes train-only alignment probes that estimate centering/standardization statistics from training data only. These are the next key check for whether the run-centering effect can become a publishable supervised baseline rather than only a transductive test-time adaptation diagnostic.
 
 ## Current Metrics Snapshot
 
@@ -124,6 +125,7 @@ Phase 1 is designed to separate optimistic pooled-split performance from leakage
 - Continue dataset/label audit, preprocessing and normalization checks, leakage analysis, and simple sanity-check baselines.
 - Prioritize run/subject nuisance control and domain-alignment diagnostics because corrected clip features classify well within runs but fail across held-out runs/subjects.
 - Convert the transductive run-normalization gains into non-transductive experiments: training-only harmonization, explicit test-time adaptation protocol, run/session covariate control, or domain-invariant feature learning.
+- Use the new train-only alignment probe outputs to decide whether a supervised run/subject harmonization baseline is viable before launching another neural model.
 - Do not trust the current temporal ResNet corrected-clip recipe until a small eval-mode overfit probe succeeds.
 - Treat the completed subject-wise result as evidence that the current full-dataset subject-wise setup is not learning; investigate data/model/label issues before making publication claims.
 - Download completed outputs into local status folders after each Kaggle session.
