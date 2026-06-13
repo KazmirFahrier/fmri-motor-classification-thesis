@@ -10,7 +10,7 @@ This repository is tracking the active full-dataset thesis runs for 4-class moto
 | --- | --- | --- | --- |
 | Full-dataset pooled legacy baseline | [`b6uejhvvnmiwb/thesis-legacy-full-resume`](https://www.kaggle.com/code/b6uejhvvnmiwb/thesis-legacy-full-resume) | Stopped by controlled policy at epoch 25 | Quantify the full-data pooled-split baseline for the Phase 1 leakage-gap comparison. |
 | Full-dataset subject-wise evaluation | [`kazmirfahrier/thesis-7batch-gpucompat-runner`](https://www.kaggle.com/code/kazmirfahrier/thesis-7batch-gpucompat-runner) | Complete; final artifacts refreshed | Continue leakage-aware subject-wise 5-fold evaluation plus holdout. |
-| Corrected clip feature-transfer diagnostic | [`b6uejhvvnmiwb/thesis-corrected-clip-baseline`](https://www.kaggle.com/code/b6uejhvvnmiwb/thesis-corrected-clip-baseline) | Version 13 complete | Regenerated the full-cohort domain-alignment diagnostic with class-wise and train-only alignment summaries. |
+| Corrected clip feature-transfer diagnostic | [`b6uejhvvnmiwb/thesis-corrected-clip-baseline`](https://www.kaggle.com/code/b6uejhvvnmiwb/thesis-corrected-clip-baseline) | Version 14 running | Run a denser full-cohort `16³` diagnostic with `clip_window_stride=1` to test whether overlapping clips improve transfer/adaptation. |
 
 ## Known Progress
 
@@ -100,6 +100,7 @@ This repository is tracking the active full-dataset thesis runs for 4-class moto
 - The diagnostic script now also includes train-only alignment probes that estimate centering/standardization statistics from training data only. These are the next key check for whether the run-centering effect can become a publishable supervised baseline rather than only a transductive test-time adaptation diagnostic.
 - Official version 13 train-only alignment found only small gains: same-subject held-out-run cosine nearest-centroid accuracy rose from `0.2641` raw to at most `0.3185` with train-subject standardization, while subject holdout stayed near chance at roughly `0.2646` best. This confirms that the large transductive gains mostly require validation-domain run statistics.
 - A local variance decomposition on the same full-cohort reduced feature matrix found that raw feature variance is overwhelmingly dominated by subject and subject-run identity: class eta-squared was effectively `0.0000`, subject was about `0.9851`, and subject-run was about `0.9971`. After subject-run centering, class eta-squared rose to `0.0068`, supporting the run/subject nuisance interpretation.
+- The corrected clip feature-transfer kernel was relaunched as version 14 with `clip_window_stride=1` and output directory `/kaggle/working/clip_domain_alignment_full16_stride1`. This tests whether using all overlapping clips from the two 8-volume event windows changes raw transfer, target-run adaptation, or train-only alignment behavior.
 
 ## Current Metrics Snapshot
 

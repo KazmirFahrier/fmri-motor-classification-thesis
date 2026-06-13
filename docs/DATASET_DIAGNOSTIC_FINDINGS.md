@@ -240,6 +240,8 @@ This does not make the result useless; it clarifies the result. The dataset appe
 
 A local variance decomposition on the same full-cohort reduced feature matrix supports this interpretation. In the raw clip-mean feature space, class identity explained effectively `0.0000` of total variance, while subject explained about `0.9851` and subject-run explained about `0.9971`. After subject-run centering, the subject/run components were removed by construction and class variance rose to `0.0068`. That is still a small signal, but it is no longer buried under subject anatomy and run-offset structure. The diagnostic script now writes this decomposition into `summary.json` for future runs.
 
+The next active diagnostic is a denser full-cohort run using `clip_window_stride=1` at `16 x 16 x 16`, launched as Kaggle version 14. The earlier full-cohort run used `clip_window_stride=8`, meaning only one non-overlapping clip per extracted 8-volume event window. The denser run asks whether overlapping clips restore within-run structure and whether train-only or target-run adaptation behaves differently when each subject-run-class block contributes more samples.
+
 ## What To Do Next
 
 Run these checks in this order:
