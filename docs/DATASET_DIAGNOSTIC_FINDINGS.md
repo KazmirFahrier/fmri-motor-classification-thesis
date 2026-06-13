@@ -207,6 +207,18 @@ Best alignment results:
 
 This strongly suggests that run-specific baseline/scale effects are masking motor-class structure. The next practical modeling direction is to build non-transductive versions of this idea: estimate nuisance normalization from training runs only, use run/session-aware harmonization, add subject/run covariate controls, or train models with explicit domain-invariance objectives.
 
+A reduced full-cohort version of the same diagnostic was run across all 62 subjects using lower-resolution `16 x 16 x 16` clip-mean spatial features and `clip_window_stride=8` to keep one non-overlapping clip per extracted event window. This produced 2,976 clips with 4,096 features each.
+
+Full-cohort reduced results:
+
+- within subject-run leave-one-clip-out was poor at this reduced/non-overlapping setting: accuracy `0.1546`, macro F1 `0.1541`, MCC `-0.1273`
+- raw same-subject run holdout stayed near chance: accuracy `0.2621`, macro F1 `0.2561`, MCC `0.0164`
+- raw subject holdout stayed near chance: accuracy `0.2542`, macro F1 `0.2183`, MCC `0.0059`
+- same-subject run holdout improved to accuracy `0.5565`, macro F1 `0.5536`, MCC `0.4109` with per-run centering plus cosine nearest centroids
+- subject holdout improved to accuracy `0.4667`, macro F1 `0.4653`, MCC `0.2902` with per-run centering plus cosine nearest centroids
+
+This full-cohort reduced run is not directly comparable to the denser 8-subject `24 x 24 x 24` run because it uses lower spatial resolution and far fewer overlapping clips. Still, it independently confirms the main pattern: raw transfer remains chance-like, while transductive run-level alignment recovers substantial class structure.
+
 ## What To Do Next
 
 Run these checks in this order:
