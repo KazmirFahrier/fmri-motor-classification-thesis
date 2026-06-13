@@ -10,7 +10,7 @@ This repository is tracking the active full-dataset thesis runs for 4-class moto
 | --- | --- | --- | --- |
 | Full-dataset pooled legacy baseline | [`b6uejhvvnmiwb/thesis-legacy-full-resume`](https://www.kaggle.com/code/b6uejhvvnmiwb/thesis-legacy-full-resume) | Stopped by controlled policy at epoch 25 | Quantify the full-data pooled-split baseline for the Phase 1 leakage-gap comparison. |
 | Full-dataset subject-wise evaluation | [`kazmirfahrier/thesis-7batch-gpucompat-runner`](https://www.kaggle.com/code/kazmirfahrier/thesis-7batch-gpucompat-runner) | Complete; final artifacts refreshed | Continue leakage-aware subject-wise 5-fold evaluation plus holdout. |
-| Corrected clip feature-transfer diagnostic | [`b6uejhvvnmiwb/thesis-corrected-clip-baseline`](https://www.kaggle.com/code/b6uejhvvnmiwb/thesis-corrected-clip-baseline) | Complete | Diagnose whether corrected clip features transfer across runs/subjects. |
+| Corrected clip feature-transfer diagnostic | [`b6uejhvvnmiwb/thesis-corrected-clip-baseline`](https://www.kaggle.com/code/b6uejhvvnmiwb/thesis-corrected-clip-baseline) | Version 12 running | Regenerate the full-cohort domain-alignment diagnostic with rotating run and subject-fold summaries from the repo script. |
 
 ## Known Progress
 
@@ -94,6 +94,8 @@ This repository is tracking the active full-dataset thesis runs for 4-class moto
 - Transductive domain-alignment probes show that run-specific nuisance structure is a major failure mode. Same-subject run holdout improved to accuracy `0.5729`, macro F1 `0.5634` with per-run standardization plus cosine nearest centroids. Subject holdout improved to accuracy `0.4896`, macro F1 `0.4807` with per-run centering plus cosine nearest centroids.
 - A reduced full-cohort 62-subject diagnostic at `16 x 16 x 16` with one non-overlapping clip per event window produced the same pattern: raw run holdout accuracy `0.2621`, raw subject holdout accuracy `0.2542`; per-run centering plus cosine improved these to `0.5565` and `0.4667` respectively.
 - Local rotation sweeps on the downloaded full-cohort reduced feature matrix confirmed the effect: all six held-out-run splits averaged `0.2655` raw accuracy vs `0.5228` after per-run centering plus cosine; six subject folds averaged `0.2609` raw accuracy vs `0.4818` after the same alignment.
+- Class-wise inspection of the aligned full-cohort sweeps shows that the gain is not only one-class collapse: all four classes are above chance after per-run centering plus cosine. Forearm movements are usually the easiest class, while left-leg and upper-arm movements remain weaker and more variable.
+- The corrected clip feature-transfer kernel was relaunched as version 12 after adding rotating held-out-run and subject-fold summaries to `scripts/analyze_clip_feature_transfer.py`; it is currently running and should produce these summaries directly in `summary.json`.
 
 ## Current Metrics Snapshot
 

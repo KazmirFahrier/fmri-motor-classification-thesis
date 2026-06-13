@@ -323,6 +323,16 @@ def summarize_rows(rows: List[dict], group_keys: Sequence[str]) -> List[dict]:
     summaries = []
     for key, group_rows in sorted(grouped.items()):
         metrics = [row["metrics"] for row in group_rows]
+        cms = [np.asarray(row["confusion_matrix"], dtype=np.float64) for row in group_rows]
+        split_recalls = []
+        split_precisions = []
+        for cm in cms:
+            row_totals = np.maximum(cm.sum(axis=1), 1.0)
+            col_totals = np.maximum(cm.sum(axis=0), 1.0)
+            split_recalls.append(np.diag(cm) / row_totals)
+            split_precisions.append(np.diag(cm) / col_totals)
+        class_recalls = np.mean(split_recalls, axis=0)
+        class_precisions = np.mean(split_precisions, axis=0)
         summary = {
             group_key: key[idx] for idx, group_key in enumerate(group_keys)
         }
@@ -334,6 +344,14 @@ def summarize_rows(rows: List[dict], group_keys: Sequence[str]) -> List[dict]:
                 "mean_macro_f1": float(np.mean([m["macro_f1"] for m in metrics])),
                 "min_top1_accuracy": float(np.min([m["top1_accuracy"] for m in metrics])),
                 "max_top1_accuracy": float(np.max([m["top1_accuracy"] for m in metrics])),
+                "mean_class_recall": {
+                    class_name: float(class_recalls[class_idx])
+                    for class_idx, class_name in enumerate(CLASS_NAMES)
+                },
+                "mean_class_precision": {
+                    class_name: float(class_precisions[class_idx])
+                    for class_idx, class_name in enumerate(CLASS_NAMES)
+                },
             }
         )
         summaries.append(summary)

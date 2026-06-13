@@ -228,6 +228,10 @@ Additional local sweeps on the downloaded full-cohort reduced feature matrix con
 
 These rotational checks strengthen the conclusion that run-level nuisance structure is systematic across the dataset, not an artifact of one chosen validation run or subject subset.
 
+Class-wise inspection of the aligned full-cohort sweeps shows that the gain is not simply a new one-class shortcut. With per-run centering plus cosine nearest centroids, every class has above-chance recall across rotating held-out runs and subject folds. Forearm movements are consistently easiest, while left-leg and upper-arm movements are weaker and more variable. This suggests the input data carries distributed motor-class information, but it is partially masked by subject/run offsets and class-specific ambiguity.
+
+The diagnostic script now writes rotating held-out-run and subject-fold summaries directly, including mean per-class recall and precision. The current Kaggle version 12 rerun of `b6uejhvvnmiwb/thesis-corrected-clip-baseline` should reproduce these summaries from the public repo code.
+
 ## What To Do Next
 
 Run these checks in this order:
