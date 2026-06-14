@@ -10,7 +10,7 @@ This repository is tracking the active full-dataset thesis runs for 4-class moto
 | --- | --- | --- | --- |
 | Full-dataset pooled legacy baseline | [`b6uejhvvnmiwb/thesis-legacy-full-resume`](https://www.kaggle.com/code/b6uejhvvnmiwb/thesis-legacy-full-resume) | Stopped by controlled policy at epoch 25 | Quantify the full-data pooled-split baseline for the Phase 1 leakage-gap comparison. |
 | Full-dataset subject-wise evaluation | [`kazmirfahrier/thesis-7batch-gpucompat-runner`](https://www.kaggle.com/code/kazmirfahrier/thesis-7batch-gpucompat-runner) | Complete; final artifacts refreshed | Continue leakage-aware subject-wise 5-fold evaluation plus holdout. |
-| Corrected clip feature-transfer diagnostic | [`b6uejhvvnmiwb/thesis-corrected-clip-baseline`](https://www.kaggle.com/code/b6uejhvvnmiwb/thesis-corrected-clip-baseline) | Version 15 complete | Full-cohort `24³`, `clip_window_stride=1` diagnostic shows higher spatial resolution improves target-run adaptation, but weak subjects remain. |
+| Corrected clip feature-transfer diagnostic | [`b6uejhvvnmiwb/thesis-corrected-clip-baseline`](https://www.kaggle.com/code/b6uejhvvnmiwb/thesis-corrected-clip-baseline) | Version 16 running | Full-cohort `32³`, `clip_window_stride=1` diagnostic tests whether the spatial-resolution improvement continues beyond `24³`. |
 
 ## Known Progress
 
@@ -113,6 +113,7 @@ This repository is tracking the active full-dataset thesis runs for 4-class moto
 - Higher resolution did not fix raw or train-only transfer. Raw cosine stayed near `0.26`; train-subject centering reached only `0.3387` on same-subject held-out-run and `0.2701` on subject holdout.
 - Weak-subject behavior persisted at `24³`: `sub-52` remained very poor at `0.1667` subject-fold trial accuracy, while best subjects such as `sub-30` and `sub-62` reached `0.75`.
 - Same-subject leave-one-run event-level classification after per-run centering averaged `0.5813`, but `sub-52` and `sub-42` remained very poor (`0.1875` and `0.2083`). Removing the 10 worst subjects only raised dense `24³` adapted subject-fold trial accuracy from `0.5652` to `0.6038`, so weak subjects are important but not the whole problem.
+- The corrected clip feature-transfer kernel was relaunched as version 16 with target shape `32 x 32 x 32`, `clip_window_stride=1`, and output directory `/kaggle/working/clip_domain_alignment_full32_stride1`. This tests whether the spatial-resolution gain observed from `16³` to `24³` continues.
 
 ## Current Metrics Snapshot
 

@@ -271,6 +271,8 @@ The higher-resolution run confirms that spatial detail matters, but only within 
 
 Follow-up weak-subject probes show that this is not merely cross-subject mismatch. Same-subject leave-one-run event-level classification after per-run centering averaged `0.5813` overall, but `sub-52` and `sub-42` remained at `0.1875` and `0.2083`, respectively. Their run-pair transfer matrices were inconsistent across runs, while stronger subjects showed stable cross-run mappings. A simple QC exclusion curve was modest: removing the worst 10 subjects raised dense `24³` target-run-adapted subject-fold trial accuracy from `0.5652` to only `0.6038`. So weak subjects are real and should be audited, but they are not the only reason full-cohort generalization is hard.
 
+The next active run is a full-cohort `32 x 32 x 32`, `clip_window_stride=1` diagnostic, launched as Kaggle version 16. Since `24³` improved target-run adaptation over `16³`, this run checks whether preserving still more spatial detail continues to help or whether performance saturates while subject-specific inconsistency remains.
+
 ## What To Do Next
 
 Run these checks in this order:
