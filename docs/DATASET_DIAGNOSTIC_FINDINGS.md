@@ -288,13 +288,24 @@ Compared with `24³`, the `32³` run gives a tiny held-out-run event-level gain 
 
 Version 16 also reproduced the same weak-subject pattern. Event-level subject-fold target-run adaptation averaged `0.5605`, but `sub-52` stayed at `0.1875`, `sub-42` at `0.2708`, and `sub-17`, `sub-63`, and `sub-20` at `0.3333`. Stronger subjects such as `sub-62`, `sub-30`, `sub-10`, and `sub-47` reached roughly `0.71-0.77`. Because the same weak subjects were already poor at `24³`, the next data-understanding work should inspect run-to-run consistency, event timing, motion/artifact profile, and anatomical/registration effects for these subjects rather than scaling resolution or continuing the legacy model.
 
+A focused event-level consistency audit was then run on the dense `24³` saved features. It averaged the three overlapping clips from each event window into one event feature, yielding 2,976 event windows from 8,928 clips, then centered features within each subject-run before measuring run-to-run class-template stability.
+
+The audit found no malformed event groups and no event-count anomalies for the focus subjects, so the clearest weak-subject failures are not explained by missing extracted events. Instead, the geometry itself is unstable:
+
+- `sub-52`: leave-one-subject adapted event accuracy `0.1667`, same-subject leave-one-run accuracy `0.1875`, mean run-pair accuracy `0.2667`, centroid margin `-0.1678`
+- `sub-42`: leave-one-subject adapted event accuracy `0.3125`, same-subject leave-one-run accuracy `0.2083`, mean run-pair accuracy `0.2458`, centroid margin `-0.1641`
+- `sub-54`: leave-one-subject adapted event accuracy `0.3750`, same-subject leave-one-run accuracy `0.4167`, centroid margin `-0.0384`
+- `sub-30`: leave-one-subject adapted event accuracy `0.7708`, same-subject leave-one-run accuracy `0.6250`, mean run-pair accuracy `0.6000`, centroid margin `0.2168`
+
+The centroid margin is the cosine similarity of the correct same-class template across runs minus the nearest wrong-class template. Negative margins mean a subject's run-to-run class geometry is effectively scrambled. Across subjects, same-subject leave-one-run accuracy correlated strongly with centroid margin (`r = 0.697`), while leave-one-subject adapted accuracy had moderate correlations with same-subject leave-one-run accuracy (`r = 0.470`) and centroid margin (`r = 0.384`). This supports a more precise hypothesis: the hard cases are not just hard because they differ from other subjects; several are internally inconsistent across their own runs.
+
 ## What To Do Next
 
 Run these checks in this order:
 
 1. Weak-subject and run-consistency audit.
 
-Focus on subjects that repeatedly fail despite target-run centering, especially `sub-52`, `sub-42`, `sub-17`, `sub-20`, `sub-54`, and `sub-63`. For each subject, inspect event timing/window extraction, per-run class-template stability, run-pair transfer matrices, motion/artifact summaries if available, and whether class mappings appear unstable or genuinely noisy. Compare these against stable subjects such as `sub-30`, `sub-62`, `sub-10`, and `sub-47`.
+Focus on subjects that repeatedly fail despite target-run centering, especially `sub-52`, `sub-42`, `sub-17`, `sub-20`, `sub-54`, and `sub-63`. The saved-feature geometry already shows that `sub-52` and `sub-42` have unstable class templates across their own runs. The next audit layer should inspect event timing/window extraction against source BIDS files, motion/artifact summaries if available, anatomical alignment, and whether particular runs/classes are corrupted or atypical. Compare these against stable subjects such as `sub-30`, `sub-62`, `sub-10`, and `sub-47`.
 
 2. Run/subject transfer diagnostic.
 

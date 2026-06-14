@@ -119,6 +119,9 @@ This repository is tracking the active full-dataset thesis runs for 4-class moto
 - Train-only alignment stayed weak at `32³`: same-subject held-out-run train-subject centering reached `0.3353` accuracy, while subject holdout stayed near chance at `0.2660`.
 - The `32³` subject-difficulty pass reproduced the same weak-subject pattern: `sub-52` remained at `0.1875` subject-fold trial accuracy, followed by `sub-42` at `0.2708` and `sub-17`/`sub-63`/`sub-20` at `0.3333`.
 - Spatial resolution appears to saturate. `32³` slightly improved held-out-run trial accuracy over `24³` (`0.6052` vs `0.6001`) but slightly reduced subject-fold trial accuracy (`0.5608` vs `0.5654`). The next bottleneck is therefore subject/run robustness, not another resolution increase.
+- A dense `24³` event-level subject/run consistency audit collapsed the 8,928 overlapping clips into 2,976 event windows and found no malformed event groups or focus-subject event-count anomalies.
+- The consistency audit ranked `sub-52` and `sub-42` as the clearest failures. Both had very low same-subject leave-one-run accuracy (`0.1875` and `0.2083`) and negative cross-run centroid margins (`-0.1678` and `-0.1641`), meaning their same-class templates are less stable across runs than competing wrong-class templates.
+- Better subjects show the opposite pattern: `sub-30` reached `0.7708` leave-one-subject adapted event accuracy, `0.6250` same-subject leave-one-run accuracy, and a positive centroid margin of `0.2168`.
 
 ## Current Metrics Snapshot
 
@@ -148,7 +151,7 @@ Phase 1 is designed to separate optimistic pooled-split performance from leakage
 - Prioritize run/subject nuisance control and domain-alignment diagnostics because corrected clip features classify well within runs but fail across held-out runs/subjects.
 - Treat `24³` dense corrected-clip features as the current sweet spot for fast diagnostics; `32³` did not materially improve subject generalization.
 - Convert the transductive run-normalization gains into non-transductive experiments: training-only harmonization, explicit test-time adaptation protocol, run/session covariate control, or domain-invariant feature learning.
-- Do a focused weak-subject audit before launching another large neural model, especially for `sub-52`, `sub-42`, `sub-17`, `sub-20`, `sub-54`, and `sub-63`.
+- Extend the weak-subject audit beyond saved feature geometry into raw-data QC: event timing against source BIDS files, motion/confound summaries, anatomical alignment, and run-level artifacts for `sub-52`, `sub-42`, `sub-17`, `sub-20`, `sub-54`, and `sub-63`.
 - Do not trust the current temporal ResNet corrected-clip recipe until a small eval-mode overfit probe succeeds.
 - Treat the completed subject-wise result as evidence that the current full-dataset subject-wise setup is not learning; investigate data/model/label issues before making publication claims.
 - Download completed outputs into local status folders after each Kaggle session.
