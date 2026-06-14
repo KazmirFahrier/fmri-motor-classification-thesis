@@ -329,6 +329,8 @@ Per-subject effects show why this should be framed carefully. Balanced assignmen
 
 A confidence-gated version was tested by applying balanced assignment only when the per-event centroid-score penalty was below a fixed threshold. This did not beat full balanced assignment. Conservative gates improved over independent argmax but peaked below or equal to full balance: held-out-run `0.6243` and subject-fold `0.5826`. Simple score-penalty gating therefore does not identify the subject-runs where balanced assignment is harmful.
 
+A wider subject-level balanced assignment was also tested by enforcing equal class counts across all available target runs for each held-out subject. This can be viewed as asking whether strong runs can rescue weak runs when the target subject is adapted as one larger 48-event group. It did not improve the aggregate result. Subject-fold accuracy reached `0.5746`, above independent argmax at `0.5669` but below per-subject-run balancing at `0.5826`. Subject-level balancing improved over per-run balancing for 22 subjects, tied for 8, and worsened 32, so smoothing across runs is not the missing ingredient.
+
 ## What To Do Next
 
 Run these checks in this order:
@@ -352,6 +354,8 @@ Avoid simple pseudo-centroid self-training for now. It should only be revisited 
 Analyze balanced-assignment deltas per subject whenever reporting the aggregate gain. The current result is an average improvement with heterogeneous subject-level effects, not a universal correction.
 
 Do not rely on simple score-penalty gating to choose whether balanced assignment should be applied. A useful gate likely needs a better instability/QC signal, not just the assignment objective value.
+
+Do not replace per-run balancing with all-runs subject-level balancing. It can reduce specific per-run overcorrections but lowers the cohort average, meaning the task balance signal is most useful at the run level where it is defined.
 
 3. Tiny overfit sanity check.
 

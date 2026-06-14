@@ -2,13 +2,16 @@
 from __future__ import annotations
 
 import argparse
-import itertools
 import json
 from collections import defaultdict
-from functools import lru_cache
 from pathlib import Path
 
 import numpy as np
+
+try:
+    from scipy.optimize import linear_sum_assignment
+except ImportError:  # pragma: no cover - fallback keeps the script usable without SciPy.
+    linear_sum_assignment = None
 
 
 CLASS_NAMES = [
@@ -130,29 +133,44 @@ def centroid_scores(x_train: np.ndarray, y_train: np.ndarray, x_val: np.ndarray)
     return score_with_centroids(x_val, centroid_matrix(x_train, y_train))
 
 
-@lru_cache(maxsize=None)
-def balanced_assignment_templates(group_size: int, class_count: int) -> tuple[tuple[int, ...], ...]:
-    if group_size % class_count != 0:
-        raise ValueError(f"Cannot evenly assign {group_size} events to {class_count} classes.")
-    per_class = group_size // class_count
-    labels = tuple(class_idx for class_idx in range(class_count) for _ in range(per_class))
-    return tuple(sorted(set(itertools.permutations(labels))))
+def balanced_assign_group_dp(scores: np.ndarray, per_class: int) -> np.ndarray:
+    """Exact fallback for balanced assignment when SciPy is unavailable."""
+    class_count = scores.shape[1]
+    target = tuple([per_class] * class_count)
+    states: dict[tuple[int, ...], tuple[float, tuple[int, ...]]] = {
+        tuple([0] * class_count): (0.0, tuple())
+    }
+    for row_idx in range(scores.shape[0]):
+        next_states: dict[tuple[int, ...], tuple[float, tuple[int, ...]]] = {}
+        for state, (score_so_far, path) in states.items():
+            for class_idx in range(class_count):
+                if state[class_idx] >= per_class:
+                    continue
+                next_state = list(state)
+                next_state[class_idx] += 1
+                next_state_tuple = tuple(next_state)
+                next_score = score_so_far + float(scores[row_idx, class_idx])
+                best_existing = next_states.get(next_state_tuple)
+                if best_existing is None or next_score > best_existing[0]:
+                    next_states[next_state_tuple] = (next_score, path + (class_idx,))
+        states = next_states
+    if target not in states:
+        raise RuntimeError("No balanced assignment found.")
+    return np.asarray(states[target][1], dtype=np.int64)
 
 
 def balanced_assign_group(scores: np.ndarray) -> np.ndarray:
-    templates = balanced_assignment_templates(scores.shape[0], scores.shape[1])
-    best_score = -np.inf
-    best_assignment: tuple[int, ...] | None = None
-    row_ids = np.arange(scores.shape[0])
-    for assignment in templates:
-        assignment_arr = np.asarray(assignment, dtype=np.int64)
-        score = float(scores[row_ids, assignment_arr].sum())
-        if score > best_score:
-            best_score = score
-            best_assignment = assignment
-    if best_assignment is None:
-        raise RuntimeError("No balanced assignment found.")
-    return np.asarray(best_assignment, dtype=np.int64)
+    group_size, class_count = scores.shape
+    if group_size % class_count != 0:
+        raise ValueError(f"Cannot evenly assign {group_size} events to {class_count} classes.")
+    per_class = group_size // class_count
+    if linear_sum_assignment is None:
+        return balanced_assign_group_dp(scores, per_class)
+    expanded_scores = np.repeat(scores, per_class, axis=1)
+    row_idx, col_idx = linear_sum_assignment(-expanded_scores)
+    assignment = np.empty(group_size, dtype=np.int64)
+    assignment[row_idx] = col_idx // per_class
+    return assignment
 
 
 def apply_balanced_assignment(scores: np.ndarray, val_idx: np.ndarray, records: list[dict]) -> np.ndarray:
@@ -163,6 +181,25 @@ def apply_balanced_assignment(scores: np.ndarray, val_idx: np.ndarray, records: 
         grouped[f'{record["subject_id"]}|run-{int(record["run_id"])}'].append(local_pos)
     for positions in grouped.values():
         positions = sorted(positions, key=lambda pos: records[int(val_idx[pos])]["event_start"])
+        group_scores = scores[positions]
+        pred[positions] = balanced_assign_group(group_scores)
+    return pred
+
+
+def apply_subject_balanced_assignment(scores: np.ndarray, val_idx: np.ndarray, records: list[dict]) -> np.ndarray:
+    pred = scores.argmax(axis=1).astype(np.int64)
+    grouped: dict[str, list[int]] = defaultdict(list)
+    for local_pos, record_idx in enumerate(val_idx):
+        record = records[int(record_idx)]
+        grouped[str(record["subject_id"])].append(local_pos)
+    for positions in grouped.values():
+        positions = sorted(
+            positions,
+            key=lambda pos: (
+                int(records[int(val_idx[pos])]["run_id"]),
+                int(records[int(val_idx[pos])]["event_start"]),
+            ),
+        )
         group_scores = scores[positions]
         pred[positions] = balanced_assign_group(group_scores)
     return pred
@@ -322,9 +359,11 @@ def main() -> None:
         scores = score_with_centroids(x_centered[val_idx], source_centroids)
         independent_pred = scores.argmax(axis=1).astype(np.int64)
         balanced_pred = apply_balanced_assignment(scores, val_idx, records)
+        subject_balanced_pred = apply_subject_balanced_assignment(scores, val_idx, records)
         prediction_rows = [
             ("independent_argmax", independent_pred),
             ("balanced_subject_run_assignment", balanced_pred),
+            ("balanced_subject_assignment", subject_balanced_pred),
         ]
         for threshold in args.balance_penalty_thresholds:
             prediction_rows.append(
@@ -415,7 +454,7 @@ def main() -> None:
         },
         "note": (
             "Balanced assignment uses unlabeled target subject-run groups and the known balanced task design "
-            "to assign exactly two events per class in each 8-event subject-run."
+            "to assign equal class counts inside target subject-run or target-subject groups."
         ),
     }
     Path(args.out_json).write_text(json.dumps(result, indent=2, default=as_jsonable))
