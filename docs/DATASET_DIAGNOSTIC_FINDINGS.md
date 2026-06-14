@@ -316,6 +316,13 @@ A fast event-level model sweep then tested whether the moderate target-run adapt
 
 This is a useful negative result. It suggests the next improvement is unlikely to come from swapping the final classifier on the same feature space. The classifier is already exploiting a simple class-template geometry; the real work is to build a representation or adaptation protocol where those class templates are stable across runs and subjects.
 
+A task-design-aware balanced assignment probe produced the first small constructive improvement on top of target-run centering. The motor paradigm contributes exactly two target events per class in each subject-run. Using that known unlabeled target-run structure, the probe keeps the same source cosine-centroid scores but assigns each 8-event subject-run exactly two predictions per class:
+
+- held-out-run event accuracy improved from `0.5981` independent argmax to `0.6243` balanced assignment
+- subject-fold event accuracy improved from `0.5669` independent argmax to `0.5826` balanced assignment
+
+This is still a test-time adaptation result, not a standard supervised classifier. But it is more scientifically grounded than arbitrary post-processing because the class-count constraint comes from the task design. The improvement suggests that some target-run-centered predictions are close but globally inconsistent within a run; enforcing the known event balance can recover part of that lost structure.
+
 ## What To Do Next
 
 Run these checks in this order:
@@ -331,6 +338,8 @@ Use simple feature baselines to quantify how much class structure survives each 
 Use the train-only alignment summaries to decide whether run/subject centering can be a standard supervised preprocessing step. If train-only centering remains near chance while transductive centering stays high, report the finding as a domain-shift/test-time-adaptation result and move to domain-invariant modeling.
 
 Use the event-level model sweep as a guardrail before adding classifier complexity. If a richer classifier underperforms cosine centroids on the aligned features, prioritize representation learning, better target-run adaptation, or QC/preprocessing fixes instead.
+
+Use the balanced-assignment probe to define a stronger adaptation baseline. It should be reported separately from independent per-event prediction because it uses unlabeled target-run grouping and the known balanced task design.
 
 3. Tiny overfit sanity check.
 

@@ -124,6 +124,7 @@ This repository is tracking the active full-dataset thesis runs for 4-class moto
 - Better subjects show the opposite pattern: `sub-30` reached `0.7708` leave-one-subject adapted event accuracy, `0.6250` same-subject leave-one-run accuracy, and a positive centroid margin of `0.2168`.
 - A source BIDS event-window audit against OpenNeuro `ds004044` version `2.0.3` matched all extracted target-class window starts against source `events.tsv` onset/TR starts. Result: 62 subjects, 372 runs, repetition time `2.0`, and `0` anomalies. This rules out a broad target-class event-timing or extraction-window mismatch.
 - A fast event-level model sweep tested whether richer linear classifiers can improve the dense `24³` target-run-centered feature baseline. They did not: cosine nearest centroids remained best at `0.5981` held-out-run event accuracy and `0.5669` subject-fold event accuracy. The best random-projection ridge models reached only `0.5346` and `0.4892`, respectively.
+- A task-design-aware balanced assignment probe improved the target-run-centered event baseline by enforcing two predicted events per class within each unlabeled subject-run. Held-out-run event accuracy rose from `0.5981` to `0.6243`, and subject-fold event accuracy rose from `0.5669` to `0.5826`.
 
 ## Current Metrics Snapshot
 
@@ -132,7 +133,7 @@ This repository is tracking the active full-dataset thesis runs for 4-class moto
 | Original 9-subject pooled split | Historical baseline: accuracy 0.8522, MCC 0.8055, ROC-AUC 0.95, PR-AUC 0.88. |
 | Full-dataset pooled split | Stopped at epoch 25 by controlled policy. Final validation snapshot: accuracy 0.2629, balanced accuracy 0.2648, macro F1 0.2501, MCC 0.0206. Training accuracy reached 0.5690, so the model is fitting training data without meaningful validation generalization. |
 | Full-dataset subject-wise CV + holdout | Complete. All five CV folds and final holdout are chance-level: accuracy 0.25, balanced accuracy 0.25, macro F1 0.10, MCC 0.0. |
-| Corrected clip feature transfer | Dense full-cohort overlapping clips show strong within-run signal. The best simple subject-fold event-window result remains dense `24³` per-subject-run centering plus cosine at `0.5654` trial accuracy; `32³` reached `0.5608` subject-fold trial accuracy while slightly improving held-out-run trial accuracy to `0.6052`. Raw/train-only transfer remains weak, and several subjects remain difficult. |
+| Corrected clip feature transfer | Dense full-cohort overlapping clips show strong within-run signal. Dense `24³` per-subject-run centering plus cosine reaches `0.5669` subject-fold event accuracy; adding known per-run class-balance assignment improves this to `0.5826`. Raw/train-only transfer remains weak, and several subjects remain difficult. |
 
 ## Why This Matters
 
@@ -154,6 +155,7 @@ Phase 1 is designed to separate optimistic pooled-split performance from leakage
 - Treat `24³` dense corrected-clip features as the current sweet spot for fast diagnostics; `32³` did not materially improve subject generalization.
 - Convert the transductive run-normalization gains into non-transductive experiments: training-only harmonization, explicit test-time adaptation protocol, run/session covariate control, or domain-invariant feature learning.
 - Do not assume classifier complexity is the missing piece: ridge-style linear classifiers underperformed cosine centroids on the aligned event features.
+- Continue design-aware adaptation probes: known per-run class balance is useful and scientifically tied to the task paradigm, but it must be reported as test-time adaptation rather than ordinary supervised classification.
 - Extend the weak-subject audit beyond saved feature geometry into raw-data QC: motion/confound summaries if available, anatomical alignment, and run-level artifacts for `sub-52`, `sub-42`, `sub-17`, `sub-20`, `sub-54`, and `sub-63`. Broad event-window timing mismatch is now ruled out.
 - Do not trust the current temporal ResNet corrected-clip recipe until a small eval-mode overfit probe succeeds.
 - Treat the completed subject-wise result as evidence that the current full-dataset subject-wise setup is not learning; investigate data/model/label issues before making publication claims.
