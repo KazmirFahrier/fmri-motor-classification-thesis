@@ -28,17 +28,20 @@ The strongest current evidence is that the extracted data contains local motor-c
 - Transductive per-run centering plus cosine nearest centroids recovers substantial signal.
 - Preliminary train-only centering does not recover most of that gain.
 - Raw feature variance is overwhelmingly explained by subject and subject-run identity rather than class identity.
+- Dense `24³` corrected-clip features are the current practical sweet spot: they reach `0.6001` held-out-run and `0.5654` subject-fold trial accuracy under target-run centering plus cosine, while `32³` confirms saturation rather than a new subject-generalization gain.
+- Several weak subjects remain unstable even after target-run centering, especially `sub-52`, `sub-42`, `sub-17`, `sub-20`, `sub-54`, and `sub-63`.
 
 Publication framing should therefore avoid claiming that the transductive alignment score is a standard supervised classifier. It should be treated as evidence for domain shift unless the method section defines a legitimate test-time adaptation protocol using unlabeled target-run statistics.
 
 ## Later Phases
 
-- Phase 2: preprocessing/domain-shift ablation under the same subject-wise protocol.
-- Phase 3: task framing comparison: volume, trial clip, beta-map samples, and target-run adaptation if scientifically justified.
-- Phase 4: architecture comparison under locked preprocessing and split protocol.
-- Phase 5: subject/run-invariance experiments such as DANN-style adversarial domain heads or explicit run covariate removal.
-- Phase 6: interpretability using saliency or Grad-CAM overlap with motor-region atlas masks.
-- Phase 7: final statistics, manuscript tables, and submission materials.
+- Phase 2: weak-subject and run-consistency audit, including event-window checks and run-pair template stability.
+- Phase 3: preprocessing/domain-shift ablation under the same subject-wise protocol.
+- Phase 4: task framing comparison: volume, trial clip, beta-map samples, and target-run adaptation if scientifically justified.
+- Phase 5: architecture comparison under locked preprocessing and split protocol.
+- Phase 6: subject/run-invariance experiments such as DANN-style adversarial domain heads, explicit run covariate removal, or test-time adaptation using unlabeled target-run statistics.
+- Phase 7: interpretability using saliency or Grad-CAM overlap with motor-region atlas masks.
+- Phase 8: final statistics, manuscript tables, and submission materials.
 
 ## Repository Rule
 

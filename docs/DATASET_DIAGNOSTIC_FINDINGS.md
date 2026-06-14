@@ -1,6 +1,6 @@
 # Dataset Diagnostic Findings
 
-Last updated: 2026-06-10.
+Last updated: 2026-06-14.
 
 This note summarizes what the completed full-dataset runs tell us about the data and what to do next. It uses the final pooled legacy metadata from:
 
@@ -271,38 +271,57 @@ The higher-resolution run confirms that spatial detail matters, but only within 
 
 Follow-up weak-subject probes show that this is not merely cross-subject mismatch. Same-subject leave-one-run event-level classification after per-run centering averaged `0.5813` overall, but `sub-52` and `sub-42` remained at `0.1875` and `0.2083`, respectively. Their run-pair transfer matrices were inconsistent across runs, while stronger subjects showed stable cross-run mappings. A simple QC exclusion curve was modest: removing the worst 10 subjects raised dense `24³` target-run-adapted subject-fold trial accuracy from `0.5652` to only `0.6038`. So weak subjects are real and should be audited, but they are not the only reason full-cohort generalization is hard.
 
-The next active run is a full-cohort `32 x 32 x 32`, `clip_window_stride=1` diagnostic, launched as Kaggle version 16. Since `24³` improved target-run adaptation over `16³`, this run checks whether preserving still more spatial detail continues to help or whether performance saturates while subject-specific inconsistency remains.
+The full-cohort `32 x 32 x 32`, `clip_window_stride=1` diagnostic completed as Kaggle version 16. It tested whether the spatial-resolution gain from `16³` to `24³` continues when preserving still more spatial detail.
+
+Version 16 confirmed that resolution is not the remaining bottleneck:
+
+- clips analyzed: `8,928`
+- feature dimension: `32,768`
+- within subject-run leave-one-clip-out: accuracy `0.7565`, macro F1 `0.7566`
+- rotating held-out-run raw cosine: mean accuracy `0.2628`, macro F1 `0.2557`
+- rotating subject-fold raw cosine: mean accuracy `0.2634`, macro F1 `0.2456`
+- rotating held-out-run per-subject-run centering plus cosine: mean clip accuracy `0.5939`, macro F1 `0.5927`
+- rotating subject-fold per-subject-run centering plus cosine: mean clip accuracy `0.5519`, macro F1 `0.5486`
+- focused event-window voting raised the same adaptation protocol to `0.6052` held-out-run trial accuracy and `0.5608` subject-fold trial accuracy
+
+Compared with `24³`, the `32³` run gives a tiny held-out-run event-level gain (`0.6052` vs `0.6001`) but a small subject-fold drop (`0.5608` vs `0.5654`). Train-only alignment remains weak (`0.3353` same-subject held-out-run with train-subject centering; `0.2660` subject holdout with train-subject centering). The practical conclusion is that dense `24³` is the current sweet spot for fast follow-up diagnostics, while `32³` is useful confirmation that the project has hit a domain-shift/subject-robustness wall rather than a simple spatial-resolution wall.
+
+Version 16 also reproduced the same weak-subject pattern. Event-level subject-fold target-run adaptation averaged `0.5605`, but `sub-52` stayed at `0.1875`, `sub-42` at `0.2708`, and `sub-17`, `sub-63`, and `sub-20` at `0.3333`. Stronger subjects such as `sub-62`, `sub-30`, `sub-10`, and `sub-47` reached roughly `0.71-0.77`. Because the same weak subjects were already poor at `24³`, the next data-understanding work should inspect run-to-run consistency, event timing, motion/artifact profile, and anatomical/registration effects for these subjects rather than scaling resolution or continuing the legacy model.
 
 ## What To Do Next
 
 Run these checks in this order:
 
-1. Run/subject transfer diagnostic.
+1. Weak-subject and run-consistency audit.
+
+Focus on subjects that repeatedly fail despite target-run centering, especially `sub-52`, `sub-42`, `sub-17`, `sub-20`, `sub-54`, and `sub-63`. For each subject, inspect event timing/window extraction, per-run class-template stability, run-pair transfer matrices, motion/artifact summaries if available, and whether class mappings appear unstable or genuinely noisy. Compare these against stable subjects such as `sub-30`, `sub-62`, `sub-10`, and `sub-47`.
+
+2. Run/subject transfer diagnostic.
 
 Use simple feature baselines to quantify how much class structure survives each split type: within-run, held-out-run, held-out-subject, and held-out-session if available. Treat within-run success with cross-run failure as a nuisance/domain-shift warning, not as deployable classification. Use transductive run-normalization only as a diagnostic; any publishable model needs a non-transductive training-only normalization or a clearly defined test-time adaptation protocol.
 
 Use the train-only alignment summaries to decide whether run/subject centering can be a standard supervised preprocessing step. If train-only centering remains near chance while transductive centering stays high, report the finding as a domain-shift/test-time-adaptation result and move to domain-invariant modeling.
 
-2. Tiny overfit sanity check.
+3. Tiny overfit sanity check.
 
 Train on one subject-run or a tiny balanced subset. A small model should reach very high training accuracy quickly. If it cannot overfit 64-256 labeled samples, the pipeline/model/loss is broken.
 
-3. Corrected-logits sanity check.
+4. Corrected-logits sanity check.
 
 Disable output softmax for cross-entropy and disable output-level DropConnect, or move regularization before the classifier. Repeat a short pooled run with z-score normalization. This tests whether the chance-level legacy result was caused by the model/loss bug.
 
-4. Event-window audit.
+5. Event-window audit.
 
 Compare extracted filenames against original BIDS event files: class label, onset, TR, HRF shift, and expected volume window. This is the most important dataset-level check.
 
-5. Block-level pooled split.
+6. Block-level pooled split.
 
 If a pooled baseline is still needed, split by subject-run-class block or by run, not by individual volume. Random volume splits leak adjacent volumes from the same block.
 
-6. Temporal clip baseline.
+7. Temporal clip baseline.
 
 Use clips with z-score normalization rather than isolated raw volumes. For the current pre-extracted class-folder dataset, use `hrf_shift=0`; true HRF-shifted clips require rebuilding class folders from the raw continuous 4D runs.
 
 ## Current Interpretation
 
-We did not prove the full dataset is useless. We proved that the current extracted-volume plus legacy-wrapper setup does not produce defensible full-dataset learning. The corrected-clip feature diagnostics now suggest that motor-class signal is present inside runs but does not survive run/subject transfer under simple spatial features. The next work should be nuisance/domain-shift diagnosis and leakage-safe simple baselines, not more epochs of the same legacy run.
+We did not prove the full dataset is useless. We proved that the current extracted-volume plus legacy-wrapper setup does not produce defensible full-dataset learning. The corrected-clip feature diagnostics now suggest that motor-class signal is present inside runs but does not survive run/subject transfer under raw simple spatial features. Target-run centering recovers a substantial but still incomplete signal, while train-only alignment remains near chance. The next work should be weak-subject/domain-shift diagnosis and leakage-safe adaptation baselines, not more epochs of the same legacy run or more spatial-resolution sweeps.

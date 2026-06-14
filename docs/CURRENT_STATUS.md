@@ -1,6 +1,6 @@
 # Current Status
 
-Last updated: 2026-06-12.
+Last updated: 2026-06-14.
 
 This repository is tracking the active full-dataset thesis runs for 4-class motor-task fMRI classification. The unpublished manuscript and private paper PDFs are intentionally not part of this public repo.
 
@@ -10,7 +10,7 @@ This repository is tracking the active full-dataset thesis runs for 4-class moto
 | --- | --- | --- | --- |
 | Full-dataset pooled legacy baseline | [`b6uejhvvnmiwb/thesis-legacy-full-resume`](https://www.kaggle.com/code/b6uejhvvnmiwb/thesis-legacy-full-resume) | Stopped by controlled policy at epoch 25 | Quantify the full-data pooled-split baseline for the Phase 1 leakage-gap comparison. |
 | Full-dataset subject-wise evaluation | [`kazmirfahrier/thesis-7batch-gpucompat-runner`](https://www.kaggle.com/code/kazmirfahrier/thesis-7batch-gpucompat-runner) | Complete; final artifacts refreshed | Continue leakage-aware subject-wise 5-fold evaluation plus holdout. |
-| Corrected clip feature-transfer diagnostic | [`b6uejhvvnmiwb/thesis-corrected-clip-baseline`](https://www.kaggle.com/code/b6uejhvvnmiwb/thesis-corrected-clip-baseline) | Version 16 running | Full-cohort `32³`, `clip_window_stride=1` diagnostic tests whether the spatial-resolution improvement continues beyond `24³`. |
+| Corrected clip feature-transfer diagnostic | [`b6uejhvvnmiwb/thesis-corrected-clip-baseline`](https://www.kaggle.com/code/b6uejhvvnmiwb/thesis-corrected-clip-baseline) | Version 16 complete | Full-cohort `32³`, `clip_window_stride=1` diagnostic tested whether the spatial-resolution improvement continues beyond `24³`. |
 
 ## Known Progress
 
@@ -113,7 +113,12 @@ This repository is tracking the active full-dataset thesis runs for 4-class moto
 - Higher resolution did not fix raw or train-only transfer. Raw cosine stayed near `0.26`; train-subject centering reached only `0.3387` on same-subject held-out-run and `0.2701` on subject holdout.
 - Weak-subject behavior persisted at `24³`: `sub-52` remained very poor at `0.1667` subject-fold trial accuracy, while best subjects such as `sub-30` and `sub-62` reached `0.75`.
 - Same-subject leave-one-run event-level classification after per-run centering averaged `0.5813`, but `sub-52` and `sub-42` remained very poor (`0.1875` and `0.2083`). Removing the 10 worst subjects only raised dense `24³` adapted subject-fold trial accuracy from `0.5652` to `0.6038`, so weak subjects are important but not the whole problem.
-- The corrected clip feature-transfer kernel was relaunched as version 16 with target shape `32 x 32 x 32`, `clip_window_stride=1`, and output directory `/kaggle/working/clip_domain_alignment_full32_stride1`. This tests whether the spatial-resolution gain observed from `16³` to `24³` continues.
+- The corrected clip feature-transfer kernel version 16 completed with target shape `32 x 32 x 32`, `clip_window_stride=1`; outputs were downloaded to `/Users/USER/Documents/New project/status_2026-06-13_clip_domain_alignment_v16_full32_stride1_complete/`.
+- Full `32³` dense features preserved the same pattern: within subject-run leave-one-clip-out reached `0.7565` accuracy / `0.7566` macro F1, while raw rotating held-out-run and subject-fold cosine transfer remained near chance at `0.2628` and `0.2634` accuracy.
+- Full `32³` per-subject-run centering plus cosine reached `0.5939` held-out-run clip accuracy / `0.5927` macro F1 and `0.5519` subject-fold clip accuracy / `0.5486` macro F1. Event-window voting raised this to `0.6052` held-out-run trial accuracy and `0.5608` subject-fold trial accuracy.
+- Train-only alignment stayed weak at `32³`: same-subject held-out-run train-subject centering reached `0.3353` accuracy, while subject holdout stayed near chance at `0.2660`.
+- The `32³` subject-difficulty pass reproduced the same weak-subject pattern: `sub-52` remained at `0.1875` subject-fold trial accuracy, followed by `sub-42` at `0.2708` and `sub-17`/`sub-63`/`sub-20` at `0.3333`.
+- Spatial resolution appears to saturate. `32³` slightly improved held-out-run trial accuracy over `24³` (`0.6052` vs `0.6001`) but slightly reduced subject-fold trial accuracy (`0.5608` vs `0.5654`). The next bottleneck is therefore subject/run robustness, not another resolution increase.
 
 ## Current Metrics Snapshot
 
@@ -122,7 +127,7 @@ This repository is tracking the active full-dataset thesis runs for 4-class moto
 | Original 9-subject pooled split | Historical baseline: accuracy 0.8522, MCC 0.8055, ROC-AUC 0.95, PR-AUC 0.88. |
 | Full-dataset pooled split | Stopped at epoch 25 by controlled policy. Final validation snapshot: accuracy 0.2629, balanced accuracy 0.2648, macro F1 0.2501, MCC 0.0206. Training accuracy reached 0.5690, so the model is fitting training data without meaningful validation generalization. |
 | Full-dataset subject-wise CV + holdout | Complete. All five CV folds and final holdout are chance-level: accuracy 0.25, balanced accuracy 0.25, macro F1 0.10, MCC 0.0. |
-| Corrected clip feature transfer | Dense full-cohort overlapping clips show strong within-run signal. Moving from `16³` to `24³` improves target-run adaptation: per-subject-run centering plus cosine reaches 0.5897 held-out-run and 0.5562 subject-fold mean clip accuracy, improving to 0.6001 and 0.5654 at event-window voting level. Raw/train-only transfer remains weak, and several subjects remain difficult. |
+| Corrected clip feature transfer | Dense full-cohort overlapping clips show strong within-run signal. The best simple subject-fold event-window result remains dense `24³` per-subject-run centering plus cosine at `0.5654` trial accuracy; `32³` reached `0.5608` subject-fold trial accuracy while slightly improving held-out-run trial accuracy to `0.6052`. Raw/train-only transfer remains weak, and several subjects remain difficult. |
 
 ## Why This Matters
 
@@ -141,8 +146,9 @@ Phase 1 is designed to separate optimistic pooled-split performance from leakage
 - Treat the pooled legacy lane as complete for Phase 1 baseline purposes and pivot to diagnosis.
 - Continue dataset/label audit, preprocessing and normalization checks, leakage analysis, and simple sanity-check baselines.
 - Prioritize run/subject nuisance control and domain-alignment diagnostics because corrected clip features classify well within runs but fail across held-out runs/subjects.
+- Treat `24³` dense corrected-clip features as the current sweet spot for fast diagnostics; `32³` did not materially improve subject generalization.
 - Convert the transductive run-normalization gains into non-transductive experiments: training-only harmonization, explicit test-time adaptation protocol, run/session covariate control, or domain-invariant feature learning.
-- Use the new train-only alignment probe outputs to decide whether a supervised run/subject harmonization baseline is viable before launching another neural model.
+- Do a focused weak-subject audit before launching another large neural model, especially for `sub-52`, `sub-42`, `sub-17`, `sub-20`, `sub-54`, and `sub-63`.
 - Do not trust the current temporal ResNet corrected-clip recipe until a small eval-mode overfit probe succeeds.
 - Treat the completed subject-wise result as evidence that the current full-dataset subject-wise setup is not learning; investigate data/model/label issues before making publication claims.
 - Download completed outputs into local status folders after each Kaggle session.
