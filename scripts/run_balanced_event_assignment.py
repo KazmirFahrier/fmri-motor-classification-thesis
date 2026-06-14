@@ -168,6 +168,31 @@ def apply_balanced_assignment(scores: np.ndarray, val_idx: np.ndarray, records: 
     return pred
 
 
+def apply_gated_balanced_assignment(
+    scores: np.ndarray,
+    val_idx: np.ndarray,
+    records: list[dict],
+    max_score_penalty_per_event: float,
+) -> np.ndarray:
+    pred = scores.argmax(axis=1).astype(np.int64)
+    grouped: dict[str, list[int]] = defaultdict(list)
+    for local_pos, record_idx in enumerate(val_idx):
+        record = records[int(record_idx)]
+        grouped[f'{record["subject_id"]}|run-{int(record["run_id"])}'].append(local_pos)
+    for positions in grouped.values():
+        positions = sorted(positions, key=lambda pos: records[int(val_idx[pos])]["event_start"])
+        group_scores = scores[positions]
+        independent = group_scores.argmax(axis=1).astype(np.int64)
+        balanced = balanced_assign_group(group_scores)
+        row_ids = np.arange(group_scores.shape[0])
+        independent_score = float(group_scores[row_ids, independent].sum())
+        balanced_score = float(group_scores[row_ids, balanced].sum())
+        penalty = (independent_score - balanced_score) / float(group_scores.shape[0])
+        if penalty <= float(max_score_penalty_per_event):
+            pred[positions] = balanced
+    return pred
+
+
 def apply_pseudo_centroid_adaptation(
     x_val: np.ndarray,
     source_centroids: np.ndarray,
@@ -270,6 +295,13 @@ def main() -> None:
     parser.add_argument("--subject-fold-count", type=int, default=6)
     parser.add_argument("--pseudo-target-weights", nargs="*", type=float, default=[0.25, 0.5, 0.75])
     parser.add_argument("--pseudo-iterations", nargs="*", type=int, default=[1, 2])
+    parser.add_argument(
+        "--balance-penalty-thresholds",
+        nargs="*",
+        type=float,
+        default=[],
+        help="Optionally apply balanced assignment only when per-event score penalty is below each threshold.",
+    )
     args = parser.parse_args()
 
     feature_dir = Path(args.feature_dir)
@@ -294,6 +326,18 @@ def main() -> None:
             ("independent_argmax", independent_pred),
             ("balanced_subject_run_assignment", balanced_pred),
         ]
+        for threshold in args.balance_penalty_thresholds:
+            prediction_rows.append(
+                (
+                    f"gated_balanced_penalty_{threshold:g}",
+                    apply_gated_balanced_assignment(
+                        scores=scores,
+                        val_idx=val_idx,
+                        records=records,
+                        max_score_penalty_per_event=threshold,
+                    ),
+                )
+            )
         for target_weight in args.pseudo_target_weights:
             for iteration_count in args.pseudo_iterations:
                 prediction_rows.append(

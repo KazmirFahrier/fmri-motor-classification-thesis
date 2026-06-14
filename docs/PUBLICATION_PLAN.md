@@ -36,6 +36,7 @@ The strongest current evidence is that the extracted data contains local motor-c
 - A task-design-aware balanced assignment adaptation improved dense `24³` event accuracy to `0.6243` for held-out runs and `0.5826` for subject folds by enforcing two predicted events per class within each unlabeled subject-run.
 - Balanced pseudo-label self-training did not improve on plain balanced assignment, so prototype updates should wait until pseudo-label quality is better.
 - Balanced assignment has heterogeneous subject-level effects, so any paper table should report aggregate gains alongside weak-subject failures rather than presenting it as a universal fix.
+- Simple score-penalty gating did not beat full balanced assignment, so avoiding harmful subject-level corrections likely needs a better instability/QC signal.
 
 Publication framing should therefore avoid claiming that the transductive alignment score is a standard supervised classifier. It should be treated as evidence for domain shift unless the method section defines a legitimate test-time adaptation protocol using unlabeled target-run statistics.
 
