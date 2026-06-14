@@ -269,6 +269,8 @@ The full-cohort `24 x 24 x 24`, `clip_window_stride=1` diagnostic completed as K
 
 The higher-resolution run confirms that spatial detail matters, but only within the target-run adaptation framework. Train-only alignment remains weak: same-subject held-out-run train-subject centering reached `0.3387`, while subject holdout reached only `0.2701`. The weak-subject pattern also persists: `sub-52` remained very poor at `0.1667` subject-fold trial accuracy, while stronger subjects such as `sub-30` and `sub-62` reached `0.75`. The next data-understanding step should focus on the consistently weak subjects and whether their event timing, extracted windows, motion/artifact profile, or anatomical alignment differs from the easier subjects.
 
+Follow-up weak-subject probes show that this is not merely cross-subject mismatch. Same-subject leave-one-run event-level classification after per-run centering averaged `0.5813` overall, but `sub-52` and `sub-42` remained at `0.1875` and `0.2083`, respectively. Their run-pair transfer matrices were inconsistent across runs, while stronger subjects showed stable cross-run mappings. A simple QC exclusion curve was modest: removing the worst 10 subjects raised dense `24³` target-run-adapted subject-fold trial accuracy from `0.5652` to only `0.6038`. So weak subjects are real and should be audited, but they are not the only reason full-cohort generalization is hard.
+
 ## What To Do Next
 
 Run these checks in this order:

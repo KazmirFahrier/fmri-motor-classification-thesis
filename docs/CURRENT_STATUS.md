@@ -112,6 +112,7 @@ This repository is tracking the active full-dataset thesis runs for 4-class moto
 - Event-window voting with dense `24³` reached `0.6001` held-out-run trial accuracy and `0.5654` subject-fold trial accuracy under per-subject-run centering plus cosine.
 - Higher resolution did not fix raw or train-only transfer. Raw cosine stayed near `0.26`; train-subject centering reached only `0.3387` on same-subject held-out-run and `0.2701` on subject holdout.
 - Weak-subject behavior persisted at `24³`: `sub-52` remained very poor at `0.1667` subject-fold trial accuracy, while best subjects such as `sub-30` and `sub-62` reached `0.75`.
+- Same-subject leave-one-run event-level classification after per-run centering averaged `0.5813`, but `sub-52` and `sub-42` remained very poor (`0.1875` and `0.2083`). Removing the 10 worst subjects only raised dense `24³` adapted subject-fold trial accuracy from `0.5652` to `0.6038`, so weak subjects are important but not the whole problem.
 
 ## Current Metrics Snapshot
 
