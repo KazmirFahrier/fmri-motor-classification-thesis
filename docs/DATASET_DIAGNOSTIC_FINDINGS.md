@@ -308,6 +308,14 @@ A full source BIDS event-window audit was then run against OpenNeuro `ds004044` 
 
 This rules out the broadest suspected extraction bug: the target class folders are not systematically shifted, swapped, or missing event windows relative to source BIDS timing. The weak-subject problem is therefore more likely to involve signal quality, subject/run alignment, motion/artifact structure, denoising/extraction choices, or genuine run-to-run response instability.
 
+A fast event-level model sweep then tested whether the moderate target-run adaptation score was limited by using an overly simple nearest-centroid classifier. It was not. On dense `24³` event features, cosine nearest centroids remained best after subject-run centering:
+
+- held-out-run event accuracy: cosine centroid `0.5981`; best random-projection ridge `0.5346`
+- subject-fold event accuracy: cosine centroid `0.5669`; best random-projection ridge `0.4892`
+- raw or train-global-centered subject-fold variants stayed near chance at roughly `0.26-0.27`
+
+This is a useful negative result. It suggests the next improvement is unlikely to come from swapping the final classifier on the same feature space. The classifier is already exploiting a simple class-template geometry; the real work is to build a representation or adaptation protocol where those class templates are stable across runs and subjects.
+
 ## What To Do Next
 
 Run these checks in this order:
@@ -321,6 +329,8 @@ Focus on subjects that repeatedly fail despite target-run centering, especially 
 Use simple feature baselines to quantify how much class structure survives each split type: within-run, held-out-run, held-out-subject, and held-out-session if available. Treat within-run success with cross-run failure as a nuisance/domain-shift warning, not as deployable classification. Use transductive run-normalization only as a diagnostic; any publishable model needs a non-transductive training-only normalization or a clearly defined test-time adaptation protocol.
 
 Use the train-only alignment summaries to decide whether run/subject centering can be a standard supervised preprocessing step. If train-only centering remains near chance while transductive centering stays high, report the finding as a domain-shift/test-time-adaptation result and move to domain-invariant modeling.
+
+Use the event-level model sweep as a guardrail before adding classifier complexity. If a richer classifier underperforms cosine centroids on the aligned features, prioritize representation learning, better target-run adaptation, or QC/preprocessing fixes instead.
 
 3. Tiny overfit sanity check.
 

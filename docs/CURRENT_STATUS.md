@@ -123,6 +123,7 @@ This repository is tracking the active full-dataset thesis runs for 4-class moto
 - The consistency audit ranked `sub-52` and `sub-42` as the clearest failures. Both had very low same-subject leave-one-run accuracy (`0.1875` and `0.2083`) and negative cross-run centroid margins (`-0.1678` and `-0.1641`), meaning their same-class templates are less stable across runs than competing wrong-class templates.
 - Better subjects show the opposite pattern: `sub-30` reached `0.7708` leave-one-subject adapted event accuracy, `0.6250` same-subject leave-one-run accuracy, and a positive centroid margin of `0.2168`.
 - A source BIDS event-window audit against OpenNeuro `ds004044` version `2.0.3` matched all extracted target-class window starts against source `events.tsv` onset/TR starts. Result: 62 subjects, 372 runs, repetition time `2.0`, and `0` anomalies. This rules out a broad target-class event-timing or extraction-window mismatch.
+- A fast event-level model sweep tested whether richer linear classifiers can improve the dense `24³` target-run-centered feature baseline. They did not: cosine nearest centroids remained best at `0.5981` held-out-run event accuracy and `0.5669` subject-fold event accuracy. The best random-projection ridge models reached only `0.5346` and `0.4892`, respectively.
 
 ## Current Metrics Snapshot
 
@@ -152,6 +153,7 @@ Phase 1 is designed to separate optimistic pooled-split performance from leakage
 - Prioritize run/subject nuisance control and domain-alignment diagnostics because corrected clip features classify well within runs but fail across held-out runs/subjects.
 - Treat `24³` dense corrected-clip features as the current sweet spot for fast diagnostics; `32³` did not materially improve subject generalization.
 - Convert the transductive run-normalization gains into non-transductive experiments: training-only harmonization, explicit test-time adaptation protocol, run/session covariate control, or domain-invariant feature learning.
+- Do not assume classifier complexity is the missing piece: ridge-style linear classifiers underperformed cosine centroids on the aligned event features.
 - Extend the weak-subject audit beyond saved feature geometry into raw-data QC: motion/confound summaries if available, anatomical alignment, and run-level artifacts for `sub-52`, `sub-42`, `sub-17`, `sub-20`, `sub-54`, and `sub-63`. Broad event-window timing mismatch is now ruled out.
 - Do not trust the current temporal ResNet corrected-clip recipe until a small eval-mode overfit probe succeeds.
 - Treat the completed subject-wise result as evidence that the current full-dataset subject-wise setup is not learning; investigate data/model/label issues before making publication claims.

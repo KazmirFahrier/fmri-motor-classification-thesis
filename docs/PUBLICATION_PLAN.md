@@ -32,6 +32,7 @@ The strongest current evidence is that the extracted data contains local motor-c
 - Several weak subjects remain unstable even after target-run centering, especially `sub-52`, `sub-42`, `sub-17`, `sub-20`, `sub-54`, and `sub-63`.
 - The first event-level consistency audit suggests that at least some weak subjects are internally inconsistent across runs, not merely mismatched to the rest of the cohort. `sub-52` and `sub-42` have negative cross-run centroid margins after subject-run centering.
 - Source BIDS timing is not the broad failure mode: all 372 extracted target-class run windows match OpenNeuro `ds004044` v2.0.3 `events.tsv` onset/TR starts.
+- A first event-level classifier-complexity sweep found that random-projection ridge underperforms cosine nearest centroids after target-run centering. The next improvement should target representation/adaptation/QC, not only a stronger final classifier.
 
 Publication framing should therefore avoid claiming that the transductive alignment score is a standard supervised classifier. It should be treated as evidence for domain shift unless the method section defines a legitimate test-time adaptation protocol using unlabeled target-run statistics.
 
