@@ -110,17 +110,24 @@ def center_by_subject_run(x: np.ndarray, records: list[dict]) -> np.ndarray:
     return out
 
 
-def centroid_scores(x_train: np.ndarray, y_train: np.ndarray, x_val: np.ndarray) -> np.ndarray:
+def centroid_matrix(x_train: np.ndarray, y_train: np.ndarray) -> np.ndarray:
     x_train = l2_normalize(x_train.astype(np.float32))
-    x_val = l2_normalize(x_val.astype(np.float32))
     centroids = []
     for class_idx in range(len(CLASS_NAMES)):
         mask = y_train == class_idx
         if not np.any(mask):
             raise ValueError(f"Missing class {class_idx}.")
         centroids.append(x_train[mask].mean(axis=0))
-    centroid_arr = l2_normalize(np.stack(centroids, axis=0))
-    return x_val.astype(np.float64) @ centroid_arr.astype(np.float64).T
+    return l2_normalize(np.stack(centroids, axis=0))
+
+
+def score_with_centroids(x_val: np.ndarray, centroids: np.ndarray) -> np.ndarray:
+    x_val = l2_normalize(x_val.astype(np.float32))
+    return x_val.astype(np.float64) @ centroids.astype(np.float64).T
+
+
+def centroid_scores(x_train: np.ndarray, y_train: np.ndarray, x_val: np.ndarray) -> np.ndarray:
+    return score_with_centroids(x_val, centroid_matrix(x_train, y_train))
 
 
 @lru_cache(maxsize=None)
@@ -158,6 +165,44 @@ def apply_balanced_assignment(scores: np.ndarray, val_idx: np.ndarray, records: 
         positions = sorted(positions, key=lambda pos: records[int(val_idx[pos])]["event_start"])
         group_scores = scores[positions]
         pred[positions] = balanced_assign_group(group_scores)
+    return pred
+
+
+def apply_pseudo_centroid_adaptation(
+    x_val: np.ndarray,
+    source_centroids: np.ndarray,
+    val_idx: np.ndarray,
+    records: list[dict],
+    target_weight: float,
+    iterations: int,
+) -> np.ndarray:
+    x_val_norm = l2_normalize(x_val.astype(np.float32))
+    pred = score_with_centroids(x_val_norm, source_centroids).argmax(axis=1).astype(np.int64)
+    grouped: dict[str, list[int]] = defaultdict(list)
+    for local_pos, record_idx in enumerate(val_idx):
+        record = records[int(record_idx)]
+        grouped[f'{record["subject_id"]}|run-{int(record["run_id"])}'].append(local_pos)
+
+    for positions in grouped.values():
+        positions = sorted(positions, key=lambda pos: records[int(val_idx[pos])]["event_start"])
+        group_x = x_val_norm[positions]
+        centroids = source_centroids.copy()
+        assignment = balanced_assign_group(group_x.astype(np.float64) @ centroids.astype(np.float64).T)
+        for _ in range(max(0, iterations)):
+            target_centroids = []
+            for class_idx in range(len(CLASS_NAMES)):
+                mask = assignment == class_idx
+                if np.any(mask):
+                    target_centroids.append(group_x[mask].mean(axis=0))
+                else:
+                    target_centroids.append(source_centroids[class_idx])
+            target_centroids_arr = l2_normalize(np.stack(target_centroids, axis=0))
+            centroids = l2_normalize(
+                (1.0 - float(target_weight)) * source_centroids
+                + float(target_weight) * target_centroids_arr
+            )
+            assignment = balanced_assign_group(group_x.astype(np.float64) @ centroids.astype(np.float64).T)
+        pred[positions] = assignment
     return pred
 
 
@@ -223,6 +268,8 @@ def main() -> None:
     parser.add_argument("--out-json", required=True)
     parser.add_argument("--split-family", choices=["all", "run", "subject"], default="all")
     parser.add_argument("--subject-fold-count", type=int, default=6)
+    parser.add_argument("--pseudo-target-weights", nargs="*", type=float, default=[0.25, 0.5, 0.75])
+    parser.add_argument("--pseudo-iterations", nargs="*", type=int, default=[1, 2])
     args = parser.parse_args()
 
     feature_dir = Path(args.feature_dir)
@@ -236,13 +283,30 @@ def main() -> None:
     for split in split_indices(records, args.split_family, args.subject_fold_count):
         train_idx = split["train_idx"]
         val_idx = split["val_idx"]
-        scores = centroid_scores(x_centered[train_idx], y[train_idx], x_centered[val_idx])
+        source_centroids = centroid_matrix(x_centered[train_idx], y[train_idx])
+        scores = score_with_centroids(x_centered[val_idx], source_centroids)
         independent_pred = scores.argmax(axis=1).astype(np.int64)
         balanced_pred = apply_balanced_assignment(scores, val_idx, records)
-        for rule, pred in [
+        prediction_rows = [
             ("independent_argmax", independent_pred),
             ("balanced_subject_run_assignment", balanced_pred),
-        ]:
+        ]
+        for target_weight in args.pseudo_target_weights:
+            for iteration_count in args.pseudo_iterations:
+                prediction_rows.append(
+                    (
+                        f"pseudo_centroid_balanced_w{target_weight:g}_i{iteration_count}",
+                        apply_pseudo_centroid_adaptation(
+                            x_val=x_centered[val_idx],
+                            source_centroids=source_centroids,
+                            val_idx=val_idx,
+                            records=records,
+                            target_weight=target_weight,
+                            iterations=iteration_count,
+                        ),
+                    )
+                )
+        for rule, pred in prediction_rows:
             rows.append(
                 {
                     "split": split["split"],

@@ -34,6 +34,7 @@ The strongest current evidence is that the extracted data contains local motor-c
 - Source BIDS timing is not the broad failure mode: all 372 extracted target-class run windows match OpenNeuro `ds004044` v2.0.3 `events.tsv` onset/TR starts.
 - A first event-level classifier-complexity sweep found that random-projection ridge underperforms cosine nearest centroids after target-run centering. The next improvement should target representation/adaptation/QC, not only a stronger final classifier.
 - A task-design-aware balanced assignment adaptation improved dense `24³` event accuracy to `0.6243` for held-out runs and `0.5826` for subject folds by enforcing two predicted events per class within each unlabeled subject-run.
+- Balanced pseudo-label self-training did not improve on plain balanced assignment, so prototype updates should wait until pseudo-label quality is better.
 
 Publication framing should therefore avoid claiming that the transductive alignment score is a standard supervised classifier. It should be treated as evidence for domain shift unless the method section defines a legitimate test-time adaptation protocol using unlabeled target-run statistics.
 

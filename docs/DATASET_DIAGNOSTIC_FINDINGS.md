@@ -323,6 +323,8 @@ A task-design-aware balanced assignment probe produced the first small construct
 
 This is still a test-time adaptation result, not a standard supervised classifier. But it is more scientifically grounded than arbitrary post-processing because the class-count constraint comes from the task design. The improvement suggests that some target-run-centered predictions are close but globally inconsistent within a run; enforcing the known event balance can recover part of that lost structure.
 
+The same balanced pseudo-labels were also tested as a way to adapt target-run class centroids. That refinement did not help. The best held-out-run pseudo-centroid variant reached `0.6240`, just below plain balanced assignment at `0.6243`, and subject-fold pseudo variants were neutral or slightly worse than the `0.5826` balanced assignment baseline. This suggests the balanced assignments are useful as a constraint, but they are not yet accurate enough to safely update class prototypes within each target run.
+
 ## What To Do Next
 
 Run these checks in this order:
@@ -340,6 +342,8 @@ Use the train-only alignment summaries to decide whether run/subject centering c
 Use the event-level model sweep as a guardrail before adding classifier complexity. If a richer classifier underperforms cosine centroids on the aligned features, prioritize representation learning, better target-run adaptation, or QC/preprocessing fixes instead.
 
 Use the balanced-assignment probe to define a stronger adaptation baseline. It should be reported separately from independent per-event prediction because it uses unlabeled target-run grouping and the known balanced task design.
+
+Avoid simple pseudo-centroid self-training for now. It should only be revisited if a future representation produces cleaner balanced pseudo-labels.
 
 3. Tiny overfit sanity check.
 
