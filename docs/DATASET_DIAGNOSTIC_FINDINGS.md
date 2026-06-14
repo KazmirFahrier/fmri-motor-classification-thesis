@@ -111,7 +111,7 @@ For `sub-01`, run `1`, the extracted volume IDs match the original BIDS event sc
 - `Left leg movements`: expected and extracted `72-79` plus `152-159`
 - `Forearm movements`: expected and extracted `104-111` plus `120-127`
 
-This does not prove every subject/run is correct, but it is a useful negative check: the representative run that passed the micro-overfit test is not obviously mislabeled by event timing. A full BIDS-events audit is still needed if all event files are mounted or downloaded.
+This did not prove every subject/run was correct, but it was a useful early negative check: the representative run that passed the micro-overfit test was not obviously mislabeled by event timing. A later full source BIDS event-window audit extended this check to all extracted subjects/runs and found zero target-class timing anomalies.
 
 ## Clip HRF Window Policy Audit
 
@@ -299,13 +299,22 @@ The audit found no malformed event groups and no event-count anomalies for the f
 
 The centroid margin is the cosine similarity of the correct same-class template across runs minus the nearest wrong-class template. Negative margins mean a subject's run-to-run class geometry is effectively scrambled. Across subjects, same-subject leave-one-run accuracy correlated strongly with centroid margin (`r = 0.697`), while leave-one-subject adapted accuracy had moderate correlations with same-subject leave-one-run accuracy (`r = 0.470`) and centroid margin (`r = 0.384`). This supports a more precise hypothesis: the hard cases are not just hard because they differ from other subjects; several are internally inconsistent across their own runs.
 
+A full source BIDS event-window audit was then run against OpenNeuro `ds004044` version `2.0.3`. The audit fetched only lightweight source `events.tsv` and `task-motor_bold.json` files from the OpenNeuro GitHub mirror, using the shared repetition time of `2.0` seconds. For all 62 extracted subjects and all 372 runs, each extracted target-class event window matched the source onset/TR-derived volume start exactly:
+
+- subjects checked: `62`
+- runs checked: `372`
+- malformed or mismatched target-class windows: `0`
+- subjects with timing anomalies: none
+
+This rules out the broadest suspected extraction bug: the target class folders are not systematically shifted, swapped, or missing event windows relative to source BIDS timing. The weak-subject problem is therefore more likely to involve signal quality, subject/run alignment, motion/artifact structure, denoising/extraction choices, or genuine run-to-run response instability.
+
 ## What To Do Next
 
 Run these checks in this order:
 
 1. Weak-subject and run-consistency audit.
 
-Focus on subjects that repeatedly fail despite target-run centering, especially `sub-52`, `sub-42`, `sub-17`, `sub-20`, `sub-54`, and `sub-63`. The saved-feature geometry already shows that `sub-52` and `sub-42` have unstable class templates across their own runs. The next audit layer should inspect event timing/window extraction against source BIDS files, motion/artifact summaries if available, anatomical alignment, and whether particular runs/classes are corrupted or atypical. Compare these against stable subjects such as `sub-30`, `sub-62`, `sub-10`, and `sub-47`.
+Focus on subjects that repeatedly fail despite target-run centering, especially `sub-52`, `sub-42`, `sub-17`, `sub-20`, `sub-54`, and `sub-63`. The saved-feature geometry already shows that `sub-52` and `sub-42` have unstable class templates across their own runs, and the source event-window audit rules out broad timing mismatch. The next audit layer should inspect motion/artifact summaries if available, anatomical alignment, denoising/extraction choices, and whether particular runs/classes are corrupted or atypical. Compare these against stable subjects such as `sub-30`, `sub-62`, `sub-10`, and `sub-47`.
 
 2. Run/subject transfer diagnostic.
 
@@ -323,7 +332,7 @@ Disable output softmax for cross-entropy and disable output-level DropConnect, o
 
 5. Event-window audit.
 
-Compare extracted filenames against original BIDS event files: class label, onset, TR, HRF shift, and expected volume window. This is the most important dataset-level check.
+Compare extracted filenames against original BIDS event files: class label, onset, TR, HRF shift, and expected volume window. The full target-class onset/TR check now passes with zero anomalies, but this script should be kept in the repository so future regenerated extractions can be audited automatically.
 
 6. Block-level pooled split.
 

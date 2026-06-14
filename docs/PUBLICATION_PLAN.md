@@ -31,12 +31,13 @@ The strongest current evidence is that the extracted data contains local motor-c
 - Dense `24³` corrected-clip features are the current practical sweet spot: they reach `0.6001` held-out-run and `0.5654` subject-fold trial accuracy under target-run centering plus cosine, while `32³` confirms saturation rather than a new subject-generalization gain.
 - Several weak subjects remain unstable even after target-run centering, especially `sub-52`, `sub-42`, `sub-17`, `sub-20`, `sub-54`, and `sub-63`.
 - The first event-level consistency audit suggests that at least some weak subjects are internally inconsistent across runs, not merely mismatched to the rest of the cohort. `sub-52` and `sub-42` have negative cross-run centroid margins after subject-run centering.
+- Source BIDS timing is not the broad failure mode: all 372 extracted target-class run windows match OpenNeuro `ds004044` v2.0.3 `events.tsv` onset/TR starts.
 
 Publication framing should therefore avoid claiming that the transductive alignment score is a standard supervised classifier. It should be treated as evidence for domain shift unless the method section defines a legitimate test-time adaptation protocol using unlabeled target-run statistics.
 
 ## Later Phases
 
-- Phase 2: weak-subject and run-consistency audit, including event-window checks and run-pair template stability.
+- Phase 2: weak-subject and run-consistency audit, including run-pair template stability, artifact/QC checks, and anatomical/preprocessing alignment checks.
 - Phase 3: preprocessing/domain-shift ablation under the same subject-wise protocol.
 - Phase 4: task framing comparison: volume, trial clip, beta-map samples, and target-run adaptation if scientifically justified.
 - Phase 5: architecture comparison under locked preprocessing and split protocol.
