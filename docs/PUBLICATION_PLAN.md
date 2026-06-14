@@ -38,6 +38,7 @@ The strongest current evidence is that the extracted data contains local motor-c
 - Balanced assignment has heterogeneous subject-level effects, so any paper table should report aggregate gains alongside weak-subject failures rather than presenting it as a universal fix.
 - Simple score-penalty gating did not beat full balanced assignment, so avoiding harmful subject-level corrections likely needs a better instability/QC signal.
 - Subject-level all-runs balancing reached `0.5746` subject-fold accuracy, below per-run balancing at `0.5826`, so the current adaptation baseline should keep the class-count constraint at the subject-run level.
+- An independent-prediction imbalance gate is the best current adaptation variant, reaching `0.5877` subject-fold event accuracy / `0.5876` macro F1 when balancing only subject-runs with class-count L1 imbalance `>= 4`. This should be reported as exploratory until the threshold is validated separately.
 
 Publication framing should therefore avoid claiming that the transductive alignment score is a standard supervised classifier. It should be treated as evidence for domain shift unless the method section defines a legitimate test-time adaptation protocol using unlabeled target-run statistics.
 

@@ -129,6 +129,7 @@ This repository is tracking the active full-dataset thesis runs for 4-class moto
 - Subject-level balanced-assignment effects are mixed. It helps some subjects, including `sub-54` (`0.3542` to `0.4375`) and `sub-62` (`0.7083` to `0.7500`), but hurts others, including `sub-52` (`0.1667` to `0.1458`), `sub-63` (`0.4167` to `0.3125`), and `sub-20` (`0.3958` to `0.3333`).
 - A score-penalty-gated balanced assignment sweep did not beat full balanced assignment. Conservative gates improved over independent argmax but peaked below or equal to full balance: subject-fold `0.5826`, held-out-run `0.6243`.
 - A wider subject-level balanced assignment, enforcing equal class counts across all available target runs for a subject, also did not beat per-run balancing. Subject-fold accuracy reached `0.5746`, above independent argmax `0.5669` but below per-subject-run balancing `0.5826`.
+- A subject-run QC sweep found a more useful gate: apply balanced assignment only when independent predictions have class-count L1 imbalance of at least `4`. This produced the best current subject-fold event result, `0.5877` accuracy / `0.5876` macro F1, while the held-out-run mean dropped slightly to `0.6200`. The signal is modest but suggests that balancing is most helpful when independent predictions visibly violate the known run design.
 
 ## Current Metrics Snapshot
 
@@ -137,7 +138,7 @@ This repository is tracking the active full-dataset thesis runs for 4-class moto
 | Original 9-subject pooled split | Historical baseline: accuracy 0.8522, MCC 0.8055, ROC-AUC 0.95, PR-AUC 0.88. |
 | Full-dataset pooled split | Stopped at epoch 25 by controlled policy. Final validation snapshot: accuracy 0.2629, balanced accuracy 0.2648, macro F1 0.2501, MCC 0.0206. Training accuracy reached 0.5690, so the model is fitting training data without meaningful validation generalization. |
 | Full-dataset subject-wise CV + holdout | Complete. All five CV folds and final holdout are chance-level: accuracy 0.25, balanced accuracy 0.25, macro F1 0.10, MCC 0.0. |
-| Corrected clip feature transfer | Dense full-cohort overlapping clips show strong within-run signal. Dense `24³` per-subject-run centering plus cosine reaches `0.5669` subject-fold event accuracy; adding known per-run class-balance assignment improves this to `0.5826`. Wider subject-level balancing reaches `0.5746`, so the per-run constraint remains the better adaptation baseline. Raw/train-only transfer remains weak, and several subjects remain difficult. |
+| Corrected clip feature transfer | Dense full-cohort overlapping clips show strong within-run signal. Dense `24³` per-subject-run centering plus cosine reaches `0.5669` subject-fold event accuracy; adding known per-run class-balance assignment improves this to `0.5826`; adding an independent-prediction imbalance gate improves subject-fold event accuracy to `0.5877`. Raw/train-only transfer remains weak, and several subjects remain difficult. |
 
 ## Why This Matters
 
@@ -163,6 +164,7 @@ Phase 1 is designed to separate optimistic pooled-split performance from leakage
 - Treat balanced assignment as an overall adaptation baseline, not a weak-subject cure; it helps some subjects while worsening others.
 - Simple confidence gating by balanced-assignment score penalty does not remove the per-subject harm while preserving the aggregate gain.
 - Subject-level balancing across all runs is not a replacement for per-run balancing; it softens a few per-run harms but lowers the cohort average.
+- Prefer independent-prediction class-count imbalance over score-penalty gating for the next adaptation probe. The current best threshold is L1 imbalance `>= 4`, but it should be validated with a separate threshold-selection protocol before being treated as publishable model performance.
 - Do not spend more effort on simple pseudo-centroid self-training until the target pseudo-label quality improves; the first sweep was neutral/slightly worse than plain balanced assignment.
 - Extend the weak-subject audit beyond saved feature geometry into raw-data QC: motion/confound summaries if available, anatomical alignment, and run-level artifacts for `sub-52`, `sub-42`, `sub-17`, `sub-20`, `sub-54`, and `sub-63`. Broad event-window timing mismatch is now ruled out.
 - Do not trust the current temporal ResNet corrected-clip recipe until a small eval-mode overfit probe succeeds.

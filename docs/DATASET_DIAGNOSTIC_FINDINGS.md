@@ -331,6 +331,10 @@ A confidence-gated version was tested by applying balanced assignment only when 
 
 A wider subject-level balanced assignment was also tested by enforcing equal class counts across all available target runs for each held-out subject. This can be viewed as asking whether strong runs can rescue weak runs when the target subject is adapted as one larger 48-event group. It did not improve the aggregate result. Subject-fold accuracy reached `0.5746`, above independent argmax at `0.5669` but below per-subject-run balancing at `0.5826`. Subject-level balancing improved over per-run balancing for 22 subjects, tied for 8, and worsened 32, so smoothing across runs is not the missing ingredient.
 
+A subject-run QC analysis then measured unlabeled score-geometry signals to see whether they predict when balanced assignment helps or hurts. Most obvious signals were weakly correlated with balanced-assignment gain, including score penalty (`r = 0.069`), mean top-1 margin (`r = 0.081`), and score standard deviation (`r = 0.124`). The most useful simple signal was independent-prediction class-count imbalance (`r = 0.168`): subject-runs whose independent predictions visibly violate the known two-per-class run design are more likely to benefit from balancing.
+
+Promoting that signal into a concrete gate produced the current best subject-fold event result. Applying balanced assignment only when the independent prediction counts have L1 imbalance at least `4` reached `0.5877` subject-fold accuracy / `0.5876` macro F1. This is better than independent argmax (`0.5669`) and always-balanced assignment (`0.5826`). It improved over always balancing for 27 subjects, tied for 19, and worsened 16. The same gate reduced held-out-run mean accuracy from `0.6243` to `0.6200`, so it should be treated as a subject-generalization clue rather than a universal improvement.
+
 ## What To Do Next
 
 Run these checks in this order:
@@ -356,6 +360,8 @@ Analyze balanced-assignment deltas per subject whenever reporting the aggregate 
 Do not rely on simple score-penalty gating to choose whether balanced assignment should be applied. A useful gate likely needs a better instability/QC signal, not just the assignment objective value.
 
 Do not replace per-run balancing with all-runs subject-level balancing. It can reduce specific per-run overcorrections but lowers the cohort average, meaning the task balance signal is most useful at the run level where it is defined.
+
+Use independent-prediction class-count imbalance as the next adaptation/QC lead. The `>= 4` threshold is promising but was selected after inspecting the diagnostic sweep, so a publishable variant needs separate threshold validation, nested CV, or an explicitly pre-registered threshold rule.
 
 3. Tiny overfit sanity check.
 

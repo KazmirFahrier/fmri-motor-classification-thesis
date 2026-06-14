@@ -230,6 +230,29 @@ def apply_gated_balanced_assignment(
     return pred
 
 
+def apply_imbalance_gated_balanced_assignment(
+    scores: np.ndarray,
+    val_idx: np.ndarray,
+    records: list[dict],
+    min_imbalance_l1: float,
+) -> np.ndarray:
+    pred = scores.argmax(axis=1).astype(np.int64)
+    grouped: dict[str, list[int]] = defaultdict(list)
+    for local_pos, record_idx in enumerate(val_idx):
+        record = records[int(record_idx)]
+        grouped[f'{record["subject_id"]}|run-{int(record["run_id"])}'].append(local_pos)
+    for positions in grouped.values():
+        positions = sorted(positions, key=lambda pos: records[int(val_idx[pos])]["event_start"])
+        group_scores = scores[positions]
+        independent = group_scores.argmax(axis=1).astype(np.int64)
+        expected_count = group_scores.shape[0] // group_scores.shape[1]
+        counts = np.bincount(independent, minlength=group_scores.shape[1])
+        imbalance_l1 = float(np.sum(np.abs(counts - expected_count)))
+        if imbalance_l1 >= float(min_imbalance_l1):
+            pred[positions] = balanced_assign_group(group_scores)
+    return pred
+
+
 def apply_pseudo_centroid_adaptation(
     x_val: np.ndarray,
     source_centroids: np.ndarray,
@@ -339,6 +362,13 @@ def main() -> None:
         default=[],
         help="Optionally apply balanced assignment only when per-event score penalty is below each threshold.",
     )
+    parser.add_argument(
+        "--balance-imbalance-thresholds",
+        nargs="*",
+        type=float,
+        default=[],
+        help="Optionally apply balanced assignment only when independent class-count L1 imbalance exceeds each threshold.",
+    )
     args = parser.parse_args()
 
     feature_dir = Path(args.feature_dir)
@@ -374,6 +404,18 @@ def main() -> None:
                         val_idx=val_idx,
                         records=records,
                         max_score_penalty_per_event=threshold,
+                    ),
+                )
+            )
+        for threshold in args.balance_imbalance_thresholds:
+            prediction_rows.append(
+                (
+                    f"gated_balanced_imbalance_l1_{threshold:g}",
+                    apply_imbalance_gated_balanced_assignment(
+                        scores=scores,
+                        val_idx=val_idx,
+                        records=records,
+                        min_imbalance_l1=threshold,
                     ),
                 )
             )
