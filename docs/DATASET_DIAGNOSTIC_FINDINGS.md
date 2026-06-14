@@ -325,6 +325,8 @@ This is still a test-time adaptation result, not a standard supervised classifie
 
 The same balanced pseudo-labels were also tested as a way to adapt target-run class centroids. That refinement did not help. The best held-out-run pseudo-centroid variant reached `0.6240`, just below plain balanced assignment at `0.6243`, and subject-fold pseudo variants were neutral or slightly worse than the `0.5826` balanced assignment baseline. This suggests the balanced assignments are useful as a constraint, but they are not yet accurate enough to safely update class prototypes within each target run.
 
+Per-subject effects show why this should be framed carefully. Balanced assignment improved some subjects, including `sub-54` (`0.3542` to `0.4375`), `sub-62` (`0.7083` to `0.7500`), `sub-13` (`0.5625` to `0.7083`), and `sub-04` (`0.5417` to `0.6875`). But it worsened several others, including `sub-52` (`0.1667` to `0.1458`), `sub-63` (`0.4167` to `0.3125`), and `sub-20` (`0.3958` to `0.3333`). So the known-design constraint improves the cohort average, but it does not solve the hardest weak-subject cases and can amplify wrong score geometry for unstable subjects.
+
 ## What To Do Next
 
 Run these checks in this order:
@@ -344,6 +346,8 @@ Use the event-level model sweep as a guardrail before adding classifier complexi
 Use the balanced-assignment probe to define a stronger adaptation baseline. It should be reported separately from independent per-event prediction because it uses unlabeled target-run grouping and the known balanced task design.
 
 Avoid simple pseudo-centroid self-training for now. It should only be revisited if a future representation produces cleaner balanced pseudo-labels.
+
+Analyze balanced-assignment deltas per subject whenever reporting the aggregate gain. The current result is an average improvement with heterogeneous subject-level effects, not a universal correction.
 
 3. Tiny overfit sanity check.
 

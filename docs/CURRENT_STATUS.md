@@ -126,6 +126,7 @@ This repository is tracking the active full-dataset thesis runs for 4-class moto
 - A fast event-level model sweep tested whether richer linear classifiers can improve the dense `24³` target-run-centered feature baseline. They did not: cosine nearest centroids remained best at `0.5981` held-out-run event accuracy and `0.5669` subject-fold event accuracy. The best random-projection ridge models reached only `0.5346` and `0.4892`, respectively.
 - A task-design-aware balanced assignment probe improved the target-run-centered event baseline by enforcing two predicted events per class within each unlabeled subject-run. Held-out-run event accuracy rose from `0.5981` to `0.6243`, and subject-fold event accuracy rose from `0.5669` to `0.5826`.
 - Pseudo-centroid refinement using those balanced target-run assignments did not improve the result. The best run-holdout pseudo variant reached `0.6240`, and subject-fold pseudo variants were at or below the plain balanced assignment result. Balanced assignment is useful as a final design constraint, but its pseudo-labels are not reliable enough to move class prototypes.
+- Subject-level balanced-assignment effects are mixed. It helps some subjects, including `sub-54` (`0.3542` to `0.4375`) and `sub-62` (`0.7083` to `0.7500`), but hurts others, including `sub-52` (`0.1667` to `0.1458`), `sub-63` (`0.4167` to `0.3125`), and `sub-20` (`0.3958` to `0.3333`).
 
 ## Current Metrics Snapshot
 
@@ -157,6 +158,7 @@ Phase 1 is designed to separate optimistic pooled-split performance from leakage
 - Convert the transductive run-normalization gains into non-transductive experiments: training-only harmonization, explicit test-time adaptation protocol, run/session covariate control, or domain-invariant feature learning.
 - Do not assume classifier complexity is the missing piece: ridge-style linear classifiers underperformed cosine centroids on the aligned event features.
 - Continue design-aware adaptation probes: known per-run class balance is useful and scientifically tied to the task paradigm, but it must be reported as test-time adaptation rather than ordinary supervised classification.
+- Treat balanced assignment as an overall adaptation baseline, not a weak-subject cure; it helps some subjects while worsening others.
 - Do not spend more effort on simple pseudo-centroid self-training until the target pseudo-label quality improves; the first sweep was neutral/slightly worse than plain balanced assignment.
 - Extend the weak-subject audit beyond saved feature geometry into raw-data QC: motion/confound summaries if available, anatomical alignment, and run-level artifacts for `sub-52`, `sub-42`, `sub-17`, `sub-20`, `sub-54`, and `sub-63`. Broad event-window timing mismatch is now ruled out.
 - Do not trust the current temporal ResNet corrected-clip recipe until a small eval-mode overfit probe succeeds.

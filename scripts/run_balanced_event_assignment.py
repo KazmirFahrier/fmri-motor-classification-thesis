@@ -280,6 +280,9 @@ def main() -> None:
     x_centered = center_by_subject_run(x, records)
 
     rows = []
+    subject_predictions: dict[str, dict[str, dict[str, list[int]]]] = defaultdict(
+        lambda: defaultdict(lambda: {"y_true": [], "y_pred": []})
+    )
     for split in split_indices(records, args.split_family, args.subject_fold_count):
         train_idx = split["train_idx"]
         val_idx = split["val_idx"]
@@ -317,13 +320,51 @@ def main() -> None:
                     "metrics": metrics(y[val_idx], pred),
                 }
             )
+            if split["family"] == "subject":
+                for local_pos, record_idx in enumerate(val_idx):
+                    subject = str(records[int(record_idx)]["subject_id"])
+                    subject_predictions[subject][rule]["y_true"].append(int(y[int(record_idx)]))
+                    subject_predictions[subject][rule]["y_pred"].append(int(pred[local_pos]))
 
     summary = summarize(rows)
+    subject_effects = []
+    for subject in sorted(subject_predictions):
+        for rule in sorted(subject_predictions[subject]):
+            y_true = np.asarray(subject_predictions[subject][rule]["y_true"], dtype=np.int64)
+            y_pred = np.asarray(subject_predictions[subject][rule]["y_pred"], dtype=np.int64)
+            row = {
+                "subject": subject,
+                "prediction_rule": rule,
+                "event_count": int(len(y_true)),
+                "metrics": metrics(y_true, y_pred),
+            }
+            subject_effects.append(row)
+
+    subject_balanced_delta = []
+    by_subject_rule = {
+        (row["subject"], row["prediction_rule"]): row
+        for row in subject_effects
+    }
+    for subject in sorted(subject_predictions):
+        base = by_subject_rule.get((subject, "independent_argmax"))
+        balanced = by_subject_rule.get((subject, "balanced_subject_run_assignment"))
+        if base and balanced:
+            subject_balanced_delta.append(
+                {
+                    "subject": subject,
+                    "independent_accuracy": base["metrics"]["accuracy"],
+                    "balanced_accuracy": balanced["metrics"]["accuracy"],
+                    "delta": balanced["metrics"]["accuracy"] - base["metrics"]["accuracy"],
+                }
+            )
+    subject_balanced_delta = sorted(subject_balanced_delta, key=lambda row: row["delta"])
     result = {
         "feature_dir": str(feature_dir),
         "event_feature_shape": list(x.shape),
         "rows": rows,
         "summary": summary,
+        "subject_effects": subject_effects,
+        "subject_balanced_delta": subject_balanced_delta,
         "best_by_family": {
             family: next(row for row in summary if row["family"] == family)
             for family in sorted(set(row["family"] for row in summary))
