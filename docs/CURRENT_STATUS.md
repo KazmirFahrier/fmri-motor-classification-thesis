@@ -10,7 +10,7 @@ This repository is tracking the active full-dataset thesis runs for 4-class moto
 | --- | --- | --- | --- |
 | Full-dataset pooled legacy baseline | [`b6uejhvvnmiwb/thesis-legacy-full-resume`](https://www.kaggle.com/code/b6uejhvvnmiwb/thesis-legacy-full-resume) | Stopped by controlled policy at epoch 25 | Quantify the full-data pooled-split baseline for the Phase 1 leakage-gap comparison. |
 | Full-dataset subject-wise evaluation | [`kazmirfahrier/thesis-7batch-gpucompat-runner`](https://www.kaggle.com/code/kazmirfahrier/thesis-7batch-gpucompat-runner) | Complete; final artifacts refreshed | Continue leakage-aware subject-wise 5-fold evaluation plus holdout. |
-| Corrected clip feature-transfer diagnostic | [`b6uejhvvnmiwb/thesis-corrected-clip-baseline`](https://www.kaggle.com/code/b6uejhvvnmiwb/thesis-corrected-clip-baseline) | Version 15 running | Full-cohort `24³`, `clip_window_stride=1` diagnostic tests whether higher spatial resolution improves transfer/adaptation. |
+| Corrected clip feature-transfer diagnostic | [`b6uejhvvnmiwb/thesis-corrected-clip-baseline`](https://www.kaggle.com/code/b6uejhvvnmiwb/thesis-corrected-clip-baseline) | Version 15 complete | Full-cohort `24³`, `clip_window_stride=1` diagnostic shows higher spatial resolution improves target-run adaptation, but weak subjects remain. |
 
 ## Known Progress
 
@@ -107,7 +107,11 @@ This repository is tracking the active full-dataset thesis runs for 4-class moto
 - Dense train-only alignment remained weak: same-subject held-out-run train-subject centering reached about `0.3212` accuracy, while subject holdout remained around chance.
 - A local subject-run centering shrinkage sweep on version 14 peaked sharply at `alpha=1.0`; partial centering at `alpha=0.9` and over-centering at `alpha=1.1` both collapsed back near `0.34-0.37` trial-level accuracy. This supports the hypothesis that the dominant nuisance is an additive subject-run offset.
 - Version 14 subject-difficulty analysis showed wide subject-level variation after target-run centering: worst subject-fold trial accuracies included `sub-52` at `0.1875` and `sub-42` at `0.2083`, while best subjects included `sub-30` at `0.8125`. Run-level variation was much smaller, suggesting the remaining blocker is subject robustness.
-- The corrected clip feature-transfer kernel was relaunched as version 15 with target shape `24 x 24 x 24`, `clip_window_stride=1`, and output directory `/kaggle/working/clip_domain_alignment_full24_stride1`. This tests whether the remaining gap is partly due to losing spatial detail at `16³`.
+- The corrected clip feature-transfer kernel version 15 completed with target shape `24 x 24 x 24`, `clip_window_stride=1`; outputs were downloaded to `/Users/USER/Documents/New project/status_2026-06-13_clip_domain_alignment_v15_full24_stride1_complete/`.
+- Compared with dense `16³`, dense `24³` improved target-run adaptation: held-out-run per-subject-run centering plus cosine rose from `0.5691` to `0.5897` clip accuracy, and subject-fold rose from `0.5201` to `0.5562`.
+- Event-window voting with dense `24³` reached `0.6001` held-out-run trial accuracy and `0.5654` subject-fold trial accuracy under per-subject-run centering plus cosine.
+- Higher resolution did not fix raw or train-only transfer. Raw cosine stayed near `0.26`; train-subject centering reached only `0.3387` on same-subject held-out-run and `0.2701` on subject holdout.
+- Weak-subject behavior persisted at `24³`: `sub-52` remained very poor at `0.1667` subject-fold trial accuracy, while best subjects such as `sub-30` and `sub-62` reached `0.75`.
 
 ## Current Metrics Snapshot
 
@@ -116,7 +120,7 @@ This repository is tracking the active full-dataset thesis runs for 4-class moto
 | Original 9-subject pooled split | Historical baseline: accuracy 0.8522, MCC 0.8055, ROC-AUC 0.95, PR-AUC 0.88. |
 | Full-dataset pooled split | Stopped at epoch 25 by controlled policy. Final validation snapshot: accuracy 0.2629, balanced accuracy 0.2648, macro F1 0.2501, MCC 0.0206. Training accuracy reached 0.5690, so the model is fitting training data without meaningful validation generalization. |
 | Full-dataset subject-wise CV + holdout | Complete. All five CV folds and final holdout are chance-level: accuracy 0.25, balanced accuracy 0.25, macro F1 0.10, MCC 0.0. |
-| Corrected clip feature transfer | Dense full-cohort overlapping clips show strong within-run signal: leave-one-clip-out accuracy 0.7478. Raw held-out run/subject transfer remains near chance. Target-run per-subject-run centering plus cosine reaches 0.5691 held-out-run and 0.5201 subject-fold mean clip accuracy, improving to 0.5833 and 0.5312 at event-window voting level. Train-only alignment still does not recover most of this gain. |
+| Corrected clip feature transfer | Dense full-cohort overlapping clips show strong within-run signal. Moving from `16³` to `24³` improves target-run adaptation: per-subject-run centering plus cosine reaches 0.5897 held-out-run and 0.5562 subject-fold mean clip accuracy, improving to 0.6001 and 0.5654 at event-window voting level. Raw/train-only transfer remains weak, and several subjects remain difficult. |
 
 ## Why This Matters
 

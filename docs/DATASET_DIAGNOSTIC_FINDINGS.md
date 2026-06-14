@@ -256,7 +256,18 @@ A local shrinkage sweep on version 14 tested subtracting `alpha * subject_run_me
 
 A subject-difficulty pass on the version 14 dense target-run adaptation predictions found wide subject-level variation at event-window voting level. Overall subject-fold trial accuracy was `0.5306`, but the worst subjects were far below chance or near chance (`sub-52`: `0.1875`, `sub-42`: `0.2083`, `sub-17`: `0.2708`), while the best subjects were much stronger (`sub-30`: `0.8125`, `sub-62`: `0.7292`, `sub-10`: `0.7083`). Held-out run difficulty was much less variable, ranging from `0.4819` to `0.5605`. After run centering, the remaining bottleneck appears to be subject-level robustness rather than a single bad run.
 
-The next active run is a full-cohort `24 x 24 x 24`, `clip_window_stride=1` diagnostic, launched as Kaggle version 15. It keeps the dense overlapping clip policy from version 14 but restores more spatial detail. If `24³` improves target-run adaptation or train-only alignment, spatial detail is part of the bottleneck. If it does not, the evidence points even more strongly toward domain shift rather than spatial downsampling.
+The full-cohort `24 x 24 x 24`, `clip_window_stride=1` diagnostic completed as Kaggle version 15. It keeps the dense overlapping clip policy from version 14 but restores more spatial detail. Higher resolution helps target-run adaptation but does not solve raw/train-only transfer:
+
+- clips analyzed: `8,928`
+- feature dimension: `13,824`
+- within subject-run leave-one-clip-out: accuracy `0.7527`, macro F1 `0.7528`
+- rotating held-out-run raw cosine: mean accuracy `0.2692`, macro F1 `0.2636`
+- rotating subject-fold raw cosine: mean accuracy `0.2605`, macro F1 `0.2422`
+- rotating held-out-run per-subject-run centering plus cosine: mean accuracy `0.5897`, macro F1 `0.5885`
+- rotating subject-fold per-subject-run centering plus cosine: mean accuracy `0.5562`, macro F1 `0.5532`
+- event-window voting over overlapping clips improves the same adaptation protocol to `0.6001` held-out-run accuracy and `0.5654` subject-fold accuracy
+
+The higher-resolution run confirms that spatial detail matters, but only within the target-run adaptation framework. Train-only alignment remains weak: same-subject held-out-run train-subject centering reached `0.3387`, while subject holdout reached only `0.2701`. The weak-subject pattern also persists: `sub-52` remained very poor at `0.1667` subject-fold trial accuracy, while stronger subjects such as `sub-30` and `sub-62` reached `0.75`. The next data-understanding step should focus on the consistently weak subjects and whether their event timing, extracted windows, motion/artifact profile, or anatomical alignment differs from the easier subjects.
 
 ## What To Do Next
 
