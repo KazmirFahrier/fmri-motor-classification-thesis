@@ -9,6 +9,8 @@ from typing import Iterable
 
 import numpy as np
 
+from run_clip_offset_event_sweep import aggregate_events_for_offset
+
 
 CLASS_NAMES = [
     "Left leg movements",
@@ -295,6 +297,12 @@ def main() -> None:
         nargs="*",
         default=["sub-52", "sub-42", "sub-17", "sub-20", "sub-54", "sub-63", "sub-30", "sub-62", "sub-10", "sub-47"],
     )
+    parser.add_argument(
+        "--clip-offset",
+        type=int,
+        default=None,
+        help="If set, use only one overlapping clip offset per event instead of averaging all offsets.",
+    )
     args = parser.parse_args()
 
     feature_dir = Path(args.feature_dir)
@@ -302,7 +310,21 @@ def main() -> None:
     y = np.load(feature_dir / "labels.npy").astype(np.int64)
     records = json.loads((feature_dir / "records.json").read_text())
 
-    event_x, event_y, event_records, qc = aggregate_events(x, y, records)
+    if args.clip_offset is None:
+        event_x, event_y, event_records, qc = aggregate_events(x, y, records)
+        feature_variant = "event_mean_all_offsets"
+    else:
+        event_x, event_y, event_records = aggregate_events_for_offset(x, y, records, args.clip_offset)
+        feature_variant = f"clip_offset_{args.clip_offset}"
+        qc = {
+            "clip_count": int(len(records)),
+            "event_count": int(len(event_records)),
+            "selected_clip_offset": int(args.clip_offset),
+            "clip_counts_per_event": {
+                str(count): int(sum(1 for record in event_records if record.get("clip_count", 1) == count))
+                for count in sorted(set(record.get("clip_count", 1) for record in event_records))
+            },
+        }
     x_centered = center_by_subject_run(event_x, event_records)
     subjects = sorted(set(record["subject_id"] for record in event_records))
 
@@ -361,10 +383,12 @@ def main() -> None:
 
     report = {
         "feature_dir": str(feature_dir),
+        "feature_variant": feature_variant,
+        "clip_offset": args.clip_offset,
         "qc": qc,
         "event_feature_shape": list(event_x.shape),
         "method": (
-            "Overlapping clips are averaged into event-window features, features are centered "
+            "Event-window features are created from the requested clip-offset policy, features are centered "
             "within each subject-run using unlabeled run statistics, and cosine nearest-centroid "
             "classifiers/stability metrics are computed on the centered event features."
         ),

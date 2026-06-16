@@ -381,13 +381,22 @@ The timing/order structure also remains, though shifted upward. Event ordinal `0
 
 Weak subjects also persist after the temporal improvement. The worst offset-2 subjects under the imbalance-gated rule are still `sub-52` (`0.1667`), `sub-42` (`0.2500`), `sub-17` (`0.3125`), and `sub-27` (`0.3750`). This means the late-window improvement is real and broad, but the weak-subject problem is not merely an early-window artifact.
 
+Repeating the subject/run consistency audit on offset `2` makes the weak-subject story more specific. The worst leave-one-subject cases are no longer all the same kind of failure:
+
+- `sub-52`: leave-one-subject adapted accuracy `0.1667`, same-subject leave-one-run accuracy `0.2292`, centroid margin `-0.1686`
+- `sub-42`: leave-one-subject adapted accuracy `0.2500`, same-subject leave-one-run accuracy `0.1667`, centroid margin `-0.1711`
+- `sub-17`: leave-one-subject adapted accuracy `0.3125`, same-subject leave-one-run accuracy `0.6042`, centroid margin `0.1206`
+- `sub-20`: leave-one-subject adapted accuracy `0.3958`, same-subject leave-one-run accuracy `0.6250`, centroid margin `0.0565`
+
+So `sub-52` and `sub-42` look internally unstable even after selecting the stronger temporal slice: their own runs do not agree on class geometry. But `sub-17` and `sub-20` look more internally coherent while still transferring poorly from the rest of the cohort. Across subjects, leave-one-subject accuracy correlates moderately with same-subject leave-one-run accuracy (`r = 0.475`) and centroid margin (`r = 0.415`), while same-subject leave-one-run accuracy correlates strongly with centroid margin (`r = 0.745`). This suggests two separate next moves: audit/repair or potentially exclude internally inconsistent subjects, and test personalization/domain-adaptation methods for internally stable but cohort-mismatched subjects.
+
 ## What To Do Next
 
 Run these checks in this order:
 
 1. Weak-subject and run-consistency audit.
 
-Focus on subjects that repeatedly fail despite target-run centering, especially `sub-52`, `sub-42`, `sub-17`, `sub-20`, `sub-54`, and `sub-63`. The saved-feature geometry already shows that `sub-52` and `sub-42` have unstable class templates across their own runs, and the source event-window audit rules out broad timing mismatch. The next audit layer should inspect motion/artifact summaries if available, anatomical alignment, denoising/extraction choices, and whether particular runs/classes are corrupted or atypical. Compare these against stable subjects such as `sub-30`, `sub-62`, `sub-10`, and `sub-47`.
+Focus on subjects that repeatedly fail despite target-run centering, especially `sub-52`, `sub-42`, `sub-17`, `sub-20`, `sub-54`, and `sub-63`. The saved-feature geometry now separates the weak cases into at least two groups. `sub-52` and `sub-42` have unstable class templates across their own runs and should get raw QC, motion/artifact, anatomical alignment, denoising, and run/class corruption checks. `sub-17` and `sub-20` look more internally stable under offset `2`, so they should be used to test subject personalization, calibration, and domain-adaptation ideas. Compare both groups against stable subjects such as `sub-30`, `sub-62`, `sub-10`, and `sub-47`.
 
 2. Run/subject transfer diagnostic.
 

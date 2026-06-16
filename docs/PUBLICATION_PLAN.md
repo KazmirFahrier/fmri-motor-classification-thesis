@@ -45,6 +45,7 @@ The strongest current evidence is that the extracted data contains local motor-c
 - Clip-offset sensitivity is now the strongest preprocessing lead: using only late clip `offset 2` improves subject-fold event accuracy from `0.5669` to `0.6022`, and offset-2 plus task-design balancing reaches `0.6376`. This should be prioritized before another large neural architecture run.
 - A coarse temporal-weight sweep found no simple offset mixture that beats pure `offset 2`, so the next temporal experiment should test later/longer HRF-aligned windows from continuous BOLD rather than averaging the current offsets.
 - Offset-2 error anatomy improves the operating point but preserves the core story: residual errors remain mostly within anatomical pairs and the weakest subjects remain poor, so temporal-window improvements should be paired with weak-subject QC and fine-pair modeling.
+- Offset-2 subject/run consistency suggests the weak-subject section should separate internally inconsistent subjects (`sub-52`, `sub-42`) from cohort-mismatched but internally more stable subjects (`sub-17`, `sub-20`, and related cases). This matters for interpretation because those two groups imply different remedies: QC/repair/exclusion versus personalization or domain adaptation.
 
 Publication framing should therefore avoid claiming that the transductive alignment score is a standard supervised classifier. It should be treated as evidence for domain shift unless the method section defines a legitimate test-time adaptation protocol using unlabeled target-run statistics.
 
