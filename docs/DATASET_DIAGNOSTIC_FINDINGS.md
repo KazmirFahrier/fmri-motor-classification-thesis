@@ -348,6 +348,10 @@ The same pass found nontrivial run-position effects. The eight-event run sequenc
 
 The error anatomy also quantifies heterogeneity. The best subjects under the imbalance-gated rule include `sub-30` (`0.8125`), `sub-11` (`0.7917`), and `sub-46`/`sub-16`/`sub-08` (`0.7708`). The worst subjects remain `sub-52` (`0.1458`), `sub-17` (`0.2083`), `sub-27` (`0.3333`), and `sub-42` (`0.3542`). At the subject-run level, 25 subject-runs are perfect while 42 are at or below chance. This means the dataset is not uniformly noisy; it contains a mixture of very learnable subject-runs and severely unstable/corrupted or poorly aligned subject-runs.
 
+A simple two-stage hierarchy was then tested directly. The model first predicts coarse leg-vs-arm with centroids, then predicts left-vs-right leg or forearm-vs-upper-arm using within-group centroids. This deployable hierarchy did not improve exact accuracy: subject-fold accuracy was `0.5618`, slightly below the flat four-class centroid baseline at `0.5669`. The coarse centroid stage itself reached `0.8222` subject-fold accuracy, confirming again that coarse motor grouping is much easier than exact classification.
+
+The diagnostic oracle version is more informative. When the true leg-vs-arm group is supplied at test time and only the within-pair fine classifier is evaluated, subject-fold exact accuracy rises to `0.6767`. This is not deployable, but it estimates the headroom available if a future model can combine reliable coarse grouping with better fine within-pair alignment. The current failure is therefore not simply that a flat classifier ignores hierarchy; a naive hierarchy compounds coarse-stage errors and still inherits unstable within-pair geometry.
+
 ## What To Do Next
 
 Run these checks in this order:
@@ -377,6 +381,8 @@ Do not replace per-run balancing with all-runs subject-level balancing. It can r
 Use independent-prediction class-count imbalance as the next adaptation/QC lead. The `>= 4` threshold is promising but was selected after inspecting the diagnostic sweep, so a publishable variant needs separate threshold validation, nested CV, or an explicitly pre-registered threshold rule.
 
 Add hierarchical evaluation and modeling. Report leg-vs-arm performance separately from exact four-class performance, because coarse motor grouping is already strong. Test two-stage classifiers: first leg-vs-arm, then left-vs-right leg or forearm-vs-upper-arm within the predicted group. If the second stage fails, the bottleneck is fine-grained representation/alignment rather than gross motor localization.
+
+The first two-stage centroid test already failed to beat flat centroids, so the next hierarchy should not just wrap the same centroids. More plausible variants are multi-task training with a coarse auxiliary loss, calibrated coarse/fine score fusion, or pair-specific alignment that is validated without oracle group labels.
 
 Investigate temporal/run-position effects. Event ordinal `0` and ordinal `6` are disproportionately weak. Test alternative event windows, longer temporal context, excluding or separately modeling first events, and run-start baseline stabilization. This should be done before another large neural run, because a window/context issue would affect any model family.
 
