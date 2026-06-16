@@ -335,6 +335,19 @@ A subject-run QC analysis then measured unlabeled score-geometry signals to see 
 
 Promoting that signal into a concrete gate produced the current best subject-fold event result. Applying balanced assignment only when the independent prediction counts have L1 imbalance at least `4` reached `0.5877` subject-fold accuracy / `0.5876` macro F1. This is better than independent argmax (`0.5669`) and always-balanced assignment (`0.5826`). It improved over always balancing for 27 subjects, tied for 19, and worsened 16. The same gate reduced held-out-run mean accuracy from `0.6243` to `0.6200`, so it should be treated as a subject-generalization clue rather than a universal improvement.
 
+An event-error anatomy pass then showed that the current adapted feature space is much better at coarse anatomical grouping than exact four-way discrimination. Under the imbalance-gated subject-fold rule, exact event accuracy is `0.5874`, but leg-vs-arm accuracy is `0.8411`. Exact accuracy inside the leg pair is only `0.5860`, and exact accuracy inside the arm pair is `0.5887`. Most errors are therefore not arbitrary class confusions. They concentrate inside related motor groups:
+
+- forearm predicted as upper arm: `203`
+- right leg predicted as left leg: `202`
+- left leg predicted as right leg: `175`
+- upper arm predicted as forearm: `175`
+
+This is one of the clearest current explanations of the full-dataset behavior. The data/features capture broad motor-system separation, but cross-subject/run alignment does not preserve enough fine-grained information to reliably distinguish left vs right leg or forearm vs upper arm.
+
+The same pass found nontrivial run-position effects. The eight-event run sequence has eight observed class-order templates across the 372 subject-runs. Under the imbalance-gated subject-fold rule, event ordinal `0` is weakest (`0.5027` accuracy), ordinal `6` is also weak (`0.5269`), while ordinals `1` and `2` are strongest (`0.6317`). First occurrences of a class are slightly easier than second occurrences (`0.5981` vs `0.5766`), but that gap is smaller than the ordinal-position spread. This suggests run-start, temporal context, event-window placement, or sequence-context effects should be tested before assuming the remaining errors are purely subject anatomical variation.
+
+The error anatomy also quantifies heterogeneity. The best subjects under the imbalance-gated rule include `sub-30` (`0.8125`), `sub-11` (`0.7917`), and `sub-46`/`sub-16`/`sub-08` (`0.7708`). The worst subjects remain `sub-52` (`0.1458`), `sub-17` (`0.2083`), `sub-27` (`0.3333`), and `sub-42` (`0.3542`). At the subject-run level, 25 subject-runs are perfect while 42 are at or below chance. This means the dataset is not uniformly noisy; it contains a mixture of very learnable subject-runs and severely unstable/corrupted or poorly aligned subject-runs.
+
 ## What To Do Next
 
 Run these checks in this order:
@@ -362,6 +375,10 @@ Do not rely on simple score-penalty gating to choose whether balanced assignment
 Do not replace per-run balancing with all-runs subject-level balancing. It can reduce specific per-run overcorrections but lowers the cohort average, meaning the task balance signal is most useful at the run level where it is defined.
 
 Use independent-prediction class-count imbalance as the next adaptation/QC lead. The `>= 4` threshold is promising but was selected after inspecting the diagnostic sweep, so a publishable variant needs separate threshold validation, nested CV, or an explicitly pre-registered threshold rule.
+
+Add hierarchical evaluation and modeling. Report leg-vs-arm performance separately from exact four-class performance, because coarse motor grouping is already strong. Test two-stage classifiers: first leg-vs-arm, then left-vs-right leg or forearm-vs-upper-arm within the predicted group. If the second stage fails, the bottleneck is fine-grained representation/alignment rather than gross motor localization.
+
+Investigate temporal/run-position effects. Event ordinal `0` and ordinal `6` are disproportionately weak. Test alternative event windows, longer temporal context, excluding or separately modeling first events, and run-start baseline stabilization. This should be done before another large neural run, because a window/context issue would affect any model family.
 
 3. Tiny overfit sanity check.
 

@@ -39,14 +39,17 @@ The strongest current evidence is that the extracted data contains local motor-c
 - Simple score-penalty gating did not beat full balanced assignment, so avoiding harmful subject-level corrections likely needs a better instability/QC signal.
 - Subject-level all-runs balancing reached `0.5746` subject-fold accuracy, below per-run balancing at `0.5826`, so the current adaptation baseline should keep the class-count constraint at the subject-run level.
 - An independent-prediction imbalance gate is the best current adaptation variant, reaching `0.5877` subject-fold event accuracy / `0.5876` macro F1 when balancing only subject-runs with class-count L1 imbalance `>= 4`. This should be reported as exploratory until the threshold is validated separately.
+- Event-error anatomy shows the adapted features are much stronger for coarse motor grouping than exact labels: leg-vs-arm accuracy is `0.8411`, while exact leg-pair and arm-pair discrimination are about `0.5860` and `0.5887`. This supports a hierarchical analysis section and suggests the main remaining bottleneck is fine-grained within-pair stability.
+- Event-position effects are visible: ordinal `0` and ordinal `6` are weakest, so the methods section should include a temporal/window-sensitivity diagnostic before claiming the remaining errors are only subject variability.
 
 Publication framing should therefore avoid claiming that the transductive alignment score is a standard supervised classifier. It should be treated as evidence for domain shift unless the method section defines a legitimate test-time adaptation protocol using unlabeled target-run statistics.
 
 ## Later Phases
 
 - Phase 2: weak-subject and run-consistency audit, including run-pair template stability, artifact/QC checks, and anatomical/preprocessing alignment checks.
-- Phase 3: preprocessing/domain-shift ablation under the same subject-wise protocol.
+- Phase 3: preprocessing/domain-shift ablation under the same subject-wise protocol, with hierarchical leg-vs-arm versus exact four-class reporting.
 - Phase 4: task framing comparison: volume, trial clip, beta-map samples, and target-run adaptation, including independent event prediction versus known-design balanced assignment.
+- Phase 4a: temporal/window-sensitivity experiments around weak event positions, especially the first event and ordinal `6`.
 - Phase 5: architecture comparison under locked preprocessing and split protocol.
 - Phase 6: subject/run-invariance experiments such as DANN-style adversarial domain heads, explicit run covariate removal, or test-time adaptation using unlabeled target-run statistics.
 - Phase 7: interpretability using saliency or Grad-CAM overlap with motor-region atlas masks.

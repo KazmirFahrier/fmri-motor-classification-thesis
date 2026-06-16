@@ -130,6 +130,8 @@ This repository is tracking the active full-dataset thesis runs for 4-class moto
 - A score-penalty-gated balanced assignment sweep did not beat full balanced assignment. Conservative gates improved over independent argmax but peaked below or equal to full balance: subject-fold `0.5826`, held-out-run `0.6243`.
 - A wider subject-level balanced assignment, enforcing equal class counts across all available target runs for a subject, also did not beat per-run balancing. Subject-fold accuracy reached `0.5746`, above independent argmax `0.5669` but below per-subject-run balancing `0.5826`.
 - A subject-run QC sweep found a more useful gate: apply balanced assignment only when independent predictions have class-count L1 imbalance of at least `4`. This produced the best current subject-fold event result, `0.5877` accuracy / `0.5876` macro F1, while the held-out-run mean dropped slightly to `0.6200`. The signal is modest but suggests that balancing is most helpful when independent predictions visibly violate the known run design.
+- An event-error anatomy pass found that the adapted features are much better at coarse motor grouping than exact 4-class discrimination. Under the imbalance-gated subject-fold rule, leg-vs-arm accuracy is `0.8411`, while exact leg-pair and arm-pair accuracy are only `0.5860` and `0.5887`. The largest confusion pairs are within anatomical groups: forearm to upper arm (`203`), right leg to left leg (`202`), left leg to right leg (`175`), and upper arm to forearm (`175`).
+- The same error anatomy pass found timing/order effects. Event ordinal `0` is weakest at `0.5027` accuracy and ordinal `6` is next weakest at `0.5269`, while ordinals `1` and `2` reach `0.6317`. First class occurrences are slightly easier than second occurrences (`0.5981` vs `0.5766`), but the larger issue is specific run-position/context effects rather than a simple repetition effect.
 
 ## Current Metrics Snapshot
 
@@ -138,7 +140,7 @@ This repository is tracking the active full-dataset thesis runs for 4-class moto
 | Original 9-subject pooled split | Historical baseline: accuracy 0.8522, MCC 0.8055, ROC-AUC 0.95, PR-AUC 0.88. |
 | Full-dataset pooled split | Stopped at epoch 25 by controlled policy. Final validation snapshot: accuracy 0.2629, balanced accuracy 0.2648, macro F1 0.2501, MCC 0.0206. Training accuracy reached 0.5690, so the model is fitting training data without meaningful validation generalization. |
 | Full-dataset subject-wise CV + holdout | Complete. All five CV folds and final holdout are chance-level: accuracy 0.25, balanced accuracy 0.25, macro F1 0.10, MCC 0.0. |
-| Corrected clip feature transfer | Dense full-cohort overlapping clips show strong within-run signal. Dense `24³` per-subject-run centering plus cosine reaches `0.5669` subject-fold event accuracy; adding known per-run class-balance assignment improves this to `0.5826`; adding an independent-prediction imbalance gate improves subject-fold event accuracy to `0.5877`. Raw/train-only transfer remains weak, and several subjects remain difficult. |
+| Corrected clip feature transfer | Dense full-cohort overlapping clips show strong within-run signal. Dense `24³` per-subject-run centering plus cosine reaches `0.5669` subject-fold event accuracy; adding known per-run class-balance assignment improves this to `0.5826`; adding an independent-prediction imbalance gate improves subject-fold event accuracy to `0.5877`. Coarse leg-vs-arm accuracy is much higher at `0.8411`, so the remaining problem is mostly fine-grained within-pair separation plus subject/run/order robustness. |
 
 ## Why This Matters
 
@@ -165,6 +167,8 @@ Phase 1 is designed to separate optimistic pooled-split performance from leakage
 - Simple confidence gating by balanced-assignment score penalty does not remove the per-subject harm while preserving the aggregate gain.
 - Subject-level balancing across all runs is not a replacement for per-run balancing; it softens a few per-run harms but lowers the cohort average.
 - Prefer independent-prediction class-count imbalance over score-penalty gating for the next adaptation probe. The current best threshold is L1 imbalance `>= 4`, but it should be validated with a separate threshold-selection protocol before being treated as publishable model performance.
+- Add hierarchical baselines: report coarse leg-vs-arm performance separately from exact 4-class performance, and test whether a two-stage classifier can improve within-leg and within-arm discrimination.
+- Investigate run-start and event-position effects. The first event and ordinal `6` are disproportionately weak, so future preprocessing/modeling should test temporal context, baseline stabilization, and event-window choices around those positions.
 - Do not spend more effort on simple pseudo-centroid self-training until the target pseudo-label quality improves; the first sweep was neutral/slightly worse than plain balanced assignment.
 - Extend the weak-subject audit beyond saved feature geometry into raw-data QC: motion/confound summaries if available, anatomical alignment, and run-level artifacts for `sub-52`, `sub-42`, `sub-17`, `sub-20`, `sub-54`, and `sub-63`. Broad event-window timing mismatch is now ruled out.
 - Do not trust the current temporal ResNet corrected-clip recipe until a small eval-mode overfit probe succeeds.
