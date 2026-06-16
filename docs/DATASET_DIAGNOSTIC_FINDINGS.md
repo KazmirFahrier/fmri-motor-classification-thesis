@@ -352,6 +352,21 @@ A simple two-stage hierarchy was then tested directly. The model first predicts 
 
 The diagnostic oracle version is more informative. When the true leg-vs-arm group is supplied at test time and only the within-pair fine classifier is evaluated, subject-fold exact accuracy rises to `0.6767`. This is not deployable, but it estimates the headroom available if a future model can combine reliable coarse grouping with better fine within-pair alignment. The current failure is therefore not simply that a flat classifier ignores hierarchy; a naive hierarchy compounds coarse-stage errors and still inherits unstable within-pair geometry.
 
+A clip-offset sweep then tested whether event averaging was hiding a better temporal slice. Each event currently contributes three overlapping clips with offsets `0`, `1`, and `2` relative to the eight-volume event window. Using only offset `2` was substantially better than averaging all offsets:
+
+- independent subject-fold event accuracy: event mean `0.5669`, offset `0` `0.5059`, offset `1` `0.5640`, offset `2` `0.6022`
+- independent held-out-run event accuracy: event mean `0.5981`, offset `0` `0.5353`, offset `1` `0.5974`, offset `2` `0.6425`
+- coarse leg-vs-arm subject-fold accuracy: event mean `0.8262`, offset `2` `0.8600`
+
+Combining offset `2` with the known-design class-balance constraint produced the strongest current event-level scores:
+
+- held-out-run offset-2 balanced assignment: `0.6851` accuracy / `0.6851` macro F1
+- subject-fold offset-2 balanced assignment: `0.6370` accuracy / `0.6370` macro F1
+- subject-fold offset-2 imbalance-gated assignment: `0.6376` accuracy / `0.6377` macro F1
+- subject-fold offset-2 balanced leg-vs-arm accuracy: `0.8811`
+
+This is a major preprocessing clue. The earliest clip offset is weak, the middle offset roughly matches the event mean, and the latest offset is clearly strongest. Averaging all offsets therefore mixes less-informative early signal into the event representation. Future feature extraction should test later HRF-aligned windows, longer context, and learned temporal weighting rather than treating all overlapping clips equally.
+
 ## What To Do Next
 
 Run these checks in this order:
@@ -385,6 +400,8 @@ Add hierarchical evaluation and modeling. Report leg-vs-arm performance separate
 The first two-stage centroid test already failed to beat flat centroids, so the next hierarchy should not just wrap the same centroids. More plausible variants are multi-task training with a coarse auxiliary loss, calibrated coarse/fine score fusion, or pair-specific alignment that is validated without oracle group labels.
 
 Investigate temporal/run-position effects. Event ordinal `0` and ordinal `6` are disproportionately weak. Test alternative event windows, longer temporal context, excluding or separately modeling first events, and run-start baseline stabilization. This should be done before another large neural run, because a window/context issue would affect any model family.
+
+Prioritize temporal window selection. Offset `2` is the strongest current preprocessing lead and already beats the previous event-mean adaptation result. The next extraction should test later shifted windows and possibly event-level temporal weighting before spending more effort on model complexity.
 
 3. Tiny overfit sanity check.
 

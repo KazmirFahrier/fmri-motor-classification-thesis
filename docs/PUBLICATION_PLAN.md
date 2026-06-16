@@ -42,6 +42,7 @@ The strongest current evidence is that the extracted data contains local motor-c
 - Event-error anatomy shows the adapted features are much stronger for coarse motor grouping than exact labels: leg-vs-arm accuracy is `0.8411`, while exact leg-pair and arm-pair discrimination are about `0.5860` and `0.5887`. This supports a hierarchical analysis section and suggests the main remaining bottleneck is fine-grained within-pair stability.
 - A deployable two-stage centroid hierarchy did not improve exact subject-fold accuracy (`0.5618`) over flat four-class centroids (`0.5669`), but an oracle-coarse hierarchy reached `0.6767`. This should be framed as evidence for hierarchical headroom, not as a solved modeling approach.
 - Event-position effects are visible: ordinal `0` and ordinal `6` are weakest, so the methods section should include a temporal/window-sensitivity diagnostic before claiming the remaining errors are only subject variability.
+- Clip-offset sensitivity is now the strongest preprocessing lead: using only late clip `offset 2` improves subject-fold event accuracy from `0.5669` to `0.6022`, and offset-2 plus task-design balancing reaches `0.6376`. This should be prioritized before another large neural architecture run.
 
 Publication framing should therefore avoid claiming that the transductive alignment score is a standard supervised classifier. It should be treated as evidence for domain shift unless the method section defines a legitimate test-time adaptation protocol using unlabeled target-run statistics.
 
@@ -50,7 +51,7 @@ Publication framing should therefore avoid claiming that the transductive alignm
 - Phase 2: weak-subject and run-consistency audit, including run-pair template stability, artifact/QC checks, and anatomical/preprocessing alignment checks.
 - Phase 3: preprocessing/domain-shift ablation under the same subject-wise protocol, with hierarchical leg-vs-arm versus exact four-class reporting.
 - Phase 4: task framing comparison: volume, trial clip, beta-map samples, and target-run adaptation, including independent event prediction versus known-design balanced assignment.
-- Phase 4a: temporal/window-sensitivity experiments around weak event positions, especially the first event and ordinal `6`.
+- Phase 4a: temporal/window-sensitivity experiments around weak event positions and clip offsets, especially the first event, ordinal `6`, and later HRF-aligned windows suggested by the offset-2 result.
 - Phase 5: architecture comparison under locked preprocessing and split protocol.
 - Phase 6: subject/run-invariance experiments such as DANN-style adversarial domain heads, explicit run covariate removal, or test-time adaptation using unlabeled target-run statistics.
 - Phase 7: interpretability using saliency or Grad-CAM overlap with motor-region atlas masks.
