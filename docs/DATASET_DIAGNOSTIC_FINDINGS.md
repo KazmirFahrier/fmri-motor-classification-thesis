@@ -390,6 +390,16 @@ Repeating the subject/run consistency audit on offset `2` makes the weak-subject
 
 So `sub-52` and `sub-42` look internally unstable even after selecting the stronger temporal slice: their own runs do not agree on class geometry. But `sub-17` and `sub-20` look more internally coherent while still transferring poorly from the rest of the cohort. Across subjects, leave-one-subject accuracy correlates moderately with same-subject leave-one-run accuracy (`r = 0.475`) and centroid margin (`r = 0.415`), while same-subject leave-one-run accuracy correlates strongly with centroid margin (`r = 0.745`). This suggests two separate next moves: audit/repair or potentially exclude internally inconsistent subjects, and test personalization/domain-adaptation methods for internally stable but cohort-mismatched subjects.
 
+A labeled subject-calibration curve then tested that second move directly. For each target subject, it held out one run, used the other target-subject runs as labeled calibration data, blended target-subject centroids with source-cohort centroids, and evaluated the held-out run after subject-run centering. The best setting consistently used a light target-subject blend (`alpha=0.25`) plus the known two-events-per-class balanced assignment:
+
+- source-only balanced assignment: `0.6344` accuracy / `0.6344` macro F1 / `0.8797` leg-vs-arm accuracy
+- one labeled target-subject calibration run: `0.6681` accuracy / `0.6681` macro F1 / `0.9070` leg-vs-arm accuracy
+- two labeled target-subject calibration runs: `0.6939` accuracy / `0.6939` macro F1 / `0.9164` leg-vs-arm accuracy
+- three labeled target-subject calibration runs: `0.7093` accuracy / `0.7093` macro F1 / `0.9198` leg-vs-arm accuracy
+- five labeled target-subject calibration runs: `0.7224` accuracy / `0.7224` macro F1 / `0.9227` leg-vs-arm accuracy
+
+This is not a zero-shot full-subject result, and it must be reported as a calibration protocol. But scientifically it is a very useful positive control: many subjects contain stable personal class geometry that the cohort model does not align to by itself. The focus-subject results show the split clearly. `sub-17` improves from `0.2917` source-only balanced accuracy to `0.7500` with five calibration runs, `sub-20` from `0.4792` to `0.7083`, `sub-27` from `0.3333` to `0.7708`, and `sub-63` from `0.3958` to `0.6875`. `sub-52` and `sub-42` do not recover, reinforcing that they are likely QC/instability cases rather than ordinary personalization cases.
+
 ## What To Do Next
 
 Run these checks in this order:
@@ -397,6 +407,8 @@ Run these checks in this order:
 1. Weak-subject and run-consistency audit.
 
 Focus on subjects that repeatedly fail despite target-run centering, especially `sub-52`, `sub-42`, `sub-17`, `sub-20`, `sub-54`, and `sub-63`. The saved-feature geometry now separates the weak cases into at least two groups. `sub-52` and `sub-42` have unstable class templates across their own runs and should get raw QC, motion/artifact, anatomical alignment, denoising, and run/class corruption checks. `sub-17` and `sub-20` look more internally stable under offset `2`, so they should be used to test subject personalization, calibration, and domain-adaptation ideas. Compare both groups against stable subjects such as `sub-30`, `sub-62`, `sub-10`, and `sub-47`.
+
+Use the labeled calibration curve as a positive-control personalization benchmark. It shows what is reachable when target-subject labels are available, and it gives a target for future unlabeled or semi-supervised adaptation. Any publishable calibrated result should choose calibration size and blend strength without peeking at the held-out run labels.
 
 2. Run/subject transfer diagnostic.
 

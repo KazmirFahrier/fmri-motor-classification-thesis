@@ -46,6 +46,7 @@ The strongest current evidence is that the extracted data contains local motor-c
 - A coarse temporal-weight sweep found no simple offset mixture that beats pure `offset 2`, so the next temporal experiment should test later/longer HRF-aligned windows from continuous BOLD rather than averaging the current offsets.
 - Offset-2 error anatomy improves the operating point but preserves the core story: residual errors remain mostly within anatomical pairs and the weakest subjects remain poor, so temporal-window improvements should be paired with weak-subject QC and fine-pair modeling.
 - Offset-2 subject/run consistency suggests the weak-subject section should separate internally inconsistent subjects (`sub-52`, `sub-42`) from cohort-mismatched but internally more stable subjects (`sub-17`, `sub-20`, and related cases). This matters for interpretation because those two groups imply different remedies: QC/repair/exclusion versus personalization or domain adaptation.
+- Labeled subject calibration is now a credible positive-control modeling track. Offset-2 source/subject centroid blending plus balanced assignment reaches `0.6681` with one labeled calibration run and `0.7224` with five calibration runs. This should be framed separately from zero-shot held-out-subject generalization and used to motivate personalization or semi-supervised adaptation experiments.
 
 Publication framing should therefore avoid claiming that the transductive alignment score is a standard supervised classifier. It should be treated as evidence for domain shift unless the method section defines a legitimate test-time adaptation protocol using unlabeled target-run statistics.
 
@@ -55,6 +56,7 @@ Publication framing should therefore avoid claiming that the transductive alignm
 - Phase 3: preprocessing/domain-shift ablation under the same subject-wise protocol, with hierarchical leg-vs-arm versus exact four-class reporting.
 - Phase 4: task framing comparison: volume, trial clip, beta-map samples, and target-run adaptation, including independent event prediction versus known-design balanced assignment.
 - Phase 4a: temporal/window-sensitivity experiments around weak event positions and clip offsets, especially the first event, ordinal `6`, and later HRF-aligned windows suggested by the offset-2 result.
+- Phase 4b: calibrated/personalized protocols, starting from labeled target-subject calibration as a positive control and then reducing label dependence through validation-selected blending, unlabeled balancing, or semi-supervised adaptation.
 - Phase 5: architecture comparison under locked preprocessing and split protocol.
 - Phase 6: subject/run-invariance experiments such as DANN-style adversarial domain heads, explicit run covariate removal, or test-time adaptation using unlabeled target-run statistics.
 - Phase 7: interpretability using saliency or Grad-CAM overlap with motor-region atlas masks.
