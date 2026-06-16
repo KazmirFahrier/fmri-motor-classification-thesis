@@ -135,6 +135,7 @@ This repository is tracking the active full-dataset thesis runs for 4-class moto
 - A deployable two-stage hierarchical centroid classifier did not improve exact subject-fold accuracy (`0.5618`) over flat four-class centroids (`0.5669`). However, an oracle-coarse diagnostic that uses the true leg-vs-arm group before within-pair classification reached `0.6767`, so there is headroom if future methods can preserve coarse grouping while improving within-pair separation.
 - A clip-offset sweep found that averaging all three overlapping clips per event was diluting signal. Using only the latest available clip offset (`offset 2`) improved independent subject-fold event accuracy from `0.5669` to `0.6022` and held-out-run accuracy from `0.5981` to `0.6425`.
 - Combining `offset 2` with the task-design balance constraint produced the best current event-level result: held-out-run accuracy `0.6851` with always-balanced assignment, and subject-fold accuracy `0.6376` with imbalance-gated balancing (`0.6370` with always-balanced assignment). Coarse leg-vs-arm subject-fold accuracy reached `0.8811` with offset-2 always-balanced assignment.
+- A coarse temporal-weight sweep over offsets `0`, `1`, and `2` found that no mixture beat pure `offset 2`. Adding 25% of offset `1` reduced subject-fold balanced accuracy from `0.6370` to `0.6205`, and adding 25% of offset `0` reduced it to `0.6088`. The current evidence therefore favors selecting the late clip rather than averaging or blending offsets.
 
 ## Current Metrics Snapshot
 
@@ -174,6 +175,7 @@ Phase 1 is designed to separate optimistic pooled-split performance from leakage
 - Do not assume a naive two-stage centroid classifier is enough; the first deployable hierarchy was slightly worse than flat centroids. Use the oracle-coarse result as an upper-bound diagnostic for better hierarchical or multi-task models.
 - Investigate run-start and event-position effects. The first event and ordinal `6` are disproportionately weak, so future preprocessing/modeling should test temporal context, baseline stabilization, and event-window choices around those positions.
 - Treat late event-window selection as the strongest current preprocessing lead. Offset `2` outperforms event-mean features, so the next extraction should test later/longer windows instead of averaging early and late clips blindly.
+- Do not use equal or learned-looking offset mixtures until a validation protocol justifies them; the first coarse grid says pure late offset is better than simple temporal blends.
 - Do not spend more effort on simple pseudo-centroid self-training until the target pseudo-label quality improves; the first sweep was neutral/slightly worse than plain balanced assignment.
 - Extend the weak-subject audit beyond saved feature geometry into raw-data QC: motion/confound summaries if available, anatomical alignment, and run-level artifacts for `sub-52`, `sub-42`, `sub-17`, `sub-20`, `sub-54`, and `sub-63`. Broad event-window timing mismatch is now ruled out.
 - Do not trust the current temporal ResNet corrected-clip recipe until a small eval-mode overfit probe succeeds.

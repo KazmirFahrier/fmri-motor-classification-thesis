@@ -367,6 +367,14 @@ Combining offset `2` with the known-design class-balance constraint produced the
 
 This is a major preprocessing clue. The earliest clip offset is weak, the middle offset roughly matches the event mean, and the latest offset is clearly strongest. Averaging all offsets therefore mixes less-informative early signal into the event representation. Future feature extraction should test later HRF-aligned windows, longer context, and learned temporal weighting rather than treating all overlapping clips equally.
 
+A coarse temporal-weight grid then tested whether a simple mixture of offsets could beat the pure late clip. The grid used weights in `0.25` increments across offsets `0`, `1`, and `2`, evaluated with the same subject/run splits and prediction rules. No mixture beat pure `offset 2`. For subject-fold balanced assignment, pure `offset 2` reached `0.6370`, while the best nearby mixtures were lower:
+
+- weights `(0: 0.00, 1: 0.25, 2: 0.75)`: `0.6205`
+- weights `(0: 0.00, 1: 0.50, 2: 0.50)`: `0.6097`
+- weights `(0: 0.25, 1: 0.00, 2: 0.75)`: `0.6088`
+
+The same pattern held for independent predictions and held-out-run splits. This makes the temporal conclusion sharper: the useful signal is concentrated late in the extracted event window, and simple averaging or blending with earlier clips mostly dilutes it.
+
 ## What To Do Next
 
 Run these checks in this order:
@@ -402,6 +410,8 @@ The first two-stage centroid test already failed to beat flat centroids, so the 
 Investigate temporal/run-position effects. Event ordinal `0` and ordinal `6` are disproportionately weak. Test alternative event windows, longer temporal context, excluding or separately modeling first events, and run-start baseline stabilization. This should be done before another large neural run, because a window/context issue would affect any model family.
 
 Prioritize temporal window selection. Offset `2` is the strongest current preprocessing lead and already beats the previous event-mean adaptation result. The next extraction should test later shifted windows and possibly event-level temporal weighting before spending more effort on model complexity.
+
+Start that follow-up with later shifted windows, not more mixtures of the currently extracted offsets. The coarse weight sweep suggests offset `2` itself is the strongest of the available slices, so the next question is whether even later or longer HRF-aligned windows from the continuous BOLD runs are better.
 
 3. Tiny overfit sanity check.
 
