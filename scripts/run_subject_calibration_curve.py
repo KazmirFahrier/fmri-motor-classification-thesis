@@ -55,6 +55,7 @@ def append_prediction_rows(
     calibration_runs: list[int],
     calibration_run_count: int,
     blend_alpha: float,
+    summary_blend_alpha: float | None = None,
     scores: np.ndarray,
     val_idx: np.ndarray,
     y: np.ndarray,
@@ -78,6 +79,7 @@ def append_prediction_rows(
                 "calibration_runs": calibration_runs,
                 "calibration_run_count": int(calibration_run_count),
                 "blend_alpha": float(blend_alpha),
+                "summary_blend_alpha": float(blend_alpha if summary_blend_alpha is None else summary_blend_alpha),
                 "accuracy": float(np.mean(y[val_idx] == pred)),
                 "y_true": y[val_idx].tolist(),
                 "y_pred": pred.tolist(),
@@ -94,7 +96,7 @@ def summarize_prediction_rows(rows: list[dict]) -> list[dict]:
             row["protocol"],
             row["prediction_rule"],
             int(row["calibration_run_count"]),
-            float(row["blend_alpha"]),
+            float(row.get("summary_blend_alpha", row["blend_alpha"])),
         )
         grouped[key]["true"].extend(row["y_true"])
         grouped[key]["pred"].extend(row["y_pred"])
@@ -134,7 +136,7 @@ def summarize_by_subject(rows: list[dict], focus_subjects: set[str]) -> list[dic
             row["protocol"],
             row["prediction_rule"],
             int(row["calibration_run_count"]),
-            float(row["blend_alpha"]),
+            float(row.get("summary_blend_alpha", row["blend_alpha"])),
         )
         grouped[key]["true"].extend(row["y_true"])
         grouped[key]["pred"].extend(row["y_pred"])
@@ -178,6 +180,44 @@ def best_by_calibration_count(summary: list[dict]) -> list[dict]:
     return best
 
 
+def select_alpha_with_calibration_cv(
+    *,
+    x_norm: np.ndarray,
+    y: np.ndarray,
+    records: list[dict],
+    source_centroids: np.ndarray,
+    subject_indices: np.ndarray,
+    calibration_runs: tuple[int, ...],
+    alphas: list[float],
+    fallback_alpha: float,
+) -> float:
+    if len(calibration_runs) < 2:
+        return float(fallback_alpha)
+
+    alpha_rows = []
+    for alpha in alphas:
+        split_acc = []
+        for validation_run in calibration_runs:
+            train_runs = set(calibration_runs) - {validation_run}
+            train_idx = np.asarray(
+                [idx for idx in subject_indices if int(records[idx]["run_id"]) in train_runs],
+                dtype=np.int64,
+            )
+            val_idx = np.asarray(
+                [idx for idx in subject_indices if int(records[idx]["run_id"]) == validation_run],
+                dtype=np.int64,
+            )
+            subject_centroids = centroid_matrix_from_normalized(x_norm, y, train_idx)
+            centroids = blend_centroids(source_centroids, subject_centroids, alpha)
+            scores = score(x_norm, val_idx, centroids)
+            pred = apply_balanced_assignment(scores, val_idx, records)
+            split_acc.append(float(np.mean(y[val_idx] == pred)))
+        alpha_rows.append({"alpha": float(alpha), "mean_accuracy": float(np.mean(split_acc))})
+
+    best = max(alpha_rows, key=lambda row: (row["mean_accuracy"], -row["alpha"]))
+    return float(best["alpha"])
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(
         description=(
@@ -195,6 +235,12 @@ def main() -> None:
         nargs="*",
         default=[0.25, 0.5, 0.75, 1.0],
         help="Weight assigned to subject-specific calibration centroids when blending with source centroids.",
+    )
+    parser.add_argument(
+        "--fallback-blend-alpha",
+        type=float,
+        default=0.25,
+        help="Blend alpha used for the validation-selected protocol when only one calibration run is available.",
     )
     parser.add_argument(
         "--focus-subjects",
@@ -281,6 +327,33 @@ def main() -> None:
                             records=event_records,
                         )
 
+                    selected_alpha = select_alpha_with_calibration_cv(
+                        x_norm=x_norm,
+                        y=event_y,
+                        records=event_records,
+                        source_centroids=source_centroids,
+                        subject_indices=subject_indices,
+                        calibration_runs=calibration_runs,
+                        alphas=[float(alpha) for alpha in args.blend_alphas],
+                        fallback_alpha=float(args.fallback_blend_alpha),
+                    )
+                    selected_centroids = blend_centroids(source_centroids, subject_centroids, selected_alpha)
+                    selected_scores = score(x_norm, val_idx, selected_centroids)
+                    append_prediction_rows(
+                        prediction_rows,
+                        subject=subject,
+                        holdout_run=holdout_run,
+                        protocol="validated_source_subject_blend",
+                        calibration_runs=[int(run_id) for run_id in calibration_runs],
+                        calibration_run_count=calibration_run_count,
+                        blend_alpha=selected_alpha,
+                        summary_blend_alpha=-1.0,
+                        scores=selected_scores,
+                        val_idx=val_idx,
+                        y=event_y,
+                        records=event_records,
+                    )
+
     summary = summarize_prediction_rows(prediction_rows)
     subject_summary = summarize_by_subject(prediction_rows, set(args.focus_subjects))
     best_rows = best_by_calibration_count(summary)
@@ -290,6 +363,7 @@ def main() -> None:
         "event_feature_shape": list(event_x.shape),
         "max_calibration_runs": int(args.max_calibration_runs),
         "blend_alphas": [float(alpha) for alpha in args.blend_alphas],
+        "fallback_blend_alpha": float(args.fallback_blend_alpha),
         "summary": summary,
         "best_by_calibration_run_count": best_rows,
         "focus_subject_summary": subject_summary,

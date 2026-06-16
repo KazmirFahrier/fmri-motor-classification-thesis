@@ -400,6 +400,14 @@ A labeled subject-calibration curve then tested that second move directly. For e
 
 This is not a zero-shot full-subject result, and it must be reported as a calibration protocol. But scientifically it is a very useful positive control: many subjects contain stable personal class geometry that the cohort model does not align to by itself. The focus-subject results show the split clearly. `sub-17` improves from `0.2917` source-only balanced accuracy to `0.7500` with five calibration runs, `sub-20` from `0.4792` to `0.7083`, `sub-27` from `0.3333` to `0.7708`, and `sub-63` from `0.3958` to `0.6875`. `sub-52` and `sub-42` do not recover, reinforcing that they are likely QC/instability cases rather than ordinary personalization cases.
 
+To reduce the most obvious overfitting concern, the calibration script also evaluates a validation-selected blend. For each held-out target run, it chooses `alpha` using only the labeled calibration runs via leave-one-calibration-run validation, then evaluates the held-out run. This keeps most of the fixed `alpha=0.25` gain:
+
+- two calibration runs: fixed `alpha=0.25` balanced accuracy `0.6939`; validation-selected `0.6873`
+- three calibration runs: fixed `0.7093`; validation-selected `0.7026`
+- five calibration runs: fixed `0.7224`; validation-selected `0.7151`
+
+The selected-alpha distribution is also reassuring: most validation splits choose `alpha=0.25`, especially for two and three calibration runs. That means light personalization is not merely a hindsight-picked parameter; it is often preferred by calibration-only validation.
+
 ## What To Do Next
 
 Run these checks in this order:
@@ -408,7 +416,7 @@ Run these checks in this order:
 
 Focus on subjects that repeatedly fail despite target-run centering, especially `sub-52`, `sub-42`, `sub-17`, `sub-20`, `sub-54`, and `sub-63`. The saved-feature geometry now separates the weak cases into at least two groups. `sub-52` and `sub-42` have unstable class templates across their own runs and should get raw QC, motion/artifact, anatomical alignment, denoising, and run/class corruption checks. `sub-17` and `sub-20` look more internally stable under offset `2`, so they should be used to test subject personalization, calibration, and domain-adaptation ideas. Compare both groups against stable subjects such as `sub-30`, `sub-62`, `sub-10`, and `sub-47`.
 
-Use the labeled calibration curve as a positive-control personalization benchmark. It shows what is reachable when target-subject labels are available, and it gives a target for future unlabeled or semi-supervised adaptation. Any publishable calibrated result should choose calibration size and blend strength without peeking at the held-out run labels.
+Use the labeled calibration curve as a positive-control personalization benchmark. It shows what is reachable when target-subject labels are available, and it gives a target for future unlabeled or semi-supervised adaptation. The validation-selected blend is the safer calibrated baseline because it chooses blend strength without peeking at the held-out run labels.
 
 2. Run/subject transfer diagnostic.
 
