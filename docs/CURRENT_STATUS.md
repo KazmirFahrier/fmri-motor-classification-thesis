@@ -136,6 +136,7 @@ This repository is tracking the active full-dataset thesis runs for 4-class moto
 - A clip-offset sweep found that averaging all three overlapping clips per event was diluting signal. Using only the latest available clip offset (`offset 2`) improved independent subject-fold event accuracy from `0.5669` to `0.6022` and held-out-run accuracy from `0.5981` to `0.6425`.
 - Combining `offset 2` with the task-design balance constraint produced the best current event-level result: held-out-run accuracy `0.6851` with always-balanced assignment, and subject-fold accuracy `0.6376` with imbalance-gated balancing (`0.6370` with always-balanced assignment). Coarse leg-vs-arm subject-fold accuracy reached `0.8811` with offset-2 always-balanced assignment.
 - A coarse temporal-weight sweep over offsets `0`, `1`, and `2` found that no mixture beat pure `offset 2`. Adding 25% of offset `1` reduced subject-fold balanced accuracy from `0.6370` to `0.6205`, and adding 25% of offset `0` reduced it to `0.6088`. The current evidence therefore favors selecting the late clip rather than averaging or blending offsets.
+- Offset-2 error anatomy shows the same failure modes, just at a better operating point. Imbalance-gated subject-fold exact accuracy is `0.6371`, leg-vs-arm accuracy is `0.8726`, and residual errors are still mostly within anatomical pairs. Event ordinal `0` remains weakest but improves from `0.5027` to `0.5457`; ordinal `3` becomes strongest at `0.7070`. The worst subjects remain `sub-52`, `sub-42`, `sub-17`, and `sub-27`.
 
 ## Current Metrics Snapshot
 
@@ -176,6 +177,7 @@ Phase 1 is designed to separate optimistic pooled-split performance from leakage
 - Investigate run-start and event-position effects. The first event and ordinal `6` are disproportionately weak, so future preprocessing/modeling should test temporal context, baseline stabilization, and event-window choices around those positions.
 - Treat late event-window selection as the strongest current preprocessing lead. Offset `2` outperforms event-mean features, so the next extraction should test later/longer windows instead of averaging early and late clips blindly.
 - Do not use equal or learned-looking offset mixtures until a validation protocol justifies them; the first coarse grid says pure late offset is better than simple temporal blends.
+- Offset `2` is a better feature slice, not a complete solution. Continue weak-subject QC and within-pair modeling because the residual structure remains after the temporal improvement.
 - Do not spend more effort on simple pseudo-centroid self-training until the target pseudo-label quality improves; the first sweep was neutral/slightly worse than plain balanced assignment.
 - Extend the weak-subject audit beyond saved feature geometry into raw-data QC: motion/confound summaries if available, anatomical alignment, and run-level artifacts for `sub-52`, `sub-42`, `sub-17`, `sub-20`, `sub-54`, and `sub-63`. Broad event-window timing mismatch is now ruled out.
 - Do not trust the current temporal ResNet corrected-clip recipe until a small eval-mode overfit probe succeeds.

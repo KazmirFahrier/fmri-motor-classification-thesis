@@ -19,6 +19,7 @@ from run_balanced_event_assignment import (
     score_with_centroids,
     split_indices,
 )
+from run_clip_offset_event_sweep import aggregate_events_for_offset
 
 
 def as_jsonable(value):
@@ -154,13 +155,24 @@ def main() -> None:
     parser.add_argument("--out-json", required=True)
     parser.add_argument("--subject-fold-count", type=int, default=6)
     parser.add_argument("--imbalance-threshold", type=float, default=4.0)
+    parser.add_argument(
+        "--clip-offset",
+        type=int,
+        default=None,
+        help="If set, use only one overlapping clip offset per event instead of averaging all offsets.",
+    )
     args = parser.parse_args()
 
     feature_dir = Path(args.feature_dir)
     clip_x = np.load(feature_dir / "features.npy").astype(np.float32)
     clip_y = np.load(feature_dir / "labels.npy").astype(np.int64)
     clip_records = json.loads((feature_dir / "records.json").read_text())
-    x, y, records = aggregate_events(clip_x, clip_y, clip_records)
+    if args.clip_offset is None:
+        x, y, records = aggregate_events(clip_x, clip_y, clip_records)
+        feature_variant = "event_mean_all_offsets"
+    else:
+        x, y, records = aggregate_events_for_offset(clip_x, clip_y, clip_records, args.clip_offset)
+        feature_variant = f"clip_offset_{args.clip_offset}"
     x_centered = center_by_subject_run(x, records)
 
     event_rows = []
@@ -216,6 +228,8 @@ def main() -> None:
 
     result = {
         "feature_dir": str(feature_dir),
+        "feature_variant": feature_variant,
+        "clip_offset": args.clip_offset,
         "event_count": len(event_rows),
         "class_sequence_summary": class_sequence_summary(event_rows),
         "rules": {},

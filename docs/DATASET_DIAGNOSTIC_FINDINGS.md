@@ -375,6 +375,12 @@ A coarse temporal-weight grid then tested whether a simple mixture of offsets co
 
 The same pattern held for independent predictions and held-out-run splits. This makes the temporal conclusion sharper: the useful signal is concentrated late in the extracted event window, and simple averaging or blending with earlier clips mostly dilutes it.
 
+Repeating the event-error anatomy on offset `2` shows what the better temporal slice fixes. Under the offset-2 imbalance-gated subject-fold rule, exact event accuracy is `0.6371`, coarse leg-vs-arm accuracy is `0.8726`, exact leg-pair accuracy is `0.6492`, and exact arm-pair accuracy is `0.6250`. These are clear improvements over the event-mean anatomy (`0.5874`, `0.8411`, `0.5860`, `0.5887`), especially for within-pair discrimination. However, the qualitative error structure remains: residual mistakes are still mostly within anatomical pairs, not random cross-body confusions.
+
+The timing/order structure also remains, though shifted upward. Event ordinal `0` is still weakest after offset-2 selection, improving from `0.5027` to `0.5457`. Ordinal `6` improves from `0.5269` to `0.5780`. Ordinal `3` becomes the strongest at `0.7070`. So offset `2` partly corrects the temporal-window issue, but first-event and sequence-position effects still need to be modeled or audited.
+
+Weak subjects also persist after the temporal improvement. The worst offset-2 subjects under the imbalance-gated rule are still `sub-52` (`0.1667`), `sub-42` (`0.2500`), `sub-17` (`0.3125`), and `sub-27` (`0.3750`). This means the late-window improvement is real and broad, but the weak-subject problem is not merely an early-window artifact.
+
 ## What To Do Next
 
 Run these checks in this order:
@@ -412,6 +418,8 @@ Investigate temporal/run-position effects. Event ordinal `0` and ordinal `6` are
 Prioritize temporal window selection. Offset `2` is the strongest current preprocessing lead and already beats the previous event-mean adaptation result. The next extraction should test later shifted windows and possibly event-level temporal weighting before spending more effort on model complexity.
 
 Start that follow-up with later shifted windows, not more mixtures of the currently extracted offsets. The coarse weight sweep suggests offset `2` itself is the strongest of the available slices, so the next question is whether even later or longer HRF-aligned windows from the continuous BOLD runs are better.
+
+After offset `2`, keep two parallel tracks: test later/longer windows for additional temporal gain, and continue weak-subject QC because the worst subjects remain poor even with the better temporal slice.
 
 3. Tiny overfit sanity check.
 
