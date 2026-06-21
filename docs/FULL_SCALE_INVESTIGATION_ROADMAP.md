@@ -88,6 +88,7 @@ Interpretation: the model is not randomly guessing. It sees broad motor-system s
 - `sub-17`, `sub-20`, `sub-26`, `sub-27`, and related cases can be internally coherent but cohort-mismatched.
 - Same-subject leave-one-run accuracy correlates strongly with centroid margin.
 - Removing weak subjects helps only modestly, so weak subjects are important but not the entire problem.
+- Saved-feature QC shows that some failures are run-specific. `sub-52` has poor runs `1`, `3`, `4`, and `5` but usable runs `2` and `6`; `sub-42` has especially bad runs `2` and `4`; `sub-54`, `sub-63`, and `sub-20` also have very weak same-class versus different-class geometry. Stable subject `sub-62` has positive within-run geometry in all runs.
 
 Interpretation: weak subjects should not be treated as one bucket. Some need QC/repair/exclusion analysis; others need personalization or domain adaptation.
 
@@ -118,8 +119,9 @@ Interpretation: simple self-training is not enough. Future semi-supervised metho
 
 ### Raw QC And Subject Repair
 
+- Use the saved-feature QC script as the first triage layer while raw motion/confound files are unavailable locally.
 - Locate or regenerate motion/confound summaries if available.
-- Compare `sub-52` and `sub-42` against stable subjects for motion, artifacts, registration quality, signal variance, and run-specific anomalies.
+- Compare bad runs from `sub-52`, `sub-42`, `sub-54`, `sub-63`, and `sub-20` against stable runs from `sub-62` and `sub-30` for motion, artifacts, registration quality, signal variance, and run-specific anomalies.
 - Inspect whether specific classes or runs are corrupted within weak subjects.
 - Test exclusion or repair policies separately from ordinary personalization.
 
@@ -217,7 +219,8 @@ Priority: medium-low until the preprocessing and representation questions are cl
 ## Immediate Next Experiments
 
 1. Raw QC audit for `sub-52` and `sub-42`, compared with stable subjects such as `sub-30` and `sub-62`.
-2. Later/longer HRF-window extraction from continuous BOLD to test whether offset `2` was still too early.
-3. Coarse-to-fine exact classification: protect leg-vs-arm separation while improving within-pair decisions.
-4. Calibration protocol formalization: validation-selected few-shot calibration with a fixed, paper-defensible evaluation design.
-5. Improved pseudo-labeling: coarse-confidence or run-consistency gated pseudo labels before any subject-prototype update.
+2. Extend the raw/saved-feature QC audit to the worst run-level cases from `sub-54`, `sub-63`, and `sub-20`.
+3. Later/longer HRF-window extraction from continuous BOLD to test whether offset `2` was still too early.
+4. Coarse-to-fine exact classification: protect leg-vs-arm separation while improving within-pair decisions.
+5. Calibration protocol formalization: validation-selected few-shot calibration with a fixed, paper-defensible evaluation design.
+6. Improved pseudo-labeling: coarse-confidence or run-consistency gated pseudo labels before any subject-prototype update.

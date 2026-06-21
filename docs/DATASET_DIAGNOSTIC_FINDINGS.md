@@ -412,6 +412,16 @@ The natural unlabeled follow-up was then tested by pseudo-labeling target-subjec
 
 This negative result is important because it separates two claims. Labeled calibration proves that many target subjects have usable personal geometry, but simple self-training does not reveal that geometry without labels. Future semi-supervised work should not just recycle source pseudo-labels into prototypes. It likely needs stronger pseudo-label selection, coarse-to-fine constraints, confidence filtering, run-consistency gates, or a representation that makes target-subject pseudo-labels cleaner before prototype adaptation.
 
+A saved-feature QC audit was then added as a local substitute for raw motion/confound QC, since no local confound files were found. It measures within-run same-class event consistency versus different-class separation after offset-2 subject-run centering. The result makes the weak-subject story more granular:
+
+- `sub-52`: mean within-run leave-one-event accuracy `0.3125`, mean same-minus-different cosine `-0.0190`; runs `1`, `3`, `4`, and `5` have negative same-minus-different geometry, while runs `2` and `6` are usable.
+- `sub-42`: mean within-run leave-one-event accuracy `0.2292`, mean same-minus-different cosine `0.0032`; runs `2` and `4` are the clearest failures.
+- `sub-54`: mean within-run leave-one-event accuracy `0.1458`, mean same-minus-different cosine `-0.1574`; this is one of the weakest saved-feature QC subjects.
+- `sub-63`: mean within-run leave-one-event accuracy `0.2500`, mean same-minus-different cosine `-0.1029`; run `1` is especially poor.
+- `sub-62`: mean within-run leave-one-event accuracy `0.4375`, mean same-minus-different cosine `0.4718`; every run has positive same-minus-different geometry.
+
+This suggests the next QC pass should not only label whole subjects as weak. It should inspect specific run failures, especially `sub-52` runs `1/3/4/5`, `sub-42` runs `2/4`, `sub-54` runs `1/4/6`, `sub-63` runs `1/4`, and `sub-20` run `3`. Raw motion, registration, and signal-quality checks should be targeted at those run-level failures first.
+
 ## What To Do Next
 
 Run these checks in this order:
