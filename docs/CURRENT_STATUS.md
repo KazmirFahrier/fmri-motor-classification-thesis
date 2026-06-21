@@ -1,8 +1,10 @@
 # Current Status
 
-Last updated: 2026-06-14.
+Last updated: 2026-06-21.
 
 This repository is tracking the active full-dataset thesis runs for 4-class motor-task fMRI classification. The unpublished manuscript and private paper PDFs are intentionally not part of this public repo.
+
+For the running full-scale investigation checklist, see [Full-Scale Investigation Roadmap](FULL_SCALE_INVESTIGATION_ROADMAP.md).
 
 ## Active Kaggle Runs
 

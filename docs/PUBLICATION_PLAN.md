@@ -2,6 +2,8 @@
 
 The working contribution is a leakage-aware benchmark for motor-task fMRI classification on the full public dataset. The project is being organized around what can be defended in a paper, not only what produces the highest number in a notebook.
 
+The active experiment memory and checklist lives in [Full-Scale Investigation Roadmap](FULL_SCALE_INVESTIGATION_ROADMAP.md).
+
 ## Core Claim Being Tested
 
 The original pooled-split accuracy may overstate generalization. The publishable result should compare:
