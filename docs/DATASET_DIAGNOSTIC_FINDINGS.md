@@ -408,6 +408,10 @@ To reduce the most obvious overfitting concern, the calibration script also eval
 
 The selected-alpha distribution is also reassuring: most validation splits choose `alpha=0.25`, especially for two and three calibration runs. That means light personalization is not merely a hindsight-picked parameter; it is often preferred by calibration-only validation.
 
+The natural unlabeled follow-up was then tested by pseudo-labeling target-subject calibration runs with the source model and the known run-balance constraint, building pseudo-subject centroids, and blending them with source centroids. This did not work. Source-only balanced assignment stayed at `0.6344` accuracy, while the best unlabeled pseudo-subject blend reached only `0.5995`, even with five pseudo-labeled calibration runs. The pseudo-labels themselves were only about as accurate as the source baseline (`0.6344` under balanced assignment), and using them as subject-specific prototypes amplified their errors rather than adapting toward the labeled-calibration ceiling.
+
+This negative result is important because it separates two claims. Labeled calibration proves that many target subjects have usable personal geometry, but simple self-training does not reveal that geometry without labels. Future semi-supervised work should not just recycle source pseudo-labels into prototypes. It likely needs stronger pseudo-label selection, coarse-to-fine constraints, confidence filtering, run-consistency gates, or a representation that makes target-subject pseudo-labels cleaner before prototype adaptation.
+
 ## What To Do Next
 
 Run these checks in this order:
@@ -416,7 +420,7 @@ Run these checks in this order:
 
 Focus on subjects that repeatedly fail despite target-run centering, especially `sub-52`, `sub-42`, `sub-17`, `sub-20`, `sub-54`, and `sub-63`. The saved-feature geometry now separates the weak cases into at least two groups. `sub-52` and `sub-42` have unstable class templates across their own runs and should get raw QC, motion/artifact, anatomical alignment, denoising, and run/class corruption checks. `sub-17` and `sub-20` look more internally stable under offset `2`, so they should be used to test subject personalization, calibration, and domain-adaptation ideas. Compare both groups against stable subjects such as `sub-30`, `sub-62`, `sub-10`, and `sub-47`.
 
-Use the labeled calibration curve as a positive-control personalization benchmark. It shows what is reachable when target-subject labels are available, and it gives a target for future unlabeled or semi-supervised adaptation. The validation-selected blend is the safer calibrated baseline because it chooses blend strength without peeking at the held-out run labels.
+Use the labeled calibration curve as a positive-control personalization benchmark. It shows what is reachable when target-subject labels are available, and it gives a target for future unlabeled or semi-supervised adaptation. The validation-selected blend is the safer calibrated baseline because it chooses blend strength without peeking at the held-out run labels. The first unlabeled pseudo-label adaptation is a negative control: it should be reported as evidence that naive self-training is not enough.
 
 2. Run/subject transfer diagnostic.
 
@@ -428,7 +432,7 @@ Use the event-level model sweep as a guardrail before adding classifier complexi
 
 Use the balanced-assignment probe to define a stronger adaptation baseline. It should be reported separately from independent per-event prediction because it uses unlabeled target-run grouping and the known balanced task design.
 
-Avoid simple pseudo-centroid self-training for now. It should only be revisited if a future representation produces cleaner balanced pseudo-labels.
+Avoid simple pseudo-centroid self-training for now. Both the earlier target-run pseudo-centroid sweep and the new unlabeled subject-adaptation sweep are negative. Revisit pseudo-label adaptation only if a future representation, confidence gate, or coarse-to-fine procedure produces cleaner target-subject labels than the current source model.
 
 Analyze balanced-assignment deltas per subject whenever reporting the aggregate gain. The current result is an average improvement with heterogeneous subject-level effects, not a universal correction.
 
