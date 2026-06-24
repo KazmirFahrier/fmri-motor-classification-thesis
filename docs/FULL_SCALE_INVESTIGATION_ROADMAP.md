@@ -131,6 +131,8 @@ Priority: high, because it determines whether some subjects should be modeled, r
 
 - Treat linear event-time detrending as the new adaptation baseline; it raises offset-2 subject-fold balanced accuracy from `0.6370` to `0.7176` and held-out-run accuracy from `0.6851` to `0.7655`.
 - Keep shuffled-time and quadratic detrending controls in future temporal experiments. Shuffled-time subject-fold balanced accuracy is only `0.5808-0.5934`, and quadratic detrending reaches `0.6355`.
+- The original transform has now been reconstructed exactly from continuous denoised BOLD for five runs. A preliminary sweep nominated windows `3:6`, `3:8`, `4:2`, `5:4`, and `6:2` against canonical `2:6`.
+- Full-cohort candidate validation is active on Kaggle as a CPU-only, per-subject-checkpointed streaming run.
 - Extract later shifted windows from continuous BOLD beyond current offset `2`.
 - Test longer HRF-aligned windows.
 - Test run-start stabilization or dropping/handling the first event separately.
@@ -226,7 +228,7 @@ Priority: medium-low until the preprocessing and representation questions are cl
 
 ## Immediate Next Experiments
 
-1. Validate linear event-time detrending on later/longer HRF windows regenerated from continuous BOLD.
+1. Complete the active full-cohort comparison of six fixed continuous-BOLD window candidates.
 2. Extend targeted raw/post-detrend QC to the worst run-level cases from `sub-54`, `sub-63`, and `sub-20`, and define a post-repair QC rule.
 3. Compare transductive run detrending with training-only nuisance regression or domain-invariant temporal residualization.
 4. Coarse-to-fine exact classification on linearly detrended offset-2 features.

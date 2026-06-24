@@ -446,6 +446,10 @@ Labeled subject calibration was then rerun on the linearly detrended representat
 
 The combined experiment reinforces the weak-subject split. Detrending plus five-run validation-selected calibration raises `sub-17` to `0.8542`, `sub-27` to `0.8750`, `sub-54` to `0.6667`, and `sub-63` to `0.7500`. It does not rescue `sub-42` (`0.2083`) or `sub-52` (`0.2292`). This is evidence that temporal drift removal and personalization address separate, common failure modes, while a residual subset has class/run inconsistency that ordinary calibration cannot repair.
 
+The next temporal extraction step was validated against the original thesis batch-generation pipeline before scaling. For five checksum-verified denoised OpenNeuro runs, continuous volumes were transformed with the original two-stage process: resize to `100³`, volume z-score, resize to `24³`, and volume z-score. Reconstructed onset+2/length-6 event means matched the saved Kaggle features almost exactly: mean cosine approximately `1.0` and relative RMSE around `6.3e-8` for every run.
+
+An exploratory sweep over offsets `0-10` and lengths `2/4/6/8` on those five runs generated a fixed candidate shortlist. After linear detrending, offset `4`, length `2` had the best mean within-run leave-one-event accuracy (`0.85`), while offset `3`, lengths `6` and `8` had the strongest mean same-minus-different geometry. Because the sample deliberately mixes catastrophic, repairable, and stable runs, these numbers are not a performance claim. They justify a full-cohort comparison of six pre-specified windows: canonical `2:6` plus `3:6`, `3:8`, `4:2`, `5:4`, and `6:2`.
+
 ## What To Do Next
 
 Run these checks in this order:
