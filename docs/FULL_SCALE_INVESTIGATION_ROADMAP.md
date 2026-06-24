@@ -150,6 +150,7 @@ Priority: high, because leg-vs-arm accuracy is high while within-pair accuracy i
 ### Calibration And Personalization
 
 - Treat labeled target-subject calibration as a positive-control benchmark.
+- Use linearly detrended offset-2 features as the primary calibration representation. Fixed five-run calibration reaches `0.7984`, and validation-selected calibration reaches `0.7957`.
 - Validate calibration-run count and alpha selection without held-out run labels.
 - Test few-shot subject calibration with fixed protocols suitable for a paper.
 - Explore semi-supervised calibration only after pseudo-label quality improves.
@@ -215,6 +216,9 @@ Priority: medium-low until the preprocessing and representation questions are cl
 | Offset-2 held-out-run balanced event prediction | `0.6851` accuracy |
 | Offset-2 + linear time detrending, subject-fold balanced | `0.7176` accuracy |
 | Offset-2 + linear time detrending, held-out-run balanced | `0.7655` accuracy |
+| Offset-2 + linear detrending + validation-selected calibration, 3 runs | `0.7757` accuracy |
+| Offset-2 + linear detrending + validation-selected calibration, 5 runs | `0.7957` accuracy |
+| Offset-2 + linear detrending + fixed calibration, 5 runs | `0.7984` accuracy |
 | Offset-2 validation-selected labeled calibration, 3 runs | `0.7026` accuracy |
 | Offset-2 validation-selected labeled calibration, 5 runs | `0.7151` accuracy |
 | Offset-2 fixed labeled calibration, 5 runs | `0.7224` accuracy |
@@ -226,5 +230,5 @@ Priority: medium-low until the preprocessing and representation questions are cl
 2. Extend targeted raw/post-detrend QC to the worst run-level cases from `sub-54`, `sub-63`, and `sub-20`, and define a post-repair QC rule.
 3. Compare transductive run detrending with training-only nuisance regression or domain-invariant temporal residualization.
 4. Coarse-to-fine exact classification on linearly detrended offset-2 features.
-5. Calibration protocol formalization on top of the detrended representation.
+5. Formalize the detrended calibration protocol and report irreparable-subject sensitivity separately.
 6. Improved pseudo-labeling only after measuring whether detrending raises pseudo-label quality.

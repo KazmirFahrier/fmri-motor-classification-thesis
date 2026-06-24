@@ -442,6 +442,10 @@ Several controls make this result harder to dismiss as generic feature removal. 
 
 This is the strongest current zero-label adaptation diagnostic, but it is still transductive preprocessing because the held-out run's unlabeled event features are used to estimate its nuisance trend. A publication must either define this as a test-time adaptation protocol or develop a training-only/domain-invariant analogue.
 
+Labeled subject calibration was then rerun on the linearly detrended representation using the same held-out-run combinations and alpha-selection safeguards. The gains are complementary rather than redundant. Detrended source-only balanced accuracy is `0.7204`; fixed `alpha=0.25` source/subject blending reaches `0.7366` with one calibration run, `0.7650` with two, `0.7821` with three, `0.7926` with four, and `0.7984` with five. Calibration-only validation selects alphas that retain `0.7599`, `0.7757`, `0.7861`, and `0.7957` with two through five runs.
+
+The combined experiment reinforces the weak-subject split. Detrending plus five-run validation-selected calibration raises `sub-17` to `0.8542`, `sub-27` to `0.8750`, `sub-54` to `0.6667`, and `sub-63` to `0.7500`. It does not rescue `sub-42` (`0.2083`) or `sub-52` (`0.2292`). This is evidence that temporal drift removal and personalization address separate, common failure modes, while a residual subset has class/run inconsistency that ordinary calibration cannot repair.
+
 ## What To Do Next
 
 Run these checks in this order:
@@ -451,6 +455,8 @@ Run these checks in this order:
 Focus on subjects that repeatedly fail despite target-run centering, especially `sub-52`, `sub-42`, `sub-17`, `sub-20`, `sub-54`, and `sub-63`. The saved-feature geometry now separates the weak cases into at least two groups. `sub-52` and `sub-42` have unstable class templates across their own runs and should get raw QC, motion/artifact, anatomical alignment, denoising, and run/class corruption checks. `sub-17` and `sub-20` look more internally stable under offset `2`, so they should be used to test subject personalization, calibration, and domain-adaptation ideas. Compare both groups against stable subjects such as `sub-30`, `sub-62`, `sub-10`, and `sub-47`.
 
 Use the labeled calibration curve as a positive-control personalization benchmark. It shows what is reachable when target-subject labels are available, and it gives a target for future unlabeled or semi-supervised adaptation. The validation-selected blend is the safer calibrated baseline because it chooses blend strength without peeking at the held-out run labels. The first unlabeled pseudo-label adaptation is a negative control: it should be reported as evidence that naive self-training is not enough.
+
+Use the detrended calibration curve as the current positive-control ceiling. Future unlabeled adaptation should first try to close the gap from `0.7204` source-only detrended performance toward the `0.7957` validation-selected five-run result.
 
 2. Run/subject transfer diagnostic.
 

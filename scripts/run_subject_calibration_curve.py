@@ -18,6 +18,7 @@ from run_balanced_event_assignment import (
     metrics,
 )
 from run_clip_offset_event_sweep import aggregate_events_for_offset, coarse_metrics
+from run_temporal_detrended_event_adaptation import temporal_detrend_by_subject_run
 
 
 def as_jsonable(value):
@@ -228,6 +229,12 @@ def main() -> None:
     parser.add_argument("--feature-dir", required=True, help="Directory containing features.npy, labels.npy, records.json.")
     parser.add_argument("--out-json", required=True)
     parser.add_argument("--clip-offset", type=int, default=2)
+    parser.add_argument(
+        "--temporal-detrend-degree",
+        type=int,
+        default=0,
+        help="Optionally remove an unlabeled within-run polynomial event-time trend before calibration.",
+    )
     parser.add_argument("--max-calibration-runs", type=int, default=5)
     parser.add_argument(
         "--blend-alphas",
@@ -255,6 +262,11 @@ def main() -> None:
     clip_records = json.loads((feature_dir / "records.json").read_text())
     event_x, event_y, event_records = aggregate_events_for_offset(clip_x, clip_y, clip_records, args.clip_offset)
     x_centered = center_by_subject_run(event_x, event_records)
+    x_centered, temporal_group_rows = temporal_detrend_by_subject_run(
+        x_centered,
+        event_records,
+        args.temporal_detrend_degree,
+    )
     x_norm = l2_normalize(x_centered.astype(np.float32))
 
     subjects = sorted(set(str(record["subject_id"]) for record in event_records))
@@ -360,6 +372,19 @@ def main() -> None:
     result = {
         "feature_dir": str(feature_dir),
         "clip_offset": int(args.clip_offset),
+        "temporal_detrend_degree": int(args.temporal_detrend_degree),
+        "mean_temporal_variance_fraction": (
+            float(
+                np.mean(
+                    [
+                        row["temporal_variance_fraction"]
+                        for row in temporal_group_rows
+                    ]
+                )
+            )
+            if temporal_group_rows
+            else 0.0
+        ),
         "event_feature_shape": list(event_x.shape),
         "max_calibration_runs": int(args.max_calibration_runs),
         "blend_alphas": [float(alpha) for alpha in args.blend_alphas],
@@ -369,7 +394,8 @@ def main() -> None:
         "focus_subject_summary": subject_summary,
         "rows": prediction_rows,
         "note": (
-            "Features are centered within each subject-run using unlabeled run statistics. "
+            "Features are centered within each subject-run using unlabeled run statistics and optionally "
+            "detrended using unlabeled event timestamps. "
             "Source-only uses all non-target subjects. Calibration protocols use labeled runs "
             "from the target subject to predict a different run from the same subject."
         ),
