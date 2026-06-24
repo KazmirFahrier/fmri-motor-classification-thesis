@@ -422,6 +422,26 @@ A saved-feature QC audit was then added as a local substitute for raw motion/con
 
 This suggests the next QC pass should not only label whole subjects as weak. It should inspect specific run failures, especially `sub-52` runs `1/3/4/5`, `sub-42` runs `2/4`, `sub-54` runs `1/4/6`, `sub-63` runs `1/4`, and `sub-20` run `3`. Raw motion, registration, and signal-quality checks should be targeted at those run-level failures first.
 
+A targeted raw BOLD follow-up tested whether those feature failures can be explained by ordinary image-quality summaries. Five source runs were fetched directly from the public OpenNeuro S3 export and verified against the Git-annex MD5 keys: failed `sub-42/run-02` and `sub-52/run-03`, stronger within-subject controls `sub-42/run-05` and `sub-52/run-02`, and stable comparator `sub-62/run-03`.
+
+Simple raw QC did not explain the feature failures. Median temporal SNR was similar across most runs, and the stable comparator had the largest DVARS/global-signal spike fraction (`0.0991`) despite positive class geometry. Failed `sub-52/run-03` had a much lower spike fraction (`0.0172`) but negative same-class geometry. Therefore a single tSNR, DVARS, or spike-count threshold would reject useful runs and retain failed runs.
+
+The more important source-level effect was linear run-position drift. Offset-2 event patterns were centered within each run, then the unlabeled linear component associated with event time was removed. This substantially improved event geometry in the usable controls and partly repaired a failed run:
+
+- `sub-42/run-05`: same-minus-different cosine `-0.070` to `0.923`; leave-one-event accuracy `0.50` to `0.875`
+- `sub-52/run-02`: `0.066` to `0.502`; accuracy `0.375` to `0.625`
+- `sub-52/run-03`: `-0.424` to `0.142`; accuracy `0.25` to `0.375`
+- `sub-62/run-03`: `0.330` to `0.833`; accuracy `0.375` to `0.750`
+- `sub-42/run-02`: `-0.584` to `-0.095`; accuracy `0.0` to `0.125`
+
+This separates repairable temporal nuisance from a residual catastrophic-run problem. `sub-42/run-02` remains poor after detrending, while other runs reveal much cleaner motor-class structure. Exclusion should therefore be based on post-repair event consistency or a validated raw/feature QC model, not motion spikes alone.
+
+The same linear detrending was then evaluated across all 2,976 offset-2 events. It uses only unlabeled event timestamps and features within each subject-run, independently for training and held-out runs. Under held-out-run evaluation, independent cosine-centroid accuracy increased from `0.6425` to `0.7050`, and balanced assignment increased from `0.6851` to `0.7655`. Under subject-fold evaluation, independent accuracy increased from `0.6022` to `0.6661`, while balanced assignment increased from `0.6370` to `0.7176`. Linear detrending improved independent subject accuracy for `54/62` subjects and balanced accuracy for `52/62`.
+
+Several controls make this result harder to dismiss as generic feature removal. Five detrenders fitted to randomly permuted event timestamps lowered subject-fold balanced accuracy to `0.5808-0.5934`, below the non-detrended baseline. Quadratic true-time detrending also underperformed at `0.6355`. The useful operation is specifically removal of the linear true-time direction, which accounts for about `28.9%` of centered event-feature energy on average. Offset ordering also remains coherent after detrending: subject-fold balanced accuracy is `0.5842` at offset 0, `0.6574` at offset 1, and `0.7176` at offset 2.
+
+This is the strongest current zero-label adaptation diagnostic, but it is still transductive preprocessing because the held-out run's unlabeled event features are used to estimate its nuisance trend. A publication must either define this as a test-time adaptation protocol or develop a training-only/domain-invariant analogue.
+
 ## What To Do Next
 
 Run these checks in this order:
@@ -458,6 +478,8 @@ The first two-stage centroid test already failed to beat flat centroids, so the 
 
 Investigate temporal/run-position effects. Event ordinal `0` and ordinal `6` are disproportionately weak. Test alternative event windows, longer temporal context, excluding or separately modeling first events, and run-start baseline stabilization. This should be done before another large neural run, because a window/context issue would affect any model family.
 
+Use linear event-time detrending as the new temporal adaptation baseline. Compare every later/longer window against both centered-only and centered-plus-linear-detrended results. Keep shuffled-time and quadratic detrending as negative controls.
+
 Prioritize temporal window selection. Offset `2` is the strongest current preprocessing lead and already beats the previous event-mean adaptation result. The next extraction should test later shifted windows and possibly event-level temporal weighting before spending more effort on model complexity.
 
 Start that follow-up with later shifted windows, not more mixtures of the currently extracted offsets. The coarse weight sweep suggests offset `2` itself is the strongest of the available slices, so the next question is whether even later or longer HRF-aligned windows from the continuous BOLD runs are better.
@@ -486,4 +508,4 @@ Use clips with z-score normalization rather than isolated raw volumes. For the c
 
 ## Current Interpretation
 
-We did not prove the full dataset is useless. We proved that the current extracted-volume plus legacy-wrapper setup does not produce defensible full-dataset learning. The corrected-clip feature diagnostics now suggest that motor-class signal is present inside runs but does not survive run/subject transfer under raw simple spatial features. Target-run centering recovers a substantial but still incomplete signal, while train-only alignment remains near chance. The next work should be weak-subject/domain-shift diagnosis and leakage-safe adaptation baselines, not more epochs of the same legacy run or more spatial-resolution sweeps.
+We did not prove the full dataset is useless. We proved that the current extracted-volume plus legacy-wrapper setup does not produce defensible full-dataset learning. Corrected late-window features contain substantial motor-class signal, but run-specific offsets and linear temporal drift mask it. Unlabeled run centering plus true-time linear detrending recovers subject-fold accuracy above `0.71` with known-design balancing, while shuffled-time controls fail. The next work should validate this temporal adaptation on later/longer windows, develop training-only or explicitly test-time versions, and isolate residual catastrophic runs rather than spending more epochs on the legacy model.

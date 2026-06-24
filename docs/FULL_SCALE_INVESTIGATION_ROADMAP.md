@@ -129,6 +129,8 @@ Priority: high, because it determines whether some subjects should be modeled, r
 
 ### Temporal Window Re-Extraction
 
+- Treat linear event-time detrending as the new adaptation baseline; it raises offset-2 subject-fold balanced accuracy from `0.6370` to `0.7176` and held-out-run accuracy from `0.6851` to `0.7655`.
+- Keep shuffled-time and quadratic detrending controls in future temporal experiments. Shuffled-time subject-fold balanced accuracy is only `0.5808-0.5934`, and quadratic detrending reaches `0.6355`.
 - Extract later shifted windows from continuous BOLD beyond current offset `2`.
 - Test longer HRF-aligned windows.
 - Test run-start stabilization or dropping/handling the first event separately.
@@ -211,6 +213,8 @@ Priority: medium-low until the preprocessing and representation questions are cl
 | Offset-2 balanced subject-fold event prediction | `0.6370` accuracy |
 | Offset-2 imbalance-gated subject-fold event prediction | `0.6376` accuracy |
 | Offset-2 held-out-run balanced event prediction | `0.6851` accuracy |
+| Offset-2 + linear time detrending, subject-fold balanced | `0.7176` accuracy |
+| Offset-2 + linear time detrending, held-out-run balanced | `0.7655` accuracy |
 | Offset-2 validation-selected labeled calibration, 3 runs | `0.7026` accuracy |
 | Offset-2 validation-selected labeled calibration, 5 runs | `0.7151` accuracy |
 | Offset-2 fixed labeled calibration, 5 runs | `0.7224` accuracy |
@@ -218,9 +222,9 @@ Priority: medium-low until the preprocessing and representation questions are cl
 
 ## Immediate Next Experiments
 
-1. Raw QC audit for `sub-52` and `sub-42`, compared with stable subjects such as `sub-30` and `sub-62`.
-2. Extend the raw/saved-feature QC audit to the worst run-level cases from `sub-54`, `sub-63`, and `sub-20`.
-3. Later/longer HRF-window extraction from continuous BOLD to test whether offset `2` was still too early.
-4. Coarse-to-fine exact classification: protect leg-vs-arm separation while improving within-pair decisions.
-5. Calibration protocol formalization: validation-selected few-shot calibration with a fixed, paper-defensible evaluation design.
-6. Improved pseudo-labeling: coarse-confidence or run-consistency gated pseudo labels before any subject-prototype update.
+1. Validate linear event-time detrending on later/longer HRF windows regenerated from continuous BOLD.
+2. Extend targeted raw/post-detrend QC to the worst run-level cases from `sub-54`, `sub-63`, and `sub-20`, and define a post-repair QC rule.
+3. Compare transductive run detrending with training-only nuisance regression or domain-invariant temporal residualization.
+4. Coarse-to-fine exact classification on linearly detrended offset-2 features.
+5. Calibration protocol formalization on top of the detrended representation.
+6. Improved pseudo-labeling only after measuring whether detrending raises pseudo-label quality.

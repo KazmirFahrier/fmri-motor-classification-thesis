@@ -52,8 +52,9 @@ The strongest current evidence is that the extracted data contains local motor-c
 - Labeled subject calibration is now a credible positive-control modeling track. Offset-2 source/subject centroid blending plus balanced assignment reaches `0.6681` with one labeled calibration run and `0.7224` with five calibration runs. This should be framed separately from zero-shot held-out-subject generalization and used to motivate personalization or semi-supervised adaptation experiments.
 - A validation-selected version of the calibration protocol remains strong: `0.6873` with two calibration runs, `0.7026` with three, and `0.7151` with five. This is the more defensible calibrated baseline because blend strength is selected using calibration runs rather than held-out run labels.
 - Naive unlabeled subject adaptation is a useful negative control. Pseudo-labeling target-subject calibration runs with the source model and balanced assignment reaches only `0.5995` after blending, below the `0.6344` source-only balanced baseline. The paper should not imply that the labeled calibration gain is recoverable by simple self-training.
+- Targeted raw QC shows that ordinary tSNR/DVARS spike summaries do not separate failed and usable runs. The stronger mechanism is linear run-position drift: unlabeled true-time detrending raises offset-2 subject-fold balanced accuracy from `0.6370` to `0.7176` and held-out-run balanced accuracy from `0.6851` to `0.7655`. Five shuffled-time controls fall to `0.5808-0.5934`, and quadratic detrending does not improve, supporting a specific temporal nuisance interpretation.
 
-Publication framing should therefore avoid claiming that the transductive alignment score is a standard supervised classifier. It should be treated as evidence for domain shift unless the method section defines a legitimate test-time adaptation protocol using unlabeled target-run statistics.
+Publication framing should therefore avoid claiming that transductive centering, temporal detrending, or balanced assignment is a standard supervised classifier. These results should be presented as an explicit unlabeled target-run adaptation protocol unless a training-only analogue is developed.
 
 ## Later Phases
 
@@ -61,6 +62,7 @@ Publication framing should therefore avoid claiming that the transductive alignm
 - Phase 3: preprocessing/domain-shift ablation under the same subject-wise protocol, with hierarchical leg-vs-arm versus exact four-class reporting.
 - Phase 4: task framing comparison: volume, trial clip, beta-map samples, and target-run adaptation, including independent event prediction versus known-design balanced assignment.
 - Phase 4a: temporal/window-sensitivity experiments around weak event positions and clip offsets, especially the first event, ordinal `6`, and later HRF-aligned windows suggested by the offset-2 result.
+- Phase 4a must use centered-plus-linear-detrended offset-2 features as the temporal baseline and retain shuffled-time/quadratic controls.
 - Phase 4b: calibrated/personalized protocols, starting from labeled target-subject calibration as a positive control and then reducing label dependence through validation-selected blending, unlabeled balancing, or semi-supervised adaptation.
 - Phase 5: architecture comparison under locked preprocessing and split protocol.
 - Phase 6: subject/run-invariance experiments such as DANN-style adversarial domain heads, explicit run covariate removal, or test-time adaptation using unlabeled target-run statistics.
