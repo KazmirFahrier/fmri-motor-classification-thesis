@@ -19,6 +19,33 @@ CLASS_NAMES = [
     "Upper arm movements",
 ]
 
+TRIAL_TYPE_CODE_MAP = {
+    0: "Rest",
+    1: "Toe movements",
+    2: "Ankle movements",
+    3: "Left leg movements",
+    4: "Right leg movements",
+    5: "Forearm movements",
+    6: "Upper arm movements",
+    7: "Wrist movements",
+    8: "Finger movements",
+    9: "Eye movements",
+    10: "Jaw movements",
+    11: "Lip movements",
+    12: "Tongue movements",
+}
+
+
+def normalize_trial_type(value: str) -> str:
+    value = str(value).strip()
+    if value in CLASS_NAMES:
+        return value
+    try:
+        code = int(float(value))
+    except ValueError:
+        return value
+    return TRIAL_TYPE_CODE_MAP.get(code, value)
+
 
 def as_jsonable(value):
     if isinstance(value, np.generic):
@@ -58,7 +85,7 @@ def load_events(path: Path, repetition_time: float) -> list[dict]:
         rows = list(csv.DictReader(handle, delimiter="\t"))
     events = []
     for row in rows:
-        trial_type = row["trial_type"]
+        trial_type = normalize_trial_type(row["trial_type"])
         if trial_type not in CLASS_NAMES:
             continue
         onset = float(row["onset"])

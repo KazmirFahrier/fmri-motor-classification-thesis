@@ -450,6 +450,8 @@ The next temporal extraction step was validated against the original thesis batc
 
 An exploratory sweep over offsets `0-10` and lengths `2/4/6/8` on those five runs generated a fixed candidate shortlist. After linear detrending, offset `4`, length `2` had the best mean within-run leave-one-event accuracy (`0.85`), while offset `3`, lengths `6` and `8` had the strongest mean same-minus-different geometry. Because the sample deliberately mixes catastrophic, repairable, and stable runs, these numbers are not a performance claim. They justify a full-cohort comparison of six pre-specified windows: canonical `2:6` plus `3:6`, `3:8`, `4:2`, `5:4`, and `6:2`.
 
+The first full-cohort streaming validation attempt exposed an event-table compatibility issue rather than a modeling result. OpenNeuro `events.tsv` files store `trial_type` as numeric task codes, while some local audit files already used text class names. The continuous-window loader now supports both forms (`3/4/5/6` map to left leg, right leg, forearm, and upper arm), and the extractor records skipped runs with reasons instead of failing on empty event sets. A quick local mapping check confirms that numeric and text versions of `sub-01/run-01` both produce the same eight target events at starts `8, 32, 72, 104, 120, 152, 192, 216`.
+
 ## What To Do Next
 
 Run these checks in this order:

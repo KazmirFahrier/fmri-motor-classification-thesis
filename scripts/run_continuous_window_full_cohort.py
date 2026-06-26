@@ -103,13 +103,24 @@ def process_run(
     data = image.get_fdata(dtype=np.float32)
     events = load_events(events_path, repetition_time)
     max_volume = data.shape[-1]
+    required_tail = max(offset + length for offset, length in windows)
+    valid_events = [
+        event
+        for event in events
+        if event["event_start"] + required_tail <= max_volume
+    ]
+    if not valid_events:
+        raise ValueError(
+            f"No usable target events for {subject} run-{run_id:02d}; "
+            f"target_events={len(events)} max_volume={max_volume} "
+            f"required_tail={required_tail}"
+        )
     needed_volumes = sorted(
         {
             event["event_start"] + offset + step
-            for event in events
+            for event in valid_events
             for offset, length in windows
             for step in range(length)
-            if event["event_start"] + offset + length <= max_volume
         }
     )
     cache = {
@@ -121,7 +132,7 @@ def process_run(
         for volume_idx in needed_volumes
     }
 
-    labels = np.asarray([event["class_id"] for event in events], dtype=np.int64)
+    labels = np.asarray([event["class_id"] for event in valid_events], dtype=np.int64)
     records = [
         {
             "subject_id": subject,
@@ -129,7 +140,7 @@ def process_run(
             "event_start": int(event["event_start"]),
             "class_id": int(event["class_id"]),
         }
-        for event in events
+        for event in valid_events
     ]
     features = {}
     for offset, length in windows:
@@ -143,7 +154,7 @@ def process_run(
                     ],
                     axis=0,
                 )
-                for event in events
+                for event in valid_events
             ]
         ).astype(np.float32)
     return features, labels, records
@@ -168,6 +179,7 @@ def process_subject(
     }
     labels = []
     records = []
+    run_rows = []
     with tempfile.TemporaryDirectory(prefix=f"{subject}-") as temp_dir:
         temp_root = Path(temp_dir)
         for key in keys:
@@ -176,22 +188,43 @@ def process_subject(
             events_path = temp_root / f"{subject}_run-{run_id}_events.tsv"
             s3.download_file(bucket, key, str(bold_path))
             s3.download_file(bucket, events_key(dataset, key), str(events_path))
-            run_features, run_labels, run_records = process_run(
-                bold_path=bold_path,
-                events_path=events_path,
-                subject=subject,
-                run_id=run_id,
-                windows=windows,
-                repetition_time=repetition_time,
-                extraction_shape=extraction_shape,
-                feature_shape=feature_shape,
-            )
-            for name, values in run_features.items():
-                subject_features[name].append(values)
-            labels.append(run_labels)
-            records.extend(run_records)
-            bold_path.unlink(missing_ok=True)
-            events_path.unlink(missing_ok=True)
+            try:
+                run_features, run_labels, run_records = process_run(
+                    bold_path=bold_path,
+                    events_path=events_path,
+                    subject=subject,
+                    run_id=run_id,
+                    windows=windows,
+                    repetition_time=repetition_time,
+                    extraction_shape=extraction_shape,
+                    feature_shape=feature_shape,
+                )
+            except Exception as exc:
+                run_rows.append(
+                    {
+                        "run_id": int(run_id),
+                        "status": "skipped",
+                        "reason": str(exc),
+                    }
+                )
+            else:
+                for name, values in run_features.items():
+                    subject_features[name].append(values)
+                labels.append(run_labels)
+                records.extend(run_records)
+                run_rows.append(
+                    {
+                        "run_id": int(run_id),
+                        "status": "completed",
+                        "event_count": int(len(run_records)),
+                    }
+                )
+            finally:
+                bold_path.unlink(missing_ok=True)
+                events_path.unlink(missing_ok=True)
+
+    if not labels:
+        raise ValueError(f"No usable runs for {subject}; run_rows={run_rows}")
 
     payload = {
         name: np.concatenate(values, axis=0)
@@ -204,6 +237,7 @@ def process_subject(
         "subject": subject,
         "run_count": len(keys),
         "event_count": len(records),
+        "runs": run_rows,
         "checkpoint": str(out_path),
         "checkpoint_bytes": out_path.stat().st_size,
     }
