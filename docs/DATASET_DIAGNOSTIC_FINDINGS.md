@@ -470,6 +470,12 @@ The selected grids are also reproducible across training cohorts. Leg maps have 
 
 Per-subject deltas explain the fold heterogeneity. `sub-12` improves by `0.150` on average (`0.775` to `0.925`), `sub-47` by `0.129`, `sub-33` by `0.117`, and `sub-39` by `0.113`. `sub-63`, previously a weak transfer subject, improves by `0.088` to `0.500`. Conversely, `sub-68` consistently falls by `0.175` (`0.600` to `0.425`), with smaller consistent regressions for `sub-25`, `sub-49`, `sub-26`, and `sub-37`. The next target is not another global feature-count sweep; it is an outer-training-validated, unlabeled signal that detects when cohort-selected pair maps mismatch a target subject.
 
+Leave-one-subject profiles across all six fixed temporal candidates reveal a separate timing axis. Global offset `3`, length `8` improves 33 subjects, ties 12, and harms 17 relative to canonical `2:6`. If held-out labels are used to choose each subject's best window, 40/62 subjects have a better alternative and the mean oracle gain is `0.048`. The distribution is broad: `6:2` is oracle-best for 20 subjects, `3:8` for 13, `4:2` for 12, and `5:4` for nine. These counts include ties resolved by the fixed ordering and are diagnostic, not a personalization result.
+
+Nested cohort-level selection shows that the global `3:8` choice is nevertheless robust. Across the 30 repeated outer subject folds, inner training subjects choose `3:8` in 25 folds, `3:6` in four, and `5:4` in one. The nested selected estimate is `0.7426`, compared with `0.7451` for fixed `3:8`; the five alternative inner choices all perform worse than `3:8` on their outer folds. The optimism from selecting `3:8` on the full cohort is therefore small (`0.0025`), and `3:8` should remain the fixed cohort baseline until a validated unlabeled subject-specific timing signal exists.
+
+Timing does not explain most pair-map regressions. `sub-68` is timing-sensitive and prefers `6:2` (`0.708` balanced accuracy versus `0.625` at `3:8`). In contrast, `sub-26`, `sub-37`, and `sub-49` are best at `3:8`, while `sub-25` is effectively tied across the main windows. Those subjects remain evidence for spatial/template mismatch rather than a shared HRF-window error.
+
 ## What To Do Next
 
 Run these checks in this order:
