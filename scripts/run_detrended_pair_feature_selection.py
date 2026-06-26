@@ -375,7 +375,12 @@ def evaluate_outer_split(
         ("selected_pair_fused_balanced", apply_balanced_assignment(fused_scores, val_idx, records)),
     ]
     rows = []
+    val_subjects = np.asarray([str(records[int(idx)]["subject_id"]) for idx in val_idx])
     for rule, pred in predictions:
+        subject_metrics = {}
+        for subject in sorted(set(val_subjects.tolist())):
+            subject_mask = val_subjects == subject
+            subject_metrics[subject] = metrics(y[val_idx][subject_mask], pred[subject_mask])
         rows.append(
             {
                 "split": split["split"],
@@ -383,6 +388,7 @@ def evaluate_outer_split(
                 "prediction_rule": rule,
                 "metrics": metrics(y[val_idx], pred),
                 "coarse_metrics": coarse_metrics(y[val_idx], pred),
+                "subject_metrics": subject_metrics,
             }
         )
 
@@ -408,6 +414,10 @@ def evaluate_outer_split(
         ),
         "top_feature_indices": {
             pair_name: ranking[:20].tolist()
+            for pair_name, ranking in rankings.items()
+        },
+        "selected_feature_indices": {
+            pair_name: ranking.tolist()
             for pair_name, ranking in rankings.items()
         },
     }

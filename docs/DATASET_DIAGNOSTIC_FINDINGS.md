@@ -466,6 +466,10 @@ The selected feature sets are compact and pair-dependent. Subject folds choose `
 
 Five repeated shuffled subject partitions address the first uncertainty. Across 30 outer folds, with feature counts and coarse weights reselected only inside each outer training set, the pair-specific fused model averages `0.7621` balanced accuracy versus `0.7451` for the all-voxel balanced baseline. Every seed improves on average (`+0.0107` to `+0.0255`). At fold level, 22 improve, one ties, and seven regress; the worst fold delta is `-0.0688` and the best is `+0.0625`. The gain is therefore not an accident of the original deterministic partition, but the regressions motivate per-subject failure analysis and map-stability checks rather than assuming universal benefit.
 
+The selected grids are also reproducible across training cohorts. Leg maps have mean pairwise Jaccard `0.361` and 254 voxels selected in at least 80% of outer folds. Arm maps have mean Jaccard `0.444` and 777 voxels selected in at least 80% of folds. This supports a stable pair-specific spatial signal, but the coordinates live in the resized `24³` array. They cannot be assigned to anatomical regions until the preprocessing transform is reconstructed with affine-aware spatial metadata.
+
+Per-subject deltas explain the fold heterogeneity. `sub-12` improves by `0.150` on average (`0.775` to `0.925`), `sub-47` by `0.129`, `sub-33` by `0.117`, and `sub-39` by `0.113`. `sub-63`, previously a weak transfer subject, improves by `0.088` to `0.500`. Conversely, `sub-68` consistently falls by `0.175` (`0.600` to `0.425`), with smaller consistent regressions for `sub-25`, `sub-49`, `sub-26`, and `sub-37`. The next target is not another global feature-count sweep; it is an outer-training-validated, unlabeled signal that detects when cohort-selected pair maps mismatch a target subject.
+
 ## What To Do Next
 
 Run these checks in this order:
