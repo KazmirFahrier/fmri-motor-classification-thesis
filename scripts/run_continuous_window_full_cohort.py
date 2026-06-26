@@ -6,11 +6,7 @@ import json
 import tempfile
 from pathlib import Path
 
-import boto3
-import nibabel as nib
 import numpy as np
-from botocore import UNSIGNED
-from botocore.config import Config
 
 from run_balanced_event_assignment import (
     apply_balanced_assignment,
@@ -99,6 +95,8 @@ def process_run(
     extraction_shape: tuple[int, int, int],
     feature_shape: tuple[int, int, int],
 ) -> tuple[dict[str, np.ndarray], np.ndarray, list[dict]]:
+    import nibabel as nib
+
     image = nib.load(bold_path)
     data = image.get_fdata(dtype=np.float32)
     events = load_events(events_path, repetition_time)
@@ -363,6 +361,10 @@ def evaluate_variant(
 
 
 def main() -> None:
+    import boto3
+    from botocore import UNSIGNED
+    from botocore.config import Config
+
     parser = argparse.ArgumentParser(
         description="Stream continuous denoised BOLD and validate candidate HRF windows on the full cohort."
     )
