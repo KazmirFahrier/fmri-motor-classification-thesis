@@ -520,6 +520,8 @@ Most importantly, an independent audit streamed the dataset authors' official le
 
 The official maps give both subjects the same oracle class cycle `[0,2,3,1]`, but it is not a practical repair. Applying its inverse to the run-level classifier raises accuracy only to `0.271` for `sub-42` and `0.250` for `sub-52`, well below each subject's unconstrained oracle permutation and far below stable performance. The correct scientific treatment is to retain the all-subject estimate as primary, report these two cases as independently verified response/topography outliers, and add a transparent QC-stratified sensitivity analysis with and without them. They must not be silently removed based on model errors.
 
+That sensitivity analysis was computed directly from the same 30 repeated nested subject-fold predictions, without retraining or changing predictions. Each subject was first averaged across repeated holdouts, and 95% intervals were bootstrapped over subjects rather than correlated folds. The selected-pair fused balanced model reaches `0.7622` across all 62 subjects (95% bootstrap interval `0.7207-0.8000`) and `0.7783` in the 60-subject QC stratum excluding only the independently replicated `sub-42`/`sub-52` outliers (`0.7437-0.8106`). The increase is only `0.0161`; `sub-42` and `sub-52` themselves average `0.325` and `0.233`. The all-subject result remains primary, and the QC analysis demonstrates that the cohort-level conclusion is robust rather than created by selective exclusion.
+
 ## What To Do Next
 
 Run these checks in this order:
