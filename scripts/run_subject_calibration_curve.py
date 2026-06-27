@@ -18,6 +18,7 @@ from run_balanced_event_assignment import (
     metrics,
 )
 from run_clip_offset_event_sweep import aggregate_events_for_offset, coarse_metrics
+from run_detrended_pair_feature_selection import load_checkpoints
 from run_temporal_detrended_event_adaptation import temporal_detrend_by_subject_run
 
 
@@ -226,7 +227,16 @@ def main() -> None:
             "subject-specific centroids on saved event features."
         )
     )
-    parser.add_argument("--feature-dir", required=True, help="Directory containing features.npy, labels.npy, records.json.")
+    inputs = parser.add_mutually_exclusive_group(required=True)
+    inputs.add_argument(
+        "--feature-dir",
+        help="Directory containing features.npy, labels.npy, records.json.",
+    )
+    inputs.add_argument(
+        "--checkpoint-dir",
+        help="Directory containing continuous-window subject checkpoint NPZ files.",
+    )
+    parser.add_argument("--window-name", default="offset_3_length_8")
     parser.add_argument("--out-json", required=True)
     parser.add_argument("--clip-offset", type=int, default=2)
     parser.add_argument(
@@ -256,11 +266,26 @@ def main() -> None:
     )
     args = parser.parse_args()
 
-    feature_dir = Path(args.feature_dir)
-    clip_x = np.load(feature_dir / "features.npy").astype(np.float32)
-    clip_y = np.load(feature_dir / "labels.npy").astype(np.int64)
-    clip_records = json.loads((feature_dir / "records.json").read_text())
-    event_x, event_y, event_records = aggregate_events_for_offset(clip_x, clip_y, clip_records, args.clip_offset)
+    if args.checkpoint_dir:
+        checkpoint_dir = Path(args.checkpoint_dir)
+        features, event_y, event_records = load_checkpoints(
+            checkpoint_dir,
+            [args.window_name],
+        )
+        event_x = features[args.window_name]
+        feature_source = f"{checkpoint_dir}:{args.window_name}"
+    else:
+        feature_dir = Path(args.feature_dir)
+        clip_x = np.load(feature_dir / "features.npy").astype(np.float32)
+        clip_y = np.load(feature_dir / "labels.npy").astype(np.int64)
+        clip_records = json.loads((feature_dir / "records.json").read_text())
+        event_x, event_y, event_records = aggregate_events_for_offset(
+            clip_x,
+            clip_y,
+            clip_records,
+            args.clip_offset,
+        )
+        feature_source = f"{feature_dir}:clip_offset_{args.clip_offset}"
     x_centered = center_by_subject_run(event_x, event_records)
     x_centered, temporal_group_rows = temporal_detrend_by_subject_run(
         x_centered,
@@ -370,7 +395,7 @@ def main() -> None:
     subject_summary = summarize_by_subject(prediction_rows, set(args.focus_subjects))
     best_rows = best_by_calibration_count(summary)
     result = {
-        "feature_dir": str(feature_dir),
+        "feature_source": feature_source,
         "clip_offset": int(args.clip_offset),
         "temporal_detrend_degree": int(args.temporal_detrend_degree),
         "mean_temporal_variance_fraction": (

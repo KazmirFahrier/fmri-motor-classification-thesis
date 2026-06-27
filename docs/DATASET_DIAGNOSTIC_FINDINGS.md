@@ -476,6 +476,16 @@ Nested cohort-level selection shows that the global `3:8` choice is nevertheless
 
 Timing does not explain most pair-map regressions. `sub-68` is timing-sensitive and prefers `6:2` (`0.708` balanced accuracy versus `0.625` at `3:8`). In contrast, `sub-26`, `sub-37`, and `sub-49` are best at `3:8`, while `sub-25` is effectively tied across the main windows. Those subjects remain evidence for spatial/template mismatch rather than a shared HRF-window error.
 
+A cross-fitted unlabeled subject gate tested whether score margins, entropy, flat/pair disagreement, balance penalties, independent class-count imbalance, and pseudo-template consistency can detect pair-map mismatch. It cannot yet. A ridge gate with its threshold selected inside each outer training cohort reaches `0.7614` repeated subject-fold balanced accuracy, slightly below always-pair at `0.7621`; a fixed-zero gate reaches `0.7604`. The oracle subject choice is `0.7805`, but the learned gate chooses pair for `98.4%` of held-out observations and matches the oracle choice only `51.6%` of the time.
+
+Retrospective signal analysis explains the failure. Subject-mean predicted and actual pair gain are negatively correlated (`r=-0.211`). Pair-minus-flat score margin is the strongest single diagnostic but remains weak (`r=0.241`, rank correlation `0.344`). `sub-68` demonstrates the central problem: its pair model has larger margins, lower entropy, and comparable pseudo-template consistency while losing `0.083-0.250` accuracy across repeats. Wrong cohort templates can therefore be confidently wrong.
+
+A nested score-level hedge does not materially solve the problem either. Flat/pair blending reaches `0.7624`, only `0.0003` above always-pair, and 21/30 outer folds select pure pair from their inner subjects. Oracle outer-fold blend-weight selection reaches `0.7708`, still below the `0.7805` oracle per-subject choice. Simple subject gating and score mixing should not be revisited without a new subject-specific representation or alignment signal.
+
+The validated `3:8` representation does improve labeled personalization. Fixed source/subject centroid blending at `alpha=0.25` reaches `0.7595`, `0.7887`, `0.8038`, `0.8149`, and `0.8175` balanced accuracy with one through five labeled target runs. Choosing alpha only by leave-one-calibration-run validation retains `0.7837` with two runs, `0.7968` with three, `0.8050` with four, and `0.8112` with five. These exceed the canonical `2:6` five-run results (`0.7984` fixed and `0.7957` validated), confirming that later/longer temporal extraction and subject calibration are complementary.
+
+The calibrated weak-subject outcomes sharpen the taxonomy again. Five-run validation-selected calibration reaches `0.875` for `sub-17`, `0.792` for `sub-20`, `0.833` for `sub-26`, `0.792` for `sub-27`, `0.667` for `sub-54`, and `0.708` for `sub-63`. It still leaves `sub-42` at `0.188` and `sub-52` at `0.25`, with coarse leg-vs-arm accuracy only `0.458` and `0.333`. Those two subjects are not ordinary domain-shift cases; they require source-level class correspondence, registration, denoising, or acquisition/data-integrity investigation.
+
 ## What To Do Next
 
 Run these checks in this order:
