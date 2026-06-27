@@ -486,6 +486,14 @@ The validated `3:8` representation does improve labeled personalization. Fixed s
 
 The calibrated weak-subject outcomes sharpen the taxonomy again. Five-run validation-selected calibration reaches `0.875` for `sub-17`, `0.792` for `sub-20`, `0.833` for `sub-26`, `0.792` for `sub-27`, `0.667` for `sub-54`, and `0.708` for `sub-63`. It still leaves `sub-42` at `0.188` and `sub-52` at `0.25`, with coarse leg-vs-arm accuracy only `0.458` and `0.333`. Those two subjects are not ordinary domain-shift cases; they require source-level class correspondence, registration, denoising, or acquisition/data-integrity investigation.
 
+A full run-to-run class-correspondence audit rules out one stable label permutation for those subjects. For each subject, all 15 run pairs were compared using their four labeled run centroids. Identity class matching is optimal in `14/15` pairs for stable `sub-30`, `11/15` for `sub-17`, and `10/15` for `sub-62`. It is optimal in only `1/15` for `sub-42` and `0/15` for `sub-52`; their mean fractions of classes retaining identity under the best run-pair mapping are only `0.283` and `0.267`.
+
+The alternative mappings are themselves inconsistent. The most common `sub-42` permutation appears in four of 15 run pairs (`26.7%`), while the most common `sub-52` mapping appears in only two (`13.3%`). Same-subject leave-one-run balanced accuracy is `0.188` and `0.146`; applying one global oracle permutation raises these only to `0.438` and `0.479`. Individual runs can look like clean but different swaps (`sub-42` run 5 is `0.0` under identity and `1.0` under its run-specific oracle; `sub-52` run 2 behaves similarly), but the required swap changes across runs. This explains why labeled calibration fails: the other five runs do not provide a stable class template for the sixth.
+
+Event-level optimal matching then tested whether the apparent class permutations were really residual event-order effects. Across all 15 run pairs, optimal event matches retain the same motor class only `0.258` of the time for both `sub-42` and `sub-52`, essentially the `0.25` chance expectation. They retain the same event ordinal `0.092` of the time for `sub-42` and `0.167` for `sub-52`, compared with ordinal chance `0.125`. `sub-52` has a small ordinal tendency, but neither subject is primarily organized by timeline position.
+
+The similarity penalty for enforcing correct class correspondence is also exceptional: `0.186` for `sub-42` and `0.153` for `sub-52`, compared with `0.028` for stable `sub-30` and `0.029` for `sub-62`. Thus the catastrophic runs do not align reliably by class, a consistent alternative class permutation, or event ordinal. The next forensic layer must be spatial and acquisition-aware: NIfTI affine/orientation consistency, registration to T1w, brain coverage/masks, denoised-versus-preprocessed correspondence, and pre-resize spatial similarity across runs.
+
 ## What To Do Next
 
 Run these checks in this order:
