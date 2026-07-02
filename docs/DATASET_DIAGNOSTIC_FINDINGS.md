@@ -536,6 +536,12 @@ The full-covariance hierarchy averages `0.8366` by subject across all 62 subject
 
 This changes the bottleneck diagnosis. Full-covariance coarse accuracy is `0.9812`, while oracle coarse routing reaches `0.8495` exact-class accuracy, leaving only a `0.0132` routing gap. The smoothed pair specialists are now limiting: leg-pair outer accuracy is `0.8312`, but forearm-versus-upper-arm accuracy is only `0.7370`. The next model-family sweep should therefore test nested diagonal/full-covariance pair classifiers, especially for the arm branch, while preserving the same subject-level outer validation and known-design caveat.
 
+That pair-family sweep is now complete. Cosine, diagonal LDA, and bounded full-covariance LDA competed separately for each pair inside every training-only inner fold. Full covariance was selected for both pairs in all 30 repeated outer folds. Leg-pair accuracy rose from `0.8312` to `0.8721`, and forearm-versus-upper-arm rose from `0.7370` to `0.7723`. The softly fused balanced hierarchy reaches `0.8622` repeated accuracy and `0.8720` on the fixed partition; hard routing is slightly lower at `0.8606`.
+
+Relative to full-covariance coarse gating with cosine pair specialists, the repeated paired gain is `0.0261` with a fold-bootstrap interval of `0.0185-0.0342`. The new model wins 28 of 30 folds, loses two, and improves all five repeated-CV seeds. Subject-averaged balanced accuracy is `0.8627` across all 62 subjects (95% subject-bootstrap interval `0.8267-0.8931`) and `0.8818` in the 60-subject QC stratum (`0.8597-0.9026`). Independent decoding also improves to `0.8120` fold-averaged and `0.8123` subject-averaged (`0.8293` QC), so the gain is not solely due to the task-balance constraint.
+
+Oracle coarse routing with the new pair specialists reaches `0.8707`, only `0.0085` above soft balanced fusion. The next useful questions are therefore narrower: improve the still-weaker arm branch, calibrate soft coarse/fine score fusion, and characterize subject-level residuals. Another broad coarse classifier sweep has little remaining headroom.
+
 ## What To Do Next
 
 Run these checks in this order:
