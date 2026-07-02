@@ -35,12 +35,117 @@ from run_spatial_scale_feature_sweep import (
 from run_temporal_detrended_event_adaptation import temporal_detrend_by_subject_run
 
 
-def choose_coarse_feature_count(
+def diagonal_lda_scores(
+    x: np.ndarray,
+    y: np.ndarray,
+    train_idx: np.ndarray,
+    val_idx: np.ndarray,
+    selected_features: np.ndarray,
+    shrinkage: float,
+) -> np.ndarray:
+    train = x[train_idx][:, selected_features].astype(np.float64)
+    val = x[val_idx][:, selected_features].astype(np.float64)
+    target = (y[train_idx] >= 2).astype(np.int64)
+    means = np.stack([train[target == class_id].mean(axis=0) for class_id in range(2)])
+    pooled_variance = 0.5 * (
+        train[target == 0].var(axis=0) + train[target == 1].var(axis=0)
+    )
+    positive = pooled_variance[pooled_variance > 0]
+    variance_target = float(np.median(positive)) if len(positive) else 1.0
+    regularized = (1.0 - shrinkage) * pooled_variance + shrinkage * variance_target
+    variance_floor = max(variance_target * 1e-3, 1e-12)
+    inverse_variance = 1.0 / np.maximum(regularized, variance_floor)
+    linear = means * inverse_variance[None, :]
+    intercept = -0.5 * np.sum(means * linear, axis=1)
+    return val @ linear.T + intercept[None, :]
+
+
+def full_lda_scores(
+    x: np.ndarray,
+    y: np.ndarray,
+    train_idx: np.ndarray,
+    val_idx: np.ndarray,
+    selected_features: np.ndarray,
+    shrinkage: float,
+) -> np.ndarray:
+    train = x[train_idx][:, selected_features].astype(np.float64)
+    val = x[val_idx][:, selected_features].astype(np.float64)
+    target = (y[train_idx] >= 2).astype(np.int64)
+    means = np.stack([train[target == class_id].mean(axis=0) for class_id in range(2)])
+    residuals = np.concatenate(
+        [train[target == class_id] - means[class_id] for class_id in range(2)],
+        axis=0,
+    )
+    covariance = residuals.T @ residuals / max(len(residuals) - 2, 1)
+    diagonal = np.diag(covariance)
+    positive = diagonal[diagonal > 0]
+    variance_target = float(np.median(positive)) if len(positive) else 1.0
+    regularized = (1.0 - shrinkage) * covariance
+    regularized.flat[:: regularized.shape[0] + 1] += shrinkage * variance_target
+    regularized.flat[:: regularized.shape[0] + 1] += max(
+        variance_target * 1e-5, 1e-12
+    )
+    # The covariance is symmetric positive definite after shrinkage.  Using its
+    # eigensystem avoids a pathological macOS Accelerate general-solve stall.
+    eigenvalues, eigenvectors = np.linalg.eigh(regularized)
+    eigenvalue_floor = max(variance_target * 1e-8, 1e-15)
+    inverse_projection = (eigenvectors.T @ means.T) / np.maximum(
+        eigenvalues[:, None], eigenvalue_floor
+    )
+    linear = (eigenvectors @ inverse_projection).T
+    intercept = -0.5 * np.sum(means * linear, axis=1)
+    return val @ linear.T + intercept[None, :]
+
+
+def coarse_scores_for_configuration(
+    coarse_x: np.ndarray,
+    y: np.ndarray,
+    train_idx: np.ndarray,
+    val_idx: np.ndarray,
+    selected_features: np.ndarray,
+    method: str,
+    shrinkage: float,
+) -> np.ndarray:
+    if method == "cosine":
+        coarse_y = (y >= 2).astype(np.int64)
+        return pair_score_matrix(
+            coarse_x,
+            coarse_y,
+            train_idx,
+            val_idx,
+            (0, 1),
+            selected_features,
+        )
+    if method == "diagonal_lda":
+        return diagonal_lda_scores(
+            coarse_x,
+            y,
+            train_idx,
+            val_idx,
+            selected_features,
+            shrinkage,
+        )
+    if method == "full_lda":
+        return full_lda_scores(
+            coarse_x,
+            y,
+            train_idx,
+            val_idx,
+            selected_features,
+            shrinkage,
+        )
+    raise ValueError(f"Unknown coarse method: {method}")
+
+
+def choose_coarse_configuration(
     coarse_x: np.ndarray,
     y: np.ndarray,
     inner: list[dict],
     feature_counts: list[int],
-) -> tuple[int, list[dict]]:
+    methods: list[str],
+    lda_shrinkages: list[float],
+    full_lda_max_features: int,
+) -> tuple[dict, list[dict]]:
     coarse_y = (y >= 2).astype(np.int64)
     rows = []
     for split in inner:
@@ -49,34 +154,76 @@ def choose_coarse_feature_count(
         )
         for feature_count in feature_counts:
             count = min(feature_count, coarse_x.shape[1])
-            scores = pair_score_matrix(
-                coarse_x,
-                coarse_y,
-                split["train_idx"],
-                split["val_idx"],
-                (0, 1),
-                ranking[:count],
+            for method in methods:
+                if method == "full_lda" and count > full_lda_max_features:
+                    continue
+                shrinkages = (
+                    lda_shrinkages
+                    if method in {"diagonal_lda", "full_lda"}
+                    else [0.0]
+                )
+                for shrinkage in shrinkages:
+                    scores = coarse_scores_for_configuration(
+                        coarse_x,
+                        y,
+                        split["train_idx"],
+                        split["val_idx"],
+                        ranking[:count],
+                        method,
+                        shrinkage,
+                    )
+                    rows.append(
+                        {
+                            "split": split["split"],
+                            "feature_count": count,
+                            "method": method,
+                            "shrinkage": shrinkage,
+                            "accuracy": pair_accuracy(
+                                scores, coarse_y, split["val_idx"], (0, 1)
+                            ),
+                        }
+                    )
+    configurations = sorted(
+        {
+            (row["feature_count"], row["method"], row["shrinkage"])
+            for row in rows
+        }
+    )
+    diagnostics = []
+    for count, method, shrinkage in configurations:
+        accuracy = float(
+            np.mean(
+                [
+                    row["accuracy"]
+                    for row in rows
+                    if row["feature_count"] == count
+                    and row["method"] == method
+                    and row["shrinkage"] == shrinkage
+                ]
             )
-            rows.append(
-                {
-                    "split": split["split"],
-                    "feature_count": count,
-                    "accuracy": pair_accuracy(
-                        scores, coarse_y, split["val_idx"], (0, 1)
-                    ),
-                }
-            )
-    means = {
-        count: float(
-            np.mean([row["accuracy"] for row in rows if row["feature_count"] == count])
         )
-        for count in sorted(set(row["feature_count"] for row in rows))
-    }
-    selected = min(means, key=lambda count: (-means[count], count))
-    return int(selected), [
-        {"feature_count": count, "mean_inner_accuracy": means[count]}
-        for count in means
-    ]
+        diagnostics.append(
+            {
+                "feature_count": count,
+                "method": method,
+                "shrinkage": shrinkage,
+                "mean_inner_accuracy": accuracy,
+            }
+        )
+    selected = min(
+        diagnostics,
+        key=lambda row: (
+            -row["mean_inner_accuracy"],
+            row["feature_count"],
+            row["method"],
+            row["shrinkage"],
+        ),
+    )
+    return {
+        "feature_count": int(selected["feature_count"]),
+        "method": selected["method"],
+        "shrinkage": float(selected["shrinkage"]),
+    }, diagnostics
 
 
 def selected_coarse_scores(
@@ -85,12 +232,20 @@ def selected_coarse_scores(
     train_idx: np.ndarray,
     val_idx: np.ndarray,
     feature_count: int,
+    method: str = "cosine",
+    shrinkage: float = 0.0,
 ) -> tuple[np.ndarray, np.ndarray]:
     coarse_y = (y >= 2).astype(np.int64)
     ranking = rank_pair_features(coarse_x, coarse_y, train_idx, (0, 1))
     selected = ranking[: min(feature_count, coarse_x.shape[1])]
-    scores = pair_score_matrix(
-        coarse_x, coarse_y, train_idx, val_idx, (0, 1), selected
+    scores = coarse_scores_for_configuration(
+        coarse_x,
+        y,
+        train_idx,
+        val_idx,
+        selected,
+        method,
+        shrinkage,
     )
     return scores, selected
 
@@ -102,7 +257,7 @@ def choose_hybrid_coarse_weight(
     records: list[dict],
     inner: list[dict],
     selected_counts: dict[str, int],
-    selected_coarse_count: int,
+    selected_coarse_configuration: dict,
     coarse_weights: list[float],
 ) -> tuple[float, list[dict]]:
     rows = []
@@ -119,7 +274,9 @@ def choose_hybrid_coarse_weight(
             y,
             split["train_idx"],
             split["val_idx"],
-            selected_coarse_count,
+            selected_coarse_configuration["feature_count"],
+            selected_coarse_configuration["method"],
+            selected_coarse_configuration["shrinkage"],
         )
         for weight in coarse_weights:
             scores = exact_scores_from_hierarchy(
@@ -197,6 +354,9 @@ def evaluate_split(
     split: dict,
     feature_counts: list[int],
     coarse_feature_counts: list[int],
+    coarse_methods: list[str],
+    lda_shrinkages: list[float],
+    full_lda_max_features: int,
     coarse_weights: list[float],
     inner_subject_fold_count: int,
 ) -> tuple[list[dict], dict]:
@@ -208,8 +368,14 @@ def evaluate_split(
     selected_counts, count_diagnostics = choose_feature_counts(
         pair_x, y, inner, feature_counts
     )
-    selected_coarse_count, coarse_count_diagnostics = choose_coarse_feature_count(
-        coarse_x, y, inner, coarse_feature_counts
+    selected_coarse_configuration, coarse_count_diagnostics = choose_coarse_configuration(
+        coarse_x,
+        y,
+        inner,
+        coarse_feature_counts,
+        coarse_methods,
+        lda_shrinkages,
+        full_lda_max_features,
     )
     selected_weight, weight_diagnostics = choose_hybrid_coarse_weight(
         pair_x,
@@ -218,14 +384,20 @@ def evaluate_split(
         records,
         inner,
         selected_counts,
-        selected_coarse_count,
+        selected_coarse_configuration,
         coarse_weights,
     )
     pair_scores, rankings = selected_pair_scores(
         pair_x, y, train_idx, val_idx, selected_counts
     )
     coarse_scores, coarse_ranking = selected_coarse_scores(
-        coarse_x, y, train_idx, val_idx, selected_coarse_count
+        coarse_x,
+        y,
+        train_idx,
+        val_idx,
+        selected_coarse_configuration["feature_count"],
+        selected_coarse_configuration["method"],
+        selected_coarse_configuration["shrinkage"],
     )
     fused_scores = exact_scores_from_hierarchy(
         coarse_scores,
@@ -276,7 +448,9 @@ def evaluate_split(
     hyperparameters = {
         "split": split["split"],
         "selected_pair_feature_counts": selected_counts,
-        "selected_coarse_feature_count": selected_coarse_count,
+        "selected_coarse_feature_count": selected_coarse_configuration["feature_count"],
+        "selected_coarse_method": selected_coarse_configuration["method"],
+        "selected_coarse_lda_shrinkage": selected_coarse_configuration["shrinkage"],
         "selected_coarse_weight": selected_weight,
         "inner_feature_count_diagnostics": count_diagnostics,
         "inner_coarse_feature_count_diagnostics": coarse_count_diagnostics,
@@ -379,6 +553,19 @@ def main() -> None:
         type=int,
         default=[64, 128, 256, 512, 1024, 2048, 4096, 8192, 13824],
     )
+    parser.add_argument(
+        "--coarse-methods",
+        nargs="*",
+        choices=["cosine", "diagonal_lda", "full_lda"],
+        default=["cosine"],
+    )
+    parser.add_argument(
+        "--lda-shrinkages",
+        nargs="*",
+        type=float,
+        default=[0.0, 0.25, 0.5, 0.75, 1.0],
+    )
+    parser.add_argument("--full-lda-max-features", type=int, default=512)
     args = parser.parse_args()
 
     shape = tuple(int(value) for value in args.feature_shape.split(","))
@@ -411,6 +598,9 @@ def main() -> None:
             feature_counts_for_dimension(
                 args.coarse_feature_counts, native_x.shape[1]
             ),
+            args.coarse_methods,
+            sorted(set(args.lda_shrinkages)),
+            args.full_lda_max_features,
             sorted(set(args.coarse_weights)),
             args.inner_subject_fold_count,
         )
@@ -429,6 +619,9 @@ def main() -> None:
         "coarse_feature_counts": feature_counts_for_dimension(
             args.coarse_feature_counts, native_x.shape[1]
         ),
+        "coarse_methods": args.coarse_methods,
+        "lda_shrinkages": sorted(set(args.lda_shrinkages)),
+        "full_lda_max_features": args.full_lda_max_features,
         "subject_seeds": args.subject_seeds,
         "mean_temporal_variance_fraction": float(
             np.mean([row["temporal_variance_fraction"] for row in detrend_rows])

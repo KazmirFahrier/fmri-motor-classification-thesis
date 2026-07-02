@@ -530,6 +530,12 @@ Adding nested coarse feature selection raises repeated hard-balanced accuracy to
 
 The mechanism is neuroanatomically coherent. Inner folds select only `64-1024` coarse voxels, most often `128`; 13 of the top coordinates recur in all 30 outer folds, and none lies in the outer two-voxel shell. In a representative RAS-aligned native volume, the stable coordinates form a superior medial cluster around approximately `x=-6..13, y=-27..-13, z=52..64 mm` and a bilateral inferior cluster near `z=-21 mm`, consistent with cortical and cerebellar motor-system contributions rather than image-edge artifacts. Selected coarse accuracy is `0.9664`; replacing it with true coarse labels yields a balanced exact-class ceiling of `0.8495`, identifying robust coarse gating as the remaining supervised bottleneck.
 
+A nested classifier-family test then asked whether the selected coarse voxels require variance and correlation information that cosine prototypes discard. Diagonal LDA is selected in all 30 repeated folds and raises hard-balanced accuracy from `0.8201` to `0.8266`; the paired gain is `0.0064` with a fold-bootstrap interval of `0.0031-0.0100`. Regularized full-covariance LDA improves again to `0.8363`, is selected in 28 of 30 folds, and beats diagonal LDA by `0.0098` (`0.0055-0.0147` paired interval). Every repeated-CV seed improves, and the fixed six-fold partition reaches `0.8388`, so the result is not driven by one partition.
+
+The full-covariance hierarchy averages `0.8366` by subject across all 62 subjects (95% subject-bootstrap interval `0.8001-0.8686`) and `0.8551` in the prespecified 60-subject QC stratum (`0.8306-0.8788`). Independent exact-class decoding is `0.7715` overall and `0.7878` in the QC stratum. The independently verified outliers remain difficult (`sub-42`: `0.3042`; `sub-52`: `0.2625`) and are retained in the primary estimate.
+
+This changes the bottleneck diagnosis. Full-covariance coarse accuracy is `0.9812`, while oracle coarse routing reaches `0.8495` exact-class accuracy, leaving only a `0.0132` routing gap. The smoothed pair specialists are now limiting: leg-pair outer accuracy is `0.8312`, but forearm-versus-upper-arm accuracy is only `0.7370`. The next model-family sweep should therefore test nested diagonal/full-covariance pair classifiers, especially for the arm branch, while preserving the same subject-level outer validation and known-design caveat.
+
 ## What To Do Next
 
 Run these checks in this order:
