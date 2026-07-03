@@ -542,6 +542,10 @@ Relative to full-covariance coarse gating with cosine pair specialists, the repe
 
 Oracle coarse routing with the new pair specialists reaches `0.8707`, only `0.0085` above soft balanced fusion. The next useful questions are therefore narrower: improve the still-weaker arm branch, calibrate soft coarse/fine score fusion, and characterize subject-level residuals. Another broad coarse classifier sweep has little remaining headroom.
 
+The first capacity follow-up expanded the full-covariance pair candidates from 512 to 1,024 selected features. Repeated softly fused accuracy rises from `0.8622` to `0.8752`; the paired gain is `0.0130` with a fold-bootstrap interval of `0.0076-0.0182`, 24 wins, two ties, four losses, and positive gains in every seed. Independent accuracy rises in parallel to `0.8248`, so the result is not an artifact of balanced assignment.
+
+Subject-averaged 1,024-cap accuracy is `0.8757` across all 62 subjects (95% subject-bootstrap interval `0.8402-0.9060`) and `0.8941` in the 60-subject QC stratum (`0.8715-0.9152`). Leg-pair accuracy is `0.8754`, arm-pair accuracy is `0.7955`, and oracle coarse routing is `0.8845`. The arm model selects 1,024 features in 29 of 30 folds; leg selects 1,024 in 19 folds and smaller sets in the remainder. This boundary behavior justifies a bounded larger-cap arm-focused screen, but the high shrinkage choices (`0.5-0.75`) warn against an unconstrained covariance expansion.
+
 ## What To Do Next
 
 Run these checks in this order:
