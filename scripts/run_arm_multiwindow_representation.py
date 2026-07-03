@@ -32,6 +32,10 @@ REPRESENTATIONS = {
     "late_8_plus_late_6": ("late_8", "late_6"),
     "late_8_plus_canonical_6": ("late_8", "canonical_6"),
     "all_three": ("late_8", "late_6", "canonical_6"),
+    "late_6_plus_tail_2": ("late_6", "tail_2"),
+    "late_8_plus_tail_2": ("late_8", "tail_2"),
+    "late_6_plus_tail_contrast": ("late_6", "tail_contrast"),
+    "late_8_plus_tail_contrast": ("late_8", "tail_contrast"),
 }
 
 
@@ -161,6 +165,10 @@ def main() -> None:
             detrended, shape, args.transform, 64
         )
         detrend_rows[short_name] = rows
+    transformed["tail_2"] = (
+        8.0 * transformed["late_8"] - 6.0 * transformed["late_6"]
+    ) / 2.0
+    transformed["tail_contrast"] = transformed["tail_2"] - transformed["late_6"]
     representations = {
         name: (
             transformed[parts[0]]

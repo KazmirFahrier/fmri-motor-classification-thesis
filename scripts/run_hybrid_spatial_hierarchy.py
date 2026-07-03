@@ -98,6 +98,43 @@ def full_lda_scores(
     return val @ linear.T + intercept[None, :]
 
 
+def diagonal_qda_scores(
+    x: np.ndarray,
+    y: np.ndarray,
+    train_idx: np.ndarray,
+    val_idx: np.ndarray,
+    selected_features: np.ndarray,
+    classes: tuple[int, int],
+    shrinkage: float,
+) -> np.ndarray:
+    pair_train = train_idx[np.isin(y[train_idx], classes)]
+    train = x[pair_train][:, selected_features].astype(np.float64)
+    val = x[val_idx][:, selected_features].astype(np.float64)
+    target = (y[pair_train] == classes[1]).astype(np.int64)
+    means = np.stack([train[target == class_id].mean(axis=0) for class_id in range(2)])
+    variances = np.stack(
+        [train[target == class_id].var(axis=0) for class_id in range(2)]
+    )
+    pooled = variances.mean(axis=0)
+    positive = pooled[pooled > 0]
+    variance_target = float(np.median(positive)) if len(positive) else 1.0
+    regularized = (1.0 - shrinkage) * variances + shrinkage * pooled[None, :]
+    regularized = np.maximum(regularized, max(variance_target * 1e-3, 1e-12))
+    return np.stack(
+        [
+            -0.5
+            * (
+                np.sum(np.log(regularized[class_id]))
+                + np.sum(
+                    (val - means[class_id]) ** 2 / regularized[class_id], axis=1
+                )
+            )
+            for class_id in range(2)
+        ],
+        axis=1,
+    )
+
+
 def coarse_scores_for_configuration(
     coarse_x: np.ndarray,
     y: np.ndarray,
@@ -265,6 +302,16 @@ def pair_scores_for_configuration(
             classes,
             shrinkage,
         )
+    if method == "diagonal_qda":
+        return diagonal_qda_scores(
+            pair_x,
+            y,
+            train_idx,
+            val_idx,
+            selected_features,
+            classes,
+            shrinkage,
+        )
     raise ValueError(f"Unknown pair method: {method}")
 
 
@@ -291,7 +338,7 @@ def choose_pair_configurations(
                         continue
                     shrinkages = (
                         lda_shrinkages
-                        if method in {"diagonal_lda", "full_lda"}
+                        if method in {"diagonal_lda", "full_lda", "diagonal_qda"}
                         else [0.0]
                     )
                     for shrinkage in shrinkages:
@@ -731,7 +778,7 @@ def main() -> None:
     parser.add_argument(
         "--pair-methods",
         nargs="*",
-        choices=["cosine", "diagonal_lda", "full_lda"],
+        choices=["cosine", "diagonal_lda", "full_lda", "diagonal_qda"],
         default=["cosine"],
     )
     parser.add_argument(
