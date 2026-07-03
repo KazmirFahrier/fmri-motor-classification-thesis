@@ -200,6 +200,58 @@ def append_cross_subject_fallback(rows: list[dict]) -> None:
                     rows.append(selected)
 
 
+def append_cross_subject_gate(rows: list[dict]) -> None:
+    fixed = [
+        row
+        for row in rows
+        if row["protocol"] == "fixed_alpha"
+        and row["calibration_run_count"] == 1
+        and np.isclose(row["alpha"], 0.1)
+    ]
+    source = {
+        (row["subject"], row["holdout_run"], row["prediction_rule"]): row["accuracy"]
+        for row in rows
+        if row["protocol"] == "source_only"
+    }
+    thresholds = [-1.0, 0.5, 0.75, 1.0]
+    subjects = sorted({row["subject"] for row in fixed})
+    for prediction_rule in sorted({row["prediction_rule"] for row in fixed}):
+        rule_rows = [row for row in fixed if row["prediction_rule"] == prediction_rule]
+        for subject in subjects:
+            candidate_means = {}
+            for threshold in thresholds:
+                accuracies = []
+                for row in rule_rows:
+                    if row["subject"] == subject:
+                        continue
+                    if row["calibration_source_accuracy"] <= threshold:
+                        accuracies.append(row["accuracy"])
+                    else:
+                        accuracies.append(
+                            source[(row["subject"], row["holdout_run"], prediction_rule)]
+                        )
+                candidate_means[threshold] = float(np.mean(accuracies))
+            selected_threshold = min(
+                thresholds,
+                key=lambda threshold: (-candidate_means[threshold], threshold),
+            )
+            for row in rule_rows:
+                if row["subject"] != subject:
+                    continue
+                selected = dict(row)
+                selected["protocol"] = "cross_subject_calibration_gate"
+                selected["summary_alpha"] = -3.0
+                selected["gate_threshold"] = selected_threshold
+                if row["calibration_source_accuracy"] > selected_threshold:
+                    selected["accuracy"] = source[
+                        (subject, row["holdout_run"], prediction_rule)
+                    ]
+                    selected["calibration_applied"] = False
+                else:
+                    selected["calibration_applied"] = True
+                rows.append(selected)
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(
         description="Measure labeled target-subject calibration of the arm LDA branch."
@@ -257,6 +309,25 @@ def main() -> None:
                         ]
                     )
                     target_means = class_means(x, y, calibration_idx, selected)
+                    calibration_arm_idx = arm_indices(calibration_idx, y)
+                    calibration_source_score = lda_scores(
+                        x,
+                        calibration_arm_idx,
+                        selected,
+                        source_means,
+                        inverse_covariance,
+                    )
+                    calibration_source_accuracy = {
+                        rule: float(
+                            np.mean(
+                                prediction
+                                == (y[calibration_arm_idx] == ARM_CLASSES[1])
+                            )
+                        )
+                        for rule, prediction in predictions(
+                            calibration_source_score
+                        ).items()
+                    }
                     combination_protocols = [
                         ("fixed_alpha", calibration_runs, alpha, alpha)
                         for alpha in args.alphas
@@ -290,6 +361,9 @@ def main() -> None:
                                     "calibration_run_count": len(runs),
                                     "alpha": alpha,
                                     "summary_alpha": summary_alpha,
+                                    "calibration_source_accuracy": calibration_source_accuracy[
+                                        rule
+                                    ],
                                     "accuracy": float(
                                         np.mean(pred == (y[val_idx] == ARM_CLASSES[1]))
                                     ),
@@ -312,6 +386,7 @@ def main() -> None:
                 )
 
     append_cross_subject_fallback(rows)
+    append_cross_subject_gate(rows)
     residual_group_summary = []
     if args.residual_json:
         residual = json.loads(Path(args.residual_json).read_text())

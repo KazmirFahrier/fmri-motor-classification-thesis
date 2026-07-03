@@ -562,6 +562,8 @@ At the subject level, five-run validated calibration improves balanced arm accur
 
 One-run calibration should not be applied universally. Cross-subject fallback selection chooses the lightest tested blend (`alpha=0.1`) but still lowers cohort balanced arm accuracy to `0.8247`; larger one-run blends are progressively worse. Two-run gains are inconclusive. The calibration curve therefore establishes five labeled runs as a clear positive personalization ceiling and three runs as the earliest plausible but not yet robust operating point. The next work should develop a leakage-safe calibration gate or an unlabeled/learned approximation, not assume that any target label is automatically helpful.
 
+The first leakage-safe one-run gate uses only the labeled calibration run to measure source-model arm accuracy, while selecting the gate threshold from all other subjects. Every leave-subject-out selection chooses threshold `0.5`; the gate applies the light `alpha=0.1` update in 540 of 1,860 cases (29.0%). Balanced arm accuracy rises from `0.8414` source-only to `0.8462`, and independent accuracy from `0.7950` to `0.7985`. The subject-level balanced gain is `0.0048`, but its bootstrap interval spans `-0.0081` to `0.0196`; the post-hoc arm-specific subgroup gains `0.0246` with interval `-0.0105` to `0.0640`. The gate successfully prevents the large universal one-run loss but does not yet establish a reliable improvement. Retain it as an inconclusive baseline and require stronger gating evidence or more calibration runs.
+
 ## What To Do Next
 
 Run these checks in this order:
