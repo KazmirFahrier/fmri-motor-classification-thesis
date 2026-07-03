@@ -546,6 +546,8 @@ The first capacity follow-up expanded the full-covariance pair candidates from 5
 
 Subject-averaged 1,024-cap accuracy is `0.8757` across all 62 subjects (95% subject-bootstrap interval `0.8402-0.9060`) and `0.8941` in the 60-subject QC stratum (`0.8715-0.9152`). Leg-pair accuracy is `0.8754`, arm-pair accuracy is `0.7955`, and oracle coarse routing is `0.8845`. The arm model selects 1,024 features in 29 of 30 folds; leg selects 1,024 in 19 folds and smaller sets in the remainder. This boundary behavior justifies a bounded larger-cap arm-focused screen, but the high shrinkage choices (`0.5-0.75`) warn against an unconstrained covariance expansion.
 
+The bounded 2,048-feature repeated screen closes that question. Fused balanced accuracy reaches `0.8773`, only `0.0021` above the validated 1,024-cap model; the paired fold-bootstrap interval is `-0.0020` to `0.0062`, with 19 wins, two ties, and nine losses. Independent decoding gains `0.0025` with an interval of `-0.0019` to `0.0069`; oracle-coarse gains `0.0015` with an interval of `-0.0028` to `0.0057`. Two of five seeds regress and runtime approximately doubles. The larger model is therefore a negative/inconclusive capacity control, not the new primary result. Retain the 1,024-feature hierarchy and redirect effort away from raw covariance expansion.
+
 ## What To Do Next
 
 Run these checks in this order:
