@@ -564,6 +564,8 @@ One-run calibration should not be applied universally. Cross-subject fallback se
 
 The first leakage-safe one-run gate uses only the labeled calibration run to measure source-model arm accuracy, while selecting the gate threshold from all other subjects. Every leave-subject-out selection chooses threshold `0.5`; the gate applies the light `alpha=0.1` update in 540 of 1,860 cases (29.0%). Balanced arm accuracy rises from `0.8414` source-only to `0.8462`, and independent accuracy from `0.7950` to `0.7985`. The subject-level balanced gain is `0.0048`, but its bootstrap interval spans `-0.0081` to `0.0196`; the post-hoc arm-specific subgroup gains `0.0246` with interval `-0.0105` to `0.0640`. The gate successfully prevents the large universal one-run loss but does not yet establish a reliable improvement. Retain it as an inconclusive baseline and require stronger gating evidence or more calibration runs.
 
+A nested multi-window representation test then asks whether early and late response averages carry complementary arm information. `offset 3, length 8` competes against concatenation with `3:6`, `2:6`, or both; representation, feature count, and covariance shrinkage are selected only in inner subject folds. Four of six fixed outer folds retain `3:8`, while two select `3:8 + 2:6`. The selected model nevertheless reaches only `0.8316` balanced arm accuracy versus `0.8354` for a fold-matched `3:8` baseline, a `-0.0038` change; independent accuracy drops from `0.8045` to `0.7956`. Naive concatenation is therefore a negative learned-representation control. Future temporal models must preserve within-event dynamics or impose stronger structure rather than stacking correlated event means.
+
 ## What To Do Next
 
 Run these checks in this order:
