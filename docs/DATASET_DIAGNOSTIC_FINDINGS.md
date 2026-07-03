@@ -548,6 +548,8 @@ Subject-averaged 1,024-cap accuracy is `0.8757` across all 62 subjects (95% subj
 
 The bounded 2,048-feature repeated screen closes that question. Fused balanced accuracy reaches `0.8773`, only `0.0021` above the validated 1,024-cap model; the paired fold-bootstrap interval is `-0.0020` to `0.0062`, with 19 wins, two ties, and nine losses. Independent decoding gains `0.0025` with an interval of `-0.0019` to `0.0069`; oracle-coarse gains `0.0015` with an interval of `-0.0028` to `0.0057`. Two of five seeds regress and runtime approximately doubles. The larger model is therefore a negative/inconclusive capacity control, not the new primary result. Retain the 1,024-feature hierarchy and redirect effort away from raw covariance expansion.
 
+Pair-specific spatial transforms were then implemented and regression-tested against the exact shared-`smooth_3` fixed result (`0.87595`). The earlier cosine screen had suggested `pool_2` for arm, but that does not survive covariance-aware classification: arm-pair accuracy falls from `0.8045` with smoothing to `0.7872` with pooling, independent exact accuracy falls from `0.8222` to `0.8138`, and fused balanced accuracy changes by only `+0.0015`. Native arm features are clearly worse (`0.8566` fused, `0.7962` independent). The shared `smooth_3` representation remains the validated spatial choice; the next arm-specific test should change temporal information or calibration rather than voxel scale.
+
 ## What To Do Next
 
 Run these checks in this order:

@@ -269,10 +269,10 @@ def pair_scores_for_configuration(
 
 
 def choose_pair_configurations(
-    pair_x: np.ndarray,
+    pair_features: dict[str, np.ndarray],
     y: np.ndarray,
     inner: list[dict],
-    feature_counts: list[int],
+    feature_counts: dict[str, list[int]],
     methods: list[str],
     lda_shrinkages: list[float],
     full_lda_max_features: int,
@@ -280,10 +280,11 @@ def choose_pair_configurations(
     selected = {}
     diagnostics = {}
     for pair_name, classes in PAIR_CLASSES.items():
+        pair_x = pair_features[pair_name]
         rows = []
         for split in inner:
             ranking = rank_pair_features(pair_x, y, split["train_idx"], classes)
-            for feature_count in feature_counts:
+            for feature_count in feature_counts[pair_name]:
                 count = min(feature_count, pair_x.shape[1])
                 for method in methods:
                     if method == "full_lda" and count > full_lda_max_features:
@@ -359,7 +360,7 @@ def choose_pair_configurations(
 
 
 def selected_pair_configuration_scores(
-    pair_x: np.ndarray,
+    pair_features: dict[str, np.ndarray],
     y: np.ndarray,
     train_idx: np.ndarray,
     val_idx: np.ndarray,
@@ -368,6 +369,7 @@ def selected_pair_configuration_scores(
     scores = {}
     rankings = {}
     for pair_name, classes in PAIR_CLASSES.items():
+        pair_x = pair_features[pair_name]
         configuration = configurations[pair_name]
         ranking = rank_pair_features(pair_x, y, train_idx, classes)
         selected = ranking[: configuration["feature_count"]]
@@ -410,7 +412,7 @@ def selected_coarse_scores(
 
 
 def choose_hybrid_coarse_weight(
-    pair_x: np.ndarray,
+    pair_features: dict[str, np.ndarray],
     coarse_x: np.ndarray,
     y: np.ndarray,
     records: list[dict],
@@ -422,7 +424,7 @@ def choose_hybrid_coarse_weight(
     rows = []
     for split in inner:
         pair_scores, _ = selected_pair_configuration_scores(
-            pair_x,
+            pair_features,
             y,
             split["train_idx"],
             split["val_idx"],
@@ -506,12 +508,12 @@ def hierarchical_balanced_prediction(
 
 
 def evaluate_split(
-    pair_x: np.ndarray,
+    pair_features: dict[str, np.ndarray],
     coarse_x: np.ndarray,
     y: np.ndarray,
     records: list[dict],
     split: dict,
-    feature_counts: list[int],
+    feature_counts: dict[str, list[int]],
     pair_methods: list[str],
     pair_full_lda_max_features: int,
     coarse_feature_counts: list[int],
@@ -527,7 +529,7 @@ def evaluate_split(
         records, train_idx, split["family"], inner_subject_fold_count
     )
     selected_pair_configurations, count_diagnostics = choose_pair_configurations(
-        pair_x,
+        pair_features,
         y,
         inner,
         feature_counts,
@@ -545,7 +547,7 @@ def evaluate_split(
         full_lda_max_features,
     )
     selected_weight, weight_diagnostics = choose_hybrid_coarse_weight(
-        pair_x,
+        pair_features,
         coarse_x,
         y,
         records,
@@ -555,7 +557,7 @@ def evaluate_split(
         coarse_weights,
     )
     pair_scores, rankings = selected_pair_configuration_scores(
-        pair_x, y, train_idx, val_idx, selected_pair_configurations
+        pair_features, y, train_idx, val_idx, selected_pair_configurations
     )
     coarse_scores, coarse_ranking = selected_coarse_scores(
         coarse_x,
@@ -702,6 +704,8 @@ def main() -> None:
     parser.add_argument("--window-name", default="offset_3_length_8")
     parser.add_argument("--feature-shape", default="24,24,24")
     parser.add_argument("--pair-transform", default="pool_2")
+    parser.add_argument("--leg-transform")
+    parser.add_argument("--arm-transform")
     parser.add_argument("--batch-size", type=int, default=64)
     parser.add_argument("--subject-fold-count", type=int, default=6)
     parser.add_argument("--inner-subject-fold-count", type=int, default=4)
@@ -754,12 +758,29 @@ def main() -> None:
     native_x, detrend_rows = temporal_detrend_by_subject_run(
         centered, records, degree=1
     )
-    pair_x, pair_shape = transform_scale(
-        native_x, shape, args.pair_transform, args.batch_size
-    )
-    feature_counts = feature_counts_for_dimension(
-        args.feature_counts, pair_x.shape[1]
-    )
+    pair_transforms = {
+        "leg": args.leg_transform or args.pair_transform,
+        "arm": args.arm_transform or args.pair_transform,
+    }
+    transformed = {}
+    for transform_name in sorted(set(pair_transforms.values())):
+        transformed[transform_name] = transform_scale(
+            native_x, shape, transform_name, args.batch_size
+        )
+    pair_features = {
+        pair_name: transformed[transform_name][0]
+        for pair_name, transform_name in pair_transforms.items()
+    }
+    pair_shapes = {
+        pair_name: transformed[transform_name][1]
+        for pair_name, transform_name in pair_transforms.items()
+    }
+    feature_counts = {
+        pair_name: feature_counts_for_dimension(
+            args.feature_counts, pair_x.shape[1]
+        )
+        for pair_name, pair_x in pair_features.items()
+    }
     rows = []
     hyperparameters = []
     for split in outer_splits(
@@ -767,7 +788,7 @@ def main() -> None:
     ):
         print(f"evaluating {split['split']}", flush=True)
         split_rows, split_hyperparameters = evaluate_split(
-            pair_x,
+            pair_features,
             native_x,
             y,
             records,
@@ -792,8 +813,12 @@ def main() -> None:
         "window_name": args.window_name,
         "native_feature_shape": shape,
         "pair_transform": args.pair_transform,
-        "pair_feature_shape": pair_shape,
-        "pair_feature_count": pair_x.shape[1],
+        "pair_transforms": pair_transforms,
+        "pair_feature_shapes": pair_shapes,
+        "pair_feature_counts": {
+            pair_name: pair_x.shape[1]
+            for pair_name, pair_x in pair_features.items()
+        },
         "feature_counts": feature_counts,
         "pair_methods": args.pair_methods,
         "pair_full_lda_max_features": args.pair_full_lda_max_features,
@@ -813,8 +838,8 @@ def main() -> None:
         "summary": summarize(rows),
         "note": (
             "The coarse leg-versus-arm gate uses native 24^3 features. Within-leg and within-arm "
-            "specialists use a label-free spatial transform; pair feature counts and fusion weights are "
-            "selected only in inner training-subject folds."
+            "specialists may use separate label-free spatial transforms; pair classifier configurations "
+            "and fusion weights are selected only in inner training-subject folds."
         ),
     }
     Path(args.out_json).write_text(json.dumps(result, indent=2, default=as_jsonable))
