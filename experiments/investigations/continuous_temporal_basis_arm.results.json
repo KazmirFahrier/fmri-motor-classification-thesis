@@ -1,0 +1,58 @@
+{
+  "experiment_id": "continuous_temporal_basis_arm",
+  "status": "planned",
+  "question": "Do within-event temporal basis maps from continuous BOLD improve the forearm-vs-upper-arm branch beyond the validated offset_3_length_8 mean-window representation?",
+  "split_protocol": "nested subject-fold selection; held-out subject labels are not used for representation, feature-count, or shrinkage selection",
+  "data_source": {
+    "openneuro_dataset": "ds004044",
+    "input_signal": "derivatives/fmriprep/*_space-T1w_desc-preproc_bold_denoised.nii.gz",
+    "window": "offset 3, length 8 TRs",
+    "feature_shape": [24, 24, 24]
+  },
+  "implementation": {
+    "extractor": "scripts/run_continuous_temporal_basis_full_cohort.py",
+    "evaluator": "scripts/run_temporal_basis_arm_representation.py",
+    "components": [
+      "mean",
+      "linear",
+      "quadratic",
+      "early_late",
+      "tail_vs_body"
+    ],
+    "representations_tested": [
+      "mean",
+      "mean_plus_linear",
+      "mean_plus_quadratic",
+      "mean_plus_early_late",
+      "mean_plus_tail",
+      "mean_plus_linear_quadratic",
+      "mean_plus_dynamic",
+      "dynamic_only"
+    ]
+  },
+  "baseline_to_beat": {
+    "description": "Fold-matched mean-only arm branch from the same temporal-basis extraction",
+    "current_saved_mean_reference": {
+      "arm_pair_accuracy": 0.7955,
+      "fixed_partition_arm_pair_accuracy": 0.8045
+    }
+  },
+  "acceptance_criteria": [
+    "Full-cohort subject checkpoints are extracted successfully.",
+    "Nested arm representation screen completes without held-out-subject leakage.",
+    "Temporal-basis selected representation beats the fold-matched mean-only baseline by a meaningful margin.",
+    "If the gain is neutral or negative, record this lane as exhausted and pivot to calibration/personalization or richer sequence models."
+  ],
+  "current_validation": {
+    "local_smoke_test": "passed",
+    "smoke_test_note": "A synthetic checkpoint with arm information only in the linear component selected mean_plus_linear in all folds and beat mean-only."
+  },
+  "kaggle": {
+    "kernel": null,
+    "artifact_dataset": null,
+    "status": "not_launched"
+  },
+  "metrics": {
+    "final": null
+  }
+}

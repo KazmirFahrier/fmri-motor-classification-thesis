@@ -1,6 +1,6 @@
 # Full-Scale Investigation Roadmap
 
-Last updated: 2026-06-21.
+Last updated: 2026-07-09.
 
 This document is the working memory for the full-dataset thesis investigation. The goal is not to find a quick number; the goal is to understand the dataset well enough that the final conclusion is defensible.
 
@@ -14,6 +14,8 @@ The full dataset contains motor-class signal, but that signal is small compared 
 - Coarse anatomical separability versus fine within-pair confusion.
 - Personal subject geometry that can be recovered with labeled calibration.
 - Limits of unlabeled or pseudo-labeled adaptation.
+
+Recent update: the strongest zero-label full-cohort model is now a multi-scale hierarchy with regularized full-covariance LDA for the coarse leg-vs-arm gate and pair specialists. It reaches `0.8752` repeated nested balanced accuracy across all subjects and `0.8941` in the prespecified 60-subject QC sensitivity stratum. Coarse routing is nearly saturated, so the active modeling bottleneck is within-pair discrimination, especially forearm versus upper-arm.
 
 ## What We Have Tried
 
@@ -73,6 +75,17 @@ Interpretation: task-design constraints help as post-processing/test-time adapta
 
 Interpretation: the useful signal is late in the current extracted event window. The next temporal work should test later or longer HRF-aligned windows from continuous BOLD, not more mixtures of the existing three offsets.
 
+### Continuous-Window Hierarchy And Arm Residuals
+
+- Full-cohort continuous-window extraction completed and validated `offset 3, length 8` as the fixed cohort window.
+- A multi-scale hierarchy with native coarse features and smoothed pair specialists reached `0.8201`, then covariance-aware coarse and pair LDA raised the repeated nested estimate to `0.8752`.
+- Pair-specific temporal controls using saved means (`2:6`, `3:6`) were negative.
+- Naive multi-window concatenation and explicit reconstructed tail contrasts were negative under nested arm evaluation.
+- Diagonal QDA was negative; full LDA remained selected for both leg and arm.
+- The next representation experiment therefore requires per-volume within-event dynamics from continuous BOLD rather than further algebra on saved window means.
+
+Interpretation: mean-window spatial covariance is near its practical limit. If there is more recoverable arm signal, it is likely in temporal response shape, calibration/personalization, or subject-specific geometry rather than another larger covariance feature cap.
+
 ### Error Anatomy
 
 - Coarse leg-vs-arm classification is much easier than exact four-class classification.
@@ -129,16 +142,14 @@ Priority: high, because it determines whether some subjects should be modeled, r
 
 ### Temporal Window Re-Extraction
 
-- Treat linear event-time detrending as the new adaptation baseline; it raises offset-2 subject-fold balanced accuracy from `0.6370` to `0.7176` and held-out-run accuracy from `0.6851` to `0.7655`.
-- Keep shuffled-time and quadratic detrending controls in future temporal experiments. Shuffled-time subject-fold balanced accuracy is only `0.5808-0.5934`, and quadratic detrending reaches `0.6355`.
-- The original transform has now been reconstructed exactly from continuous denoised BOLD for five runs. A preliminary sweep nominated windows `3:6`, `3:8`, `4:2`, `5:4`, and `6:2` against canonical `2:6`.
-- Full-cohort candidate validation is active on Kaggle as a CPU-only, per-subject-checkpointed streaming run.
-- Extract later shifted windows from continuous BOLD beyond current offset `2`.
-- Test longer HRF-aligned windows.
+- Treat linear event-time detrending and fixed `3:8` continuous windows as the current zero-label preprocessing baseline.
+- The full-cohort candidate-window validation is complete; fixed `3:8` remains the defensible cohort default.
+- Extract compact temporal-basis maps from continuous BOLD for `3:8`: mean, linear slope, quadratic curvature, early-vs-late contrast, and tail-vs-body contrast.
+- Test these basis maps with a nested arm-specific representation screen against a fold-matched mean-only baseline.
 - Test run-start stabilization or dropping/handling the first event separately.
 - Evaluate whether ordinal `0` and ordinal `6` weaknesses are windowing, baseline, or sequence-context problems.
 
-Priority: high, because offset `2` is the strongest preprocessing clue so far.
+Priority: high, because saved mean-window temporal variants are exhausted and the arm branch is now the main residual bottleneck.
 
 ### Coarse-To-Fine Modeling
 
@@ -218,6 +229,9 @@ Priority: medium-low until the preprocessing and representation questions are cl
 | Offset-2 held-out-run balanced event prediction | `0.6851` accuracy |
 | Offset-2 + linear time detrending, subject-fold balanced | `0.7176` accuracy |
 | Offset-2 + linear time detrending, held-out-run balanced | `0.7655` accuracy |
+| Fixed `3:8` full-covariance hierarchy, repeated subject folds | `0.8752` balanced accuracy |
+| Fixed `3:8` full-covariance hierarchy, 60-subject QC stratum | `0.8941` subject-averaged accuracy |
+| Fixed `3:8` arm pair branch | `0.7955` pair accuracy |
 | Offset-2 + linear detrending + validation-selected calibration, 3 runs | `0.7757` accuracy |
 | Offset-2 + linear detrending + validation-selected calibration, 5 runs | `0.7957` accuracy |
 | Offset-2 + linear detrending + fixed calibration, 5 runs | `0.7984` accuracy |

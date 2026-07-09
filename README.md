@@ -23,9 +23,8 @@ This repository tracks ongoing thesis work on 4-class motor-task fMRI classifica
 - The repository contains the cleaned training pipeline, configs, scripts, and tests for leakage-aware experiments.
 - The older notebooks and `notebook_code.py` preserve the earlier prototype workflow used to build the initial model idea.
 - The unpublished manuscript is intentionally **not** included in this public repo.
-- Phase 1 full-dataset runs are active on Kaggle and are being resumed from saved artifacts rather than restarted:
-  - Full-dataset pooled legacy baseline: [`kazmirfahrierniloy/thesis-legacy-full-resume`](https://www.kaggle.com/code/kazmirfahrierniloy/thesis-legacy-full-resume)
-  - Full-dataset subject-wise run: [`kazmirfahrierniloy/thesis-7batch-subjectwise-gpucompat-resume`](https://www.kaggle.com/code/kazmirfahrierniloy/thesis-7batch-subjectwise-gpucompat-resume)
+- Phase 1 full-dataset legacy runs are complete: the pooled legacy baseline was stopped at epoch 25 by the controlled decision policy, and the subject-wise legacy run completed at chance-level holdout performance.
+- The active work is now the full-scale diagnostic/modeling investigation: continuous-event baselines, subject/run nuisance control, multi-scale covariance-aware hierarchies, weak-subject forensics, and temporal-basis experiments for the remaining arm-branch errors.
 - Current run state is tracked in `docs/CURRENT_STATUS.md` and `experiments/phase1_baselines/*.results.json`.
 
 ## Dataset Context
@@ -56,14 +55,18 @@ This repository tracks ongoing thesis work on 4-class motor-task fMRI classifica
 2. Measure how much each architecture component actually contributes.
 3. Run strict subject-wise evaluation on the full dataset.
 4. Improve accuracy without relying on leakage-prone splits.
+5. Understand the dataset deeply enough to distinguish model limitations, subject-specific response geometry, and true QC/outlier cases.
 
 ## Active Experiment Registry
 The `experiments/` directory records what is running and what has completed. Result JSONs are intentionally lightweight: they store status, protocol, metrics, fold progress, Kaggle kernel links, and artifact dataset references, not raw data or model checkpoints.
 
 Current Phase 1 registry entries:
 - `phase1_original_subset_pooled`: historical 9-subject pooled-split baseline, complete.
-- `phase1_full_dataset_pooled`: full public dataset pooled-split legacy run, currently running on Kaggle.
-- `phase1_subjectwise_5fold_full`: full public dataset subject-wise 5-fold plus holdout run, currently running on Kaggle.
+- `phase1_full_dataset_pooled`: full public dataset pooled-split legacy run, complete/stopped by policy.
+- `phase1_subjectwise_5fold_full`: full public dataset subject-wise 5-fold plus holdout run, complete.
+
+Current investigation registry entries:
+- `continuous_temporal_basis_arm`: planned continuous-BOLD temporal-basis extraction and nested arm-branch representation screen.
 
 These files are meant to make the repo reflect the real research process: long-running Kaggle sessions, resumable checkpoints, and metrics updated only when a run actually finishes.
 

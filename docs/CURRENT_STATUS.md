@@ -1,6 +1,6 @@
 # Current Status
 
-Last updated: 2026-07-02.
+Last updated: 2026-07-09.
 
 This repository is tracking the active full-dataset thesis runs for 4-class motor-task fMRI classification. The unpublished manuscript and private paper PDFs are intentionally not part of this public repo.
 
@@ -13,6 +13,7 @@ For the running full-scale investigation checklist, see [Full-Scale Investigatio
 | Full-dataset pooled legacy baseline | [`b6uejhvvnmiwb/thesis-legacy-full-resume`](https://www.kaggle.com/code/b6uejhvvnmiwb/thesis-legacy-full-resume) | Stopped by controlled policy at epoch 25 | Quantify the full-data pooled-split baseline for the Phase 1 leakage-gap comparison. |
 | Full-dataset subject-wise evaluation | [`kazmirfahrier/thesis-7batch-gpucompat-runner`](https://www.kaggle.com/code/kazmirfahrier/thesis-7batch-gpucompat-runner) | Complete; final artifacts refreshed | Continue leakage-aware subject-wise 5-fold evaluation plus holdout. |
 | Corrected clip feature-transfer diagnostic | [`b6uejhvvnmiwb/thesis-corrected-clip-baseline`](https://www.kaggle.com/code/b6uejhvvnmiwb/thesis-corrected-clip-baseline) | Version 16 complete | Full-cohort `32³`, `clip_window_stride=1` diagnostic tested whether the spatial-resolution improvement continues beyond `24³`. |
+| Continuous temporal-basis extraction | Planned Kaggle CPU/script run | Prepared locally; not yet a completed metric | Extract per-event within-response basis maps from continuous BOLD so arm classifiers can test temporal dynamics instead of only saved mean windows. |
 
 ## Known Progress
 
@@ -216,6 +217,8 @@ For the running full-scale investigation checklist, see [Full-Scale Investigatio
 - Nested multi-window arm representations test `3:8` alone against concatenation with `3:6`, `2:6`, or both. The selector keeps `3:8` in four of six fixed folds and chooses `3:8 + 2:6` twice, but selected balanced arm accuracy is `0.8316` versus `0.8354` for a fold-matched `3:8` baseline; independent accuracy falls from `0.8045` to `0.7956`. Reject naive temporal concatenation.
 - Structured temporal features reconstruct the exact two-volume late tail from overlapping means and test amplitude-plus-tail/contrast representations. Tail variants are selected in four of six folds but still score `0.8342` balanced versus `0.8354` baseline and reduce independent accuracy by `0.0085`. Inner-fold tail structure does not transfer to outer subjects.
 - Diagonal QDA tests nonlinear class-specific voxel variance against full LDA. Inner selection chooses full LDA for both leg and arm in every fixed fold, reproducing the baseline exactly. Class-dependent diagonal variance adds no useful transferable information.
+- Continuous temporal-basis extraction is now implemented for the next representation lane. `scripts/run_continuous_temporal_basis_full_cohort.py` streams OpenNeuro denoised BOLD and writes compact per-event maps for mean, linear slope, quadratic curvature, early-vs-late contrast, tail-vs-body contrast, and concatenated basis views.
+- The corresponding nested arm evaluator, `scripts/run_temporal_basis_arm_representation.py`, compares temporal-basis representations against a fold-matched mean-only baseline using training-subject-only selection. A synthetic smoke test correctly selected `mean_plus_linear` when the fake arm signal was placed only in the within-event slope component.
 
 ## Current Metrics Snapshot
 
@@ -286,6 +289,7 @@ Phase 1 is designed to separate optimistic pooled-split performance from leakage
 - The first cross-subject one-run gate avoids the large ungated loss but its small gain is uncertain. Improve gate evidence/features or move to learned arm representations; do not promote the current threshold as a primary result.
 - Simple multi-window feature concatenation is also negative under nested selection. A learned arm representation must exploit temporal structure explicitly or add stronger regularization/nonlinearity; do not merely stack the existing event means.
 - Explicit tail contrasts and diagonal QDA are now negative as well. The existing mean-window checkpoints have exhausted the obvious structured linear/quadratic variants; the next temporal representation experiment requires per-volume within-event sequences from continuous BOLD rather than further transformations of saved means.
+- Launch the continuous temporal-basis extraction and then run the nested arm representation screen. Treat it as positive only if selected temporal-basis representations beat the fold-matched mean-only baseline under subject-fold validation; otherwise conclude that simple within-event temporal coefficients do not solve the arm branch.
 - Split weak-subject follow-up into two tracks: QC/removal or run repair for internally inconsistent subjects such as `sub-52` and `sub-42`, and personalization/domain-adaptation experiments for internally stable but cohort-mismatched subjects such as `sub-17`, `sub-20`, `sub-26`, and `sub-27`.
 - Do not expect broad post-detrend run exclusion to solve the problem. The first policy sweep shows keep-all training data is best or tied, and oracle validation exclusion adds only a small coverage-losing gain. Use run QC to flag special cases and guide repair, not as the main modeling strategy.
 - Broaden saved-feature QC follow-up beyond `sub-52` and `sub-42`: `sub-54`, `sub-63`, and `sub-20` have some of the weakest within-run geometry. The next raw QC pass should prioritize specific bad runs, not only whole subjects.
