@@ -13,7 +13,7 @@ For the running full-scale investigation checklist, see [Full-Scale Investigatio
 | Full-dataset pooled legacy baseline | [`b6uejhvvnmiwb/thesis-legacy-full-resume`](https://www.kaggle.com/code/b6uejhvvnmiwb/thesis-legacy-full-resume) | Stopped by controlled policy at epoch 25 | Quantify the full-data pooled-split baseline for the Phase 1 leakage-gap comparison. |
 | Full-dataset subject-wise evaluation | [`kazmirfahrier/thesis-7batch-gpucompat-runner`](https://www.kaggle.com/code/kazmirfahrier/thesis-7batch-gpucompat-runner) | Complete; final artifacts refreshed | Continue leakage-aware subject-wise 5-fold evaluation plus holdout. |
 | Corrected clip feature-transfer diagnostic | [`b6uejhvvnmiwb/thesis-corrected-clip-baseline`](https://www.kaggle.com/code/b6uejhvvnmiwb/thesis-corrected-clip-baseline) | Version 16 complete | Full-cohort `32³`, `clip_window_stride=1` diagnostic tested whether the spatial-resolution improvement continues beyond `24³`. |
-| Continuous temporal-basis extraction | Planned Kaggle CPU/script run | Prepared locally; not yet a completed metric | Extract per-event within-response basis maps from continuous BOLD so arm classifiers can test temporal dynamics instead of only saved mean windows. |
+| Continuous temporal-basis extraction | [`b6uejhvvnmiwb/thesis-temporal-basis-full-cohort`](https://www.kaggle.com/code/b6uejhvvnmiwb/thesis-temporal-basis-full-cohort) | Version 1 running | Extract per-event within-response basis maps from continuous BOLD so arm classifiers can test temporal dynamics instead of only saved mean windows. |
 
 ## Known Progress
 

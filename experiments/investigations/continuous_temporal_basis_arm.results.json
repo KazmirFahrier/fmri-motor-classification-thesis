@@ -1,6 +1,6 @@
 {
   "experiment_id": "continuous_temporal_basis_arm",
-  "status": "planned",
+  "status": "running",
   "question": "Do within-event temporal basis maps from continuous BOLD improve the forearm-vs-upper-arm branch beyond the validated offset_3_length_8 mean-window representation?",
   "split_protocol": "nested subject-fold selection; held-out subject labels are not used for representation, feature-count, or shrinkage selection",
   "data_source": {
@@ -48,9 +48,9 @@
     "smoke_test_note": "A synthetic checkpoint with arm information only in the linear component selected mean_plus_linear in all folds and beat mean-only."
   },
   "kaggle": {
-    "kernel": null,
+    "kernel": "b6uejhvvnmiwb/thesis-temporal-basis-full-cohort",
     "artifact_dataset": null,
-    "status": "not_launched"
+    "status": "version_1_running"
   },
   "metrics": {
     "final": null
