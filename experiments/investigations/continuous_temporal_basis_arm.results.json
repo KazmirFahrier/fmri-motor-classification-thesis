@@ -1,6 +1,6 @@
 {
   "experiment_id": "continuous_temporal_basis_arm",
-  "status": "running",
+  "status": "complete",
   "question": "Do within-event temporal basis maps from continuous BOLD improve the forearm-vs-upper-arm branch beyond the validated offset_3_length_8 mean-window representation?",
   "split_protocol": "nested subject-fold selection; held-out subject labels are not used for representation, feature-count, or shrinkage selection",
   "data_source": {
@@ -12,6 +12,7 @@
   "implementation": {
     "extractor": "scripts/run_continuous_temporal_basis_full_cohort.py",
     "evaluator": "scripts/run_temporal_basis_arm_representation.py",
+    "end_to_end_hierarchy_evaluator": "scripts/run_temporal_basis_hierarchy.py",
     "components": [
       "mean",
       "linear",
@@ -50,9 +51,65 @@
   "kaggle": {
     "kernel": "b6uejhvvnmiwb/thesis-temporal-basis-full-cohort",
     "artifact_dataset": null,
-    "status": "version_1_running"
+    "status": "version_1_complete"
+  },
+  "local_outputs": {
+    "status_dir": "/Users/USER/Documents/New project/status_2026-07-10_temporal_basis_full_cohort_complete",
+    "checkpoint_dir": "/Users/USER/Documents/New project/status_2026-07-10_temporal_basis_full_cohort_complete/continuous_temporal_basis_full_cohort/subject_checkpoints",
+    "arm_fixed": "/Users/USER/Documents/New project/status_2026-07-10_temporal_basis_full_cohort_complete/temporal_basis_arm_fixed.json",
+    "arm_repeated": "/Users/USER/Documents/New project/status_2026-07-10_temporal_basis_full_cohort_complete/temporal_basis_arm_repeated_with_rep_summaries.json",
+    "hierarchy_tail_fixed": "/Users/USER/Documents/New project/status_2026-07-10_temporal_basis_full_cohort_complete/temporal_basis_hierarchy_tail_fixed.json",
+    "hierarchy_tail_repeated": "/Users/USER/Documents/New project/status_2026-07-10_temporal_basis_full_cohort_complete/temporal_basis_hierarchy_tail_repeated.json"
   },
   "metrics": {
-    "final": null
+    "extraction": {
+      "subject_count": 62,
+      "checkpoint_count": 62,
+      "total_checkpoint_gb": 1.727096363,
+      "feature_keys": [
+        "offset_3_length_8_mean",
+        "offset_3_length_8_linear",
+        "offset_3_length_8_quadratic",
+        "offset_3_length_8_early_late",
+        "offset_3_length_8_tail_vs_body",
+        "offset_3_length_8_mean_linear_quadratic",
+        "offset_3_length_8_dynamic"
+      ]
+    },
+    "nested_arm_screen_repeated": {
+      "split_count": 30,
+      "selected_temporal_basis_balanced_accuracy": 0.8357070707070708,
+      "mean_only_balanced_accuracy": 0.8357828282828285,
+      "selected_minus_mean_balanced": -0.00007575757575758087,
+      "selected_minus_mean_balanced_bootstrap_ci": [-0.009772727272727263, 0.008586489898989844],
+      "selected_temporal_basis_independent_accuracy": 0.7923232323232323,
+      "mean_only_independent_accuracy": 0.7941792929292929,
+      "selected_representation_counts": {
+        "mean": 2,
+        "mean_plus_linear": 6,
+        "mean_plus_quadratic": 4,
+        "mean_plus_early_late": 7,
+        "mean_plus_tail": 3,
+        "mean_plus_linear_quadratic": 3,
+        "mean_plus_dynamic": 5,
+        "dynamic_only": 0
+      }
+    },
+    "representation_summary_repeated": {
+      "mean_balanced_accuracy": 0.8357828282828285,
+      "mean_plus_tail_balanced_accuracy": 0.8452020202020203,
+      "mean_plus_tail_minus_mean_bootstrap_ci": [-0.000050505050505063875, 0.018838383838383824],
+      "dynamic_only_balanced_accuracy": 0.6962121212121212
+    },
+    "end_to_end_tail_hierarchy_repeated": {
+      "hybrid_fused_balanced_accuracy": 0.8765719696969698,
+      "baseline_hybrid_fused_balanced_accuracy": 0.8751641414141414,
+      "tail_minus_baseline_bootstrap_ci": [-0.005587279040404036, 0.007260101010101002],
+      "hybrid_fused_independent_accuracy": 0.8226704545454546,
+      "baseline_hybrid_fused_independent_accuracy": 0.8247790404,
+      "arm_pair_accuracy": 0.790959595959596,
+      "baseline_arm_pair_accuracy": 0.7954545454545453
+    },
+    "conclusion": "Full temporal-basis extraction succeeded, but simple linear/quadratic/contrast temporal coefficients do not meaningfully improve the validated mean-window hierarchy. Keep the offset_3_length_8 full-covariance hierarchy as the primary zero-label baseline and pivot to richer sequence/HRF models or calibration/personalization."
   }
 }

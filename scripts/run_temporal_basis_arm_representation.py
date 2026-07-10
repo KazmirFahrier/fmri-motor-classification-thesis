@@ -181,6 +181,35 @@ def choose_configuration(
     return selected, diagnostics
 
 
+def best_configuration_by_representation(
+    diagnostics: list[dict],
+) -> dict[str, dict]:
+    best = {}
+    representation_order = {name: index for index, name in enumerate(REPRESENTATIONS)}
+    for representation in REPRESENTATIONS:
+        candidates = [
+            row for row in diagnostics if row["representation"] == representation
+        ]
+        if not candidates:
+            continue
+        winner = min(
+            candidates,
+            key=lambda row: (
+                -row["mean_inner_accuracy"],
+                representation_order[row["representation"]],
+                row["feature_count"],
+                row["shrinkage"],
+            ),
+        )
+        best[representation] = {
+            "representation": representation,
+            "feature_count": int(winner["feature_count"]),
+            "shrinkage": float(winner["shrinkage"]),
+            "mean_inner_accuracy": float(winner["mean_inner_accuracy"]),
+        }
+    return best
+
+
 def evaluate_selected(
     x: np.ndarray,
     y: np.ndarray,
@@ -243,6 +272,7 @@ def main() -> None:
 
     rows = []
     hyperparameters = []
+    representation_rows = []
     for split in outer_splits(
         records, "subject", args.subject_fold_count, args.subject_seeds
     ):
@@ -260,13 +290,8 @@ def main() -> None:
             sorted(set(args.feature_counts)),
             sorted(set(args.shrinkages)),
         )
-        baseline_selected, _ = choose_configuration(
-            {"mean": representations["mean"]},
-            y,
-            inner,
-            sorted(set(args.feature_counts)),
-            sorted(set(args.shrinkages)),
-        )
+        best_by_representation = best_configuration_by_representation(diagnostics)
+        baseline_selected = best_by_representation["mean"]
 
         selected_metrics, selected_features = evaluate_selected(
             representations[selected["representation"]],
@@ -284,6 +309,29 @@ def main() -> None:
             baseline_selected["feature_count"],
             baseline_selected["shrinkage"],
         )
+        for representation_name, configuration in best_by_representation.items():
+            representation_metrics, representation_features = evaluate_selected(
+                representations[representation_name],
+                y,
+                records,
+                split,
+                configuration["feature_count"],
+                configuration["shrinkage"],
+            )
+            representation_rows.append(
+                {
+                    "split": split["split"],
+                    "representation": representation_name,
+                    "feature_count": configuration["feature_count"],
+                    "shrinkage": configuration["shrinkage"],
+                    "mean_inner_accuracy": configuration["mean_inner_accuracy"],
+                    "balanced_accuracy": representation_metrics["balanced_accuracy"],
+                    "independent_accuracy": representation_metrics[
+                        "independent_accuracy"
+                    ],
+                    "top_feature_indices": representation_features[:20].tolist(),
+                }
+            )
         row = {
             "split": split["split"],
             "selected_representation": selected["representation"],
@@ -301,6 +349,7 @@ def main() -> None:
             {
                 "split": split["split"],
                 "selected": selected,
+                "best_by_representation": best_by_representation,
                 "inner_diagnostics": diagnostics,
                 "top_feature_indices": selected_features[:20].tolist(),
             }
@@ -323,6 +372,7 @@ def main() -> None:
             for name, group_rows in detrend_rows.items()
         },
         "rows": rows,
+        "representation_rows": representation_rows,
         "hyperparameters": hyperparameters,
         "summary": {
             "split_count": len(rows),
@@ -348,6 +398,32 @@ def main() -> None:
             ),
             "selected_representation_counts": {
                 name: sum(row["selected_representation"] == name for row in rows)
+                for name in REPRESENTATIONS
+            },
+            "representation_summary": {
+                name: {
+                    "split_count": sum(
+                        row["representation"] == name for row in representation_rows
+                    ),
+                    "mean_balanced_accuracy": float(
+                        np.mean(
+                            [
+                                row["balanced_accuracy"]
+                                for row in representation_rows
+                                if row["representation"] == name
+                            ]
+                        )
+                    ),
+                    "mean_independent_accuracy": float(
+                        np.mean(
+                            [
+                                row["independent_accuracy"]
+                                for row in representation_rows
+                                if row["representation"] == name
+                            ]
+                        )
+                    ),
+                }
                 for name in REPRESENTATIONS
             },
         },

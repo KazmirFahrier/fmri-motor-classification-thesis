@@ -82,9 +82,12 @@ Interpretation: the useful signal is late in the current extracted event window.
 - Pair-specific temporal controls using saved means (`2:6`, `3:6`) were negative.
 - Naive multi-window concatenation and explicit reconstructed tail contrasts were negative under nested arm evaluation.
 - Diagonal QDA was negative; full LDA remained selected for both leg and arm.
-- The next representation experiment therefore requires per-volume within-event dynamics from continuous BOLD rather than further algebra on saved window means.
+- Continuous temporal-basis extraction from denoised BOLD completed for all 62 subjects at fixed `3:8`.
+- Nested arm screening of mean, linear, quadratic, early-vs-late, tail-vs-body, and combined basis representations is neutral overall: selected temporal-basis representations average `0.8357` balanced arm accuracy versus `0.8358` for mean-only.
+- `mean_plus_tail` is the only borderline lead (`0.8452` balanced arm accuracy), but its paired interval crosses zero and independent accuracy falls.
+- An end-to-end hierarchy using `mean + tail_vs_body` only in the arm branch reaches `0.8766`, only `+0.0014` over the `0.8752` baseline with uncertainty crossing zero.
 
-Interpretation: mean-window spatial covariance is near its practical limit. If there is more recoverable arm signal, it is likely in temporal response shape, calibration/personalization, or subject-specific geometry rather than another larger covariance feature cap.
+Interpretation: mean-window spatial covariance is near its practical limit, and simple linear temporal basis concatenation does not unlock the remaining arm errors. If there is more recoverable arm signal, it likely needs richer sequence/HRF modeling, calibration/personalization, or subject-specific geometry rather than another handcrafted temporal coefficient.
 
 ### Error Anatomy
 
@@ -144,8 +147,8 @@ Priority: high, because it determines whether some subjects should be modeled, r
 
 - Treat linear event-time detrending and fixed `3:8` continuous windows as the current zero-label preprocessing baseline.
 - The full-cohort candidate-window validation is complete; fixed `3:8` remains the defensible cohort default.
-- Extract compact temporal-basis maps from continuous BOLD for `3:8`: mean, linear slope, quadratic curvature, early-vs-late contrast, and tail-vs-body contrast.
-- Test these basis maps with a nested arm-specific representation screen against a fold-matched mean-only baseline.
+- Compact temporal-basis maps from continuous BOLD for `3:8` are extracted and tested.
+- Do not spend more cycles on simple basis concatenation unless a new hypothesis changes the representation family.
 - Test run-start stabilization or dropping/handling the first event separately.
 - Evaluate whether ordinal `0` and ordinal `6` weaknesses are windowing, baseline, or sequence-context problems.
 
@@ -232,6 +235,8 @@ Priority: medium-low until the preprocessing and representation questions are cl
 | Fixed `3:8` full-covariance hierarchy, repeated subject folds | `0.8752` balanced accuracy |
 | Fixed `3:8` full-covariance hierarchy, 60-subject QC stratum | `0.8941` subject-averaged accuracy |
 | Fixed `3:8` arm pair branch | `0.7955` pair accuracy |
+| Fixed `3:8` temporal-basis selected arm branch | `0.8357` balanced arm accuracy versus `0.8358` mean-only |
+| Fixed `3:8` mean-plus-tail hierarchy | `0.8766` balanced accuracy; not meaningfully above `0.8752` baseline |
 | Offset-2 + linear detrending + validation-selected calibration, 3 runs | `0.7757` accuracy |
 | Offset-2 + linear detrending + validation-selected calibration, 5 runs | `0.7957` accuracy |
 | Offset-2 + linear detrending + fixed calibration, 5 runs | `0.7984` accuracy |
