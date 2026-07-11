@@ -86,8 +86,11 @@ Interpretation: the useful signal is late in the current extracted event window.
 - Nested arm screening of mean, linear, quadratic, early-vs-late, tail-vs-body, and combined basis representations is neutral overall: selected temporal-basis representations average `0.8357` balanced arm accuracy versus `0.8358` for mean-only.
 - `mean_plus_tail` is the only borderline lead (`0.8452` balanced arm accuracy), but its paired interval crosses zero and independent accuracy falls.
 - An end-to-end hierarchy using `mean + tail_vs_body` only in the arm branch reaches `0.8766`, only `+0.0014` over the `0.8752` baseline with uncertainty crossing zero.
+- Ordered eight-volume sequence extraction completed for all 62 subjects and exactly reconstructs the mean hierarchy baseline.
+- A training-subject-only regularized Fisher temporal filter reaches `0.8740` balanced accuracy, while un-smoothed Fisher and SVD controls reach `0.8736` and `0.8737`; none improves independent or arm-pair performance.
+- Learned filter weights are highly stable and collapse toward a gently late-weighted mean. Close single global temporal filtering; future sequence work must learn multiple temporal components or lag-specific spatial maps.
 
-Interpretation: mean-window spatial covariance is near its practical limit, and simple linear temporal basis concatenation does not unlock the remaining arm errors. If there is more recoverable arm signal, it likely needs richer sequence/HRF modeling, calibration/personalization, or subject-specific geometry rather than another handcrafted temporal coefficient.
+Interpretation: mean-window spatial covariance is near its practical limit, and neither handcrafted temporal bases nor a learned global temporal filter unlock the remaining arm errors. If there is more recoverable sequence signal, it requires lag-specific spatial patterns, multiple temporal components, calibration/personalization, or subject-specific geometry.
 
 ### Exact-Class Subject Calibration
 
@@ -263,7 +266,7 @@ Priority: medium-low until the preprocessing and representation questions are cl
 
 ## Immediate Next Experiments
 
-1. Extract richer within-event sequences only for models that preserve temporal order; simple polynomial and contrast bases are closed.
+1. Test a low-rank multi-filter or lag-specific spatial sequence model with strict training-subject-only fitting; single global filters are closed.
 2. Test hierarchical/Bayesian arm shrinkage only if it uses richer target geometry than calibration accuracy thresholds.
 3. Extend targeted raw/post-detrend QC to the worst run-level cases from `sub-54`, `sub-63`, and `sub-20`, and define a post-repair QC rule.
 4. Compare transductive run detrending with training-only nuisance regression or domain-invariant temporal residualization.
