@@ -130,9 +130,15 @@ def select_alpha(
     calibration_runs: tuple[int, ...],
     model: dict,
     alphas: list[float],
-) -> float:
+) -> dict:
     classes = model["classes"]
     candidates = []
+    source_accuracies = []
+    for validation_run in calibration_runs:
+        val_idx = calibration_indices(subject_idx, records, (validation_run,))
+        source_scores = pair_scores(x, val_idx, model)
+        source_accuracies.append(pair_accuracy(source_scores, y, val_idx, classes))
+    source_accuracy = float(np.mean(source_accuracies))
     for alpha in alphas:
         accuracies = []
         for validation_run in calibration_runs:
@@ -146,7 +152,13 @@ def select_alpha(
             scores = pair_scores(x, val_idx, model, means)
             accuracies.append(pair_accuracy(scores, y, val_idx, classes))
         candidates.append((float(np.mean(accuracies)), -alpha, alpha))
-    return float(max(candidates)[2])
+    selected_accuracy, _, selected_alpha = max(candidates)
+    return {
+        "alpha": float(selected_alpha),
+        "source_accuracy": source_accuracy,
+        "selected_accuracy": float(selected_accuracy),
+        "gain": float(selected_accuracy - source_accuracy),
+    }
 
 
 def evaluate_scores(
@@ -314,6 +326,110 @@ def paired_subject_bootstrap(
     return output
 
 
+def bootstrap_difference(
+    values: np.ndarray,
+    iterations: int,
+    rng: np.random.Generator,
+) -> list[float]:
+    samples = rng.choice(values, size=(iterations, len(values)), replace=True).mean(axis=1)
+    return [float(value) for value in np.quantile(samples, [0.025, 0.975])]
+
+
+def evaluate_calibration_gates(
+    gate_rows: list[dict],
+    excluded_subjects: set[str],
+    iterations: int,
+    seed: int,
+) -> list[dict]:
+    output = []
+    rng = np.random.default_rng(seed)
+    subjects = sorted({row["subject"] for row in gate_rows})
+    for count in sorted({row["calibration_run_count"] for row in gate_rows}):
+        count_rows = [row for row in gate_rows if row["calibration_run_count"] == count]
+        policies: dict[str, list[dict]] = {"positive_internal_gain": []}
+        for row in count_rows:
+            selected = dict(row)
+            selected["gate_threshold"] = 0.0
+            selected["calibration_applied"] = row["calibration_loo_gain"] > 0.0
+            selected["gated_accuracy"] = (
+                row["calibrated_accuracy"]
+                if selected["calibration_applied"]
+                else row["source_accuracy"]
+            )
+            policies["positive_internal_gain"].append(selected)
+
+        cross_fitted = []
+        for subject in subjects:
+            train_rows = [row for row in count_rows if row["subject"] != subject]
+            target_rows = [row for row in count_rows if row["subject"] == subject]
+            values = sorted({row["calibration_loo_gain"] for row in train_rows})
+            thresholds = [float("-inf"), *values, float("inf")]
+            candidates = []
+            for threshold in thresholds:
+                accuracies = [
+                    row["calibrated_accuracy"]
+                    if row["calibration_loo_gain"] > threshold
+                    else row["source_accuracy"]
+                    for row in train_rows
+                ]
+                application_rate = float(
+                    np.mean([row["calibration_loo_gain"] > threshold for row in train_rows])
+                )
+                candidates.append((float(np.mean(accuracies)), -application_rate, threshold))
+            threshold = float(max(candidates)[2])
+            for row in target_rows:
+                selected = dict(row)
+                selected["gate_threshold"] = threshold
+                selected["calibration_applied"] = row["calibration_loo_gain"] > threshold
+                selected["gated_accuracy"] = (
+                    row["calibrated_accuracy"]
+                    if selected["calibration_applied"]
+                    else row["source_accuracy"]
+                )
+                cross_fitted.append(selected)
+        policies["cross_subject_threshold"] = cross_fitted
+
+        for policy, values in policies.items():
+            for stratum, excluded in (("all", set()), ("qc", excluded_subjects)):
+                stratum_subjects = [subject for subject in subjects if subject not in excluded]
+                subject_rows = {
+                    subject: [row for row in values if row["subject"] == subject]
+                    for subject in stratum_subjects
+                }
+                source = np.asarray(
+                    [np.mean([row["source_accuracy"] for row in subject_rows[subject]]) for subject in stratum_subjects]
+                )
+                universal = np.asarray(
+                    [np.mean([row["calibrated_accuracy"] for row in subject_rows[subject]]) for subject in stratum_subjects]
+                )
+                gated = np.asarray(
+                    [np.mean([row["gated_accuracy"] for row in subject_rows[subject]]) for subject in stratum_subjects]
+                )
+                output.append(
+                    {
+                        "policy": policy,
+                        "calibration_run_count": count,
+                        "stratum": stratum,
+                        "subject_count": len(stratum_subjects),
+                        "source_accuracy": float(np.mean(source)),
+                        "universal_calibration_accuracy": float(np.mean(universal)),
+                        "gated_accuracy": float(np.mean(gated)),
+                        "gated_minus_source": float(np.mean(gated - source)),
+                        "gated_minus_source_ci95": bootstrap_difference(
+                            gated - source, iterations, rng
+                        ),
+                        "gated_minus_universal": float(np.mean(gated - universal)),
+                        "gated_minus_universal_ci95": bootstrap_difference(
+                            gated - universal, iterations, rng
+                        ),
+                        "application_rate": float(
+                            np.mean([row["calibration_applied"] for row in values if row["subject"] in stratum_subjects])
+                        ),
+                    }
+                )
+    return output
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(
         description="Evaluate leakage-safe labeled subject calibration in the exact-class hierarchy."
@@ -327,6 +443,7 @@ def main() -> None:
     parser.add_argument("--bootstrap-iterations", type=int, default=20000)
     parser.add_argument("--bootstrap-seed", type=int, default=20260711)
     parser.add_argument("--qc-excluded-subjects", nargs="*", default=["sub-42", "sub-52"])
+    parser.add_argument("--split-limit", type=int)
     args = parser.parse_args()
 
     baseline = json.loads(Path(args.baseline_json).read_text())
@@ -351,8 +468,12 @@ def main() -> None:
     hyperparameters = {row["split"]: row for row in baseline["hyperparameters"]}
     subjects_array = np.asarray([str(record["subject_id"]) for record in records])
     rows = []
+    gate_rows = []
 
-    for split_name in sorted(hyperparameters):
+    split_names = sorted(hyperparameters)
+    if args.split_limit is not None:
+        split_names = split_names[: args.split_limit]
+    for split_name in split_names:
         print(f"fitting {split_name}", flush=True)
         split = split_by_name[split_name]
         hyper = hyperparameters[split_name]
@@ -457,12 +578,61 @@ def main() -> None:
                                 )
                                 for pair_name, model in pair_models.items()
                             }
+                            arm_alpha = selected_alphas["arm"]["alpha"]
+                            arm_means = (
+                                (1.0 - arm_alpha) * pair_models["arm"]["source_means"]
+                                + arm_alpha * target_means["arm"]
+                            )
+                            gate_pair_scores = {
+                                "leg": source_pair_scores["leg"],
+                                "arm": pair_scores(
+                                    pair_x, eval_idx, pair_models["arm"], arm_means
+                                ),
+                            }
+                            gate_metrics = evaluate_scores(
+                                coarse_scores,
+                                gate_pair_scores,
+                                float(hyper["selected_coarse_weight"]),
+                                y,
+                                eval_idx,
+                                records,
+                            )["balanced"]
+                            gate_rows.append(
+                                {
+                                    **base,
+                                    "calibration_runs": list(calibration_runs),
+                                    "calibration_run_count": count,
+                                    "selected_alpha": arm_alpha,
+                                    "calibration_source_arm_accuracy": selected_alphas[
+                                        "arm"
+                                    ]["source_accuracy"],
+                                    "calibration_selected_arm_accuracy": selected_alphas[
+                                        "arm"
+                                    ]["selected_accuracy"],
+                                    "calibration_loo_gain": selected_alphas["arm"]["gain"],
+                                    "source_accuracy": source_metrics["balanced"][
+                                        "balanced_accuracy"
+                                    ],
+                                    "calibrated_accuracy": gate_metrics[
+                                        "balanced_accuracy"
+                                    ],
+                                }
+                            )
                         protocols = [
                             ("fixed_alpha", float(alpha), {name: float(alpha) for name in pair_models})
                             for alpha in args.alphas
                         ]
                         if count >= 2:
-                            protocols.append(("calibration_loo_alpha", -1.0, selected_alphas))
+                            protocols.append(
+                                (
+                                    "calibration_loo_alpha",
+                                    -1.0,
+                                    {
+                                        pair_name: diagnostics["alpha"]
+                                        for pair_name, diagnostics in selected_alphas.items()
+                                    },
+                                )
+                            )
                         for protocol, summary_alpha, alpha_by_pair in protocols:
                             for branch_mode in args.branch_modes:
                                 active = set(PAIR_CLASSES) if branch_mode == "both" else {branch_mode}
@@ -550,6 +720,13 @@ def main() -> None:
             args.bootstrap_iterations,
             args.bootstrap_seed,
         ),
+        "calibration_gate_summary": evaluate_calibration_gates(
+            gate_rows,
+            set(args.qc_excluded_subjects),
+            args.bootstrap_iterations,
+            args.bootstrap_seed + 1,
+        ),
+        "calibration_gate_rows": gate_rows,
         "rows": rows,
         "note": (
             "Every evaluation run is excluded from target-subject calibration and alpha selection. "
@@ -563,7 +740,7 @@ def main() -> None:
             {
                 "out_json": args.out_json,
                 "baseline_reproduction": result["baseline_reproduction"],
-                "paired_subject_bootstrap": result["paired_subject_bootstrap"],
+                "calibration_gate_summary": result["calibration_gate_summary"],
             },
             indent=2,
         )

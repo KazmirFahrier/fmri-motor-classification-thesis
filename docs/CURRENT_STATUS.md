@@ -228,6 +228,8 @@ For the running full-scale investigation checklist, see [Full-Scale Investigatio
 - Five-run arm calibration improves all 62 subjects by `+0.0157` on average (95% interval `+0.0049` to `+0.0269`) and reaches `0.9088` in the QC-60 sensitivity analysis (`+0.0147`, interval `+0.0040` to `+0.0259`). Independent exact decoding also rises from `0.8250` to `0.8430`, and all five repeated seeds improve.
 - The branch controls identify the mechanism. Five-run leg-only calibration is neutral (`0.8747`), while calibrating both branches reaches `0.8903` with a wider interval crossing zero. A light fixed arm blend (`alpha=0.1`) reaches `0.8919`, but one-run calibration remains harmful (`0.8651`). Keep the zero-label and labeled-personalization results separate.
 - Calibration is not universally safe: with five validation-selected runs, 31 subjects improve, six tie, and 25 regress. The next personalization experiment must use calibration-only quality evidence to gate or tune the arm update; it must not use held-out-run labels or post-hoc residual groups.
+- The calibration-only gate follow-up is negative. Leave-one-calibration-run-out arm gain correlates only `0.03-0.06` with held-out exact-class benefit. A fixed positive-internal-gain gate applies five-run calibration to 43.7% of cases and falls to `0.8836`, significantly below universal calibration (`0.8913`).
+- A leave-one-subject-out threshold gate converges to applying calibration in 99.9% of five-run cases and reaches `0.8911`, effectively reproducing the universal policy. The selector already chooses `alpha=0.1` in 82.1% of five-run cases. Close simple calibration-quality gating; at three to five runs, the best validated labeled policy is the light universal arm update.
 
 ## Current Metrics Snapshot
 

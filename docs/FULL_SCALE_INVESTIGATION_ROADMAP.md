@@ -97,6 +97,8 @@ Interpretation: mean-window spatial covariance is near its practical limit, and 
 - Independent exact decoding rises from `0.8250` to `0.8430`, and all five repeated subject partitions improve.
 - Leg calibration is neutral or harmful, both-branch calibration is less stable, one-run arm calibration is harmful, and two runs remain inconclusive.
 - Twenty-five subjects still regress under five-run validation-selected arm calibration, so this is a labeled-personalization ceiling rather than a universal adaptation rule.
+- A direct calibration-only gate based on leave-one-calibration-run-out gain is negative: the diagnostic correlates only `0.03-0.06` with held-out benefit, and the fixed gate lowers five-run accuracy to `0.8836`.
+- A cross-subject threshold gate applies calibration in 99.9% of five-run cases and reproduces the universal result. Close simple quality-threshold gating; the next safety model must use richer subject geometry or hierarchical shrinkage.
 
 Interpretation: the main residual transfer failure is target-specific forearm/upper-arm mean geometry. The next calibration experiment should gate or continuously shrink the arm update using calibration-run evidence only; held-out-run labels and post-hoc residual groups remain forbidden.
 
@@ -261,8 +263,8 @@ Priority: medium-low until the preprocessing and representation questions are cl
 
 ## Immediate Next Experiments
 
-1. Build and validate a calibration-only gate or adaptive shrinkage rule for the exact-class arm update, using no held-out-run labels.
-2. Extract richer within-event sequences only for models that preserve temporal order; simple polynomial and contrast bases are closed.
+1. Extract richer within-event sequences only for models that preserve temporal order; simple polynomial and contrast bases are closed.
+2. Test hierarchical/Bayesian arm shrinkage only if it uses richer target geometry than calibration accuracy thresholds.
 3. Extend targeted raw/post-detrend QC to the worst run-level cases from `sub-54`, `sub-63`, and `sub-20`, and define a post-repair QC rule.
 4. Compare transductive run detrending with training-only nuisance regression or domain-invariant temporal residualization.
 5. Improve pseudo-labeling only after measuring whether the hierarchy raises target arm pseudo-label quality.

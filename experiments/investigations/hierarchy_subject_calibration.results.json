@@ -12,6 +12,7 @@
   },
   "implementation": "scripts/run_hierarchy_subject_calibration.py",
   "local_output": "/Users/USER/Documents/New project/status_2026-07-11_hierarchy_subject_calibration/hierarchy_subject_calibration.json",
+  "local_gate_output": "/Users/USER/Documents/New project/status_2026-07-11_hierarchy_subject_calibration/hierarchy_arm_calibration_gate.json",
   "baseline_reproduction": {
     "saved_fold_weighted_balanced_accuracy": 0.8751641414141414,
     "reconstructed_fold_weighted_balanced_accuracy": 0.8751641414141414,
@@ -60,5 +61,27 @@
     "both_branches_five_runs_balanced_accuracy": 0.8903225806451615,
     "both_branches_five_runs_difference_ci95": [-0.001008064516129035, 0.031115591397849467]
   },
-  "conclusion": "Labeled target-subject calibration is a real full-model improvement when restricted to the weaker arm branch and supplied at least three runs. Four to five runs give robust all-subject and QC-stratified gains. One run is harmful, two are inconclusive, and leg calibration adds no value. Keep 0.8752 as the zero-label benchmark and 0.8913 as the five-run labeled-personalization result; develop a calibration-only gate because a substantial minority of subjects still regress."
+  "calibration_only_gate_followup": {
+    "diagnostic": "leave-one-calibration-run-out arm gain before evaluating the held-out run",
+    "diagnostic_to_heldout_gain_correlation": {
+      "two_runs": 0.03472402476787158,
+      "three_runs": 0.03664538927881211,
+      "four_runs": 0.035525376109826784,
+      "five_runs": 0.06286486515398991
+    },
+    "five_run_positive_internal_gain_gate": {
+      "application_rate": 0.43655913978494626,
+      "balanced_accuracy": 0.8836021505376342,
+      "minus_universal_calibration": -0.007728494623655909,
+      "minus_universal_ci95": [-0.014112903225806443, -0.0014784946236559087]
+    },
+    "five_run_cross_subject_threshold_gate": {
+      "application_rate": 0.9989247311827957,
+      "balanced_accuracy": 0.8910618279569892,
+      "minus_universal_calibration": -0.00026881720430107787
+    },
+    "five_run_selected_alpha_0_1_fraction": 0.8209677419354838,
+    "conclusion": "Calibration-run internal gain does not predict held-out benefit. The fixed gate discards a significant part of the universal gain, while the cross-subject threshold converges to applying calibration almost universally. Close this simple gating lane."
+  },
+  "conclusion": "Labeled target-subject calibration is a real full-model improvement when restricted to the weaker arm branch and supplied at least three runs. Four to five runs give robust all-subject and QC-stratified gains. One run is harmful, two are inconclusive, and leg calibration adds no value. Keep 0.8752 as the zero-label benchmark and 0.8913 as the five-run labeled-personalization result. A calibration-only internal-gain gate was tested and failed to identify regressions; universal light arm calibration remains the best validated labeled policy once at least three runs are available."
 }
