@@ -1,0 +1,64 @@
+{
+  "experiment_id": "hierarchy_subject_calibration",
+  "status": "complete",
+  "question": "Does leakage-safe labeled target-subject calibration improve the validated four-class full-covariance hierarchy, and which pair branch should be calibrated?",
+  "protocol": {
+    "outer_validation": "30 repeated subject folds from seeds 11, 23, 37, 51, and 71",
+    "source_model": "saved nested-selected offset_3_length_8 hierarchy configurations; feature ranking, covariance, coarse gate, and hierarchy weight use source subjects only",
+    "target_calibration": "one to five labeled runs from the held-out subject; the evaluation run is always excluded",
+    "alpha_selection": "leave-one-calibration-run-out pair accuracy; evaluation-run labels are never used",
+    "branches_tested": ["arm", "leg", "both"],
+    "prediction_rules": ["balanced", "independent"]
+  },
+  "implementation": "scripts/run_hierarchy_subject_calibration.py",
+  "local_output": "/Users/USER/Documents/New project/status_2026-07-11_hierarchy_subject_calibration/hierarchy_subject_calibration.json",
+  "baseline_reproduction": {
+    "saved_fold_weighted_balanced_accuracy": 0.8751641414141414,
+    "reconstructed_fold_weighted_balanced_accuracy": 0.8751641414141414,
+    "difference": 0.0,
+    "subject_weighted_balanced_accuracy": 0.8756720430107527,
+    "subject_weighted_independent_accuracy": 0.825
+  },
+  "validation_selected_arm_calibration": {
+    "two_runs_balanced_accuracy": 0.8793010752688172,
+    "two_runs_difference_ci95": [-0.006969254032258051, 0.014294354838709666],
+    "three_runs_balanced_accuracy": 0.8861155913978495,
+    "three_runs_difference_ci95": [0.00023521505376345063, 0.02085349462365593],
+    "four_runs_balanced_accuracy": 0.8891666666666667,
+    "four_runs_difference_ci95": [0.0032795698924731206, 0.024072916666666642],
+    "five_runs_balanced_accuracy": 0.8913306451612902,
+    "five_runs_mean_difference": 0.015658602150537628,
+    "five_runs_difference_ci95": [0.004905913978494613, 0.026948924731182777],
+    "five_runs_independent_accuracy": 0.843010752688172,
+    "five_runs_seed_differences": {
+      "11": 0.014113,
+      "23": 0.013105,
+      "37": 0.020161,
+      "51": 0.016465,
+      "71": 0.014449
+    },
+    "five_runs_subject_outcomes": {
+      "improved": 31,
+      "tied": 6,
+      "worsened": 25
+    }
+  },
+  "qc_60_validation_selected_arm_calibration": {
+    "source_balanced_accuracy": 0.8940972222222222,
+    "three_runs_balanced_accuracy": 0.9036041666666665,
+    "three_runs_difference_ci95": [-0.0005833333333333193, 0.019833506944444444],
+    "four_runs_balanced_accuracy": 0.9064583333333333,
+    "four_runs_difference_ci95": [0.002180555555555558, 0.022805902777777755],
+    "five_runs_balanced_accuracy": 0.9088194444444444,
+    "five_runs_difference_ci95": [0.0040277777777777725, 0.025902777777777768]
+  },
+  "sensitivity_and_controls": {
+    "fixed_alpha_0_1_five_runs_balanced_accuracy": 0.8919354838709677,
+    "fixed_alpha_0_1_five_runs_difference_ci95": [0.007459677419354829, 0.02527049731182781],
+    "fixed_alpha_0_1_one_run_balanced_accuracy": 0.8651478494623657,
+    "leg_only_five_runs_balanced_accuracy": 0.8746639784946237,
+    "both_branches_five_runs_balanced_accuracy": 0.8903225806451615,
+    "both_branches_five_runs_difference_ci95": [-0.001008064516129035, 0.031115591397849467]
+  },
+  "conclusion": "Labeled target-subject calibration is a real full-model improvement when restricted to the weaker arm branch and supplied at least three runs. Four to five runs give robust all-subject and QC-stratified gains. One run is harmful, two are inconclusive, and leg calibration adds no value. Keep 0.8752 as the zero-label benchmark and 0.8913 as the five-run labeled-personalization result; develop a calibration-only gate because a substantial minority of subjects still regress."
+}

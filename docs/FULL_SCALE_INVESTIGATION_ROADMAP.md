@@ -89,6 +89,17 @@ Interpretation: the useful signal is late in the current extracted event window.
 
 Interpretation: mean-window spatial covariance is near its practical limit, and simple linear temporal basis concatenation does not unlock the remaining arm errors. If there is more recoverable arm signal, it likely needs richer sequence/HRF modeling, calibration/personalization, or subject-specific geometry rather than another handcrafted temporal coefficient.
 
+### Exact-Class Subject Calibration
+
+- The repeated exact-class calibration evaluator reproduces the saved fold-weighted zero-label hierarchy exactly at `0.875164` before applying any target update.
+- Updating only target-subject arm class means from non-evaluation runs reaches subject-averaged balanced accuracy `0.8861`, `0.8892`, and `0.8913` with three, four, and five labeled runs.
+- Five-run arm calibration improves the all-subject result by `+0.0157` (95% paired subject interval `+0.0049` to `+0.0269`) and reaches `0.9088` in the QC-60 sensitivity stratum.
+- Independent exact decoding rises from `0.8250` to `0.8430`, and all five repeated subject partitions improve.
+- Leg calibration is neutral or harmful, both-branch calibration is less stable, one-run arm calibration is harmful, and two runs remain inconclusive.
+- Twenty-five subjects still regress under five-run validation-selected arm calibration, so this is a labeled-personalization ceiling rather than a universal adaptation rule.
+
+Interpretation: the main residual transfer failure is target-specific forearm/upper-arm mean geometry. The next calibration experiment should gate or continuously shrink the arm update using calibration-run evidence only; held-out-run labels and post-hoc residual groups remain forbidden.
+
 ### Error Anatomy
 
 - Coarse leg-vs-arm classification is much easier than exact four-class classification.
@@ -237,6 +248,9 @@ Priority: medium-low until the preprocessing and representation questions are cl
 | Fixed `3:8` arm pair branch | `0.7955` pair accuracy |
 | Fixed `3:8` temporal-basis selected arm branch | `0.8357` balanced arm accuracy versus `0.8358` mean-only |
 | Fixed `3:8` mean-plus-tail hierarchy | `0.8766` balanced accuracy; not meaningfully above `0.8752` baseline |
+| Fixed `3:8` hierarchy + validation-selected arm calibration, 3 runs | `0.8861` subject-averaged balanced accuracy |
+| Fixed `3:8` hierarchy + validation-selected arm calibration, 5 runs | `0.8913` subject-averaged balanced accuracy; `0.9088` QC-60 |
+| Fixed `3:8` hierarchy + arm calibration, independent prediction, 5 runs | `0.8430` accuracy |
 | Offset-2 + linear detrending + validation-selected calibration, 3 runs | `0.7757` accuracy |
 | Offset-2 + linear detrending + validation-selected calibration, 5 runs | `0.7957` accuracy |
 | Offset-2 + linear detrending + fixed calibration, 5 runs | `0.7984` accuracy |
@@ -247,9 +261,9 @@ Priority: medium-low until the preprocessing and representation questions are cl
 
 ## Immediate Next Experiments
 
-1. Complete the active full-cohort comparison of six fixed continuous-BOLD window candidates.
-2. Extend targeted raw/post-detrend QC to the worst run-level cases from `sub-54`, `sub-63`, and `sub-20`, and define a post-repair QC rule.
-3. Compare transductive run detrending with training-only nuisance regression or domain-invariant temporal residualization.
-4. Coarse-to-fine exact classification on linearly detrended offset-2 features.
-5. Formalize the detrended calibration protocol and report irreparable-subject sensitivity separately.
-6. Improved pseudo-labeling only after measuring whether detrending raises pseudo-label quality.
+1. Build and validate a calibration-only gate or adaptive shrinkage rule for the exact-class arm update, using no held-out-run labels.
+2. Extract richer within-event sequences only for models that preserve temporal order; simple polynomial and contrast bases are closed.
+3. Extend targeted raw/post-detrend QC to the worst run-level cases from `sub-54`, `sub-63`, and `sub-20`, and define a post-repair QC rule.
+4. Compare transductive run detrending with training-only nuisance regression or domain-invariant temporal residualization.
+5. Improve pseudo-labeling only after measuring whether the hierarchy raises target arm pseudo-label quality.
+6. Revisit neural sequence models only after a small eval-mode overfit probe succeeds on the corrected event protocol.

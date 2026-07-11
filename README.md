@@ -24,7 +24,7 @@ This repository tracks ongoing thesis work on 4-class motor-task fMRI classifica
 - The older notebooks and `notebook_code.py` preserve the earlier prototype workflow used to build the initial model idea.
 - The unpublished manuscript is intentionally **not** included in this public repo.
 - Phase 1 full-dataset legacy runs are complete: the pooled legacy baseline was stopped at epoch 25 by the controlled decision policy, and the subject-wise legacy run completed at chance-level holdout performance.
-- The active work is now the full-scale diagnostic/modeling investigation: continuous-event baselines, subject/run nuisance control, multi-scale covariance-aware hierarchies, weak-subject forensics, and temporal-basis experiments for the remaining arm-branch errors.
+- The active work is now the full-scale diagnostic/modeling investigation: continuous-event baselines, subject/run nuisance control, multi-scale covariance-aware hierarchies, weak-subject forensics, temporal representation tests, and leakage-safe subject personalization for the remaining arm-branch errors.
 - Current run state is tracked in `docs/CURRENT_STATUS.md` and `experiments/phase1_baselines/*.results.json`.
 
 ## Dataset Context
@@ -66,7 +66,8 @@ Current Phase 1 registry entries:
 - `phase1_subjectwise_5fold_full`: full public dataset subject-wise 5-fold plus holdout run, complete.
 
 Current investigation registry entries:
-- `continuous_temporal_basis_arm`: planned continuous-BOLD temporal-basis extraction and nested arm-branch representation screen.
+- `continuous_temporal_basis_arm`: completed continuous-BOLD extraction and negative nested temporal-basis/arm-hierarchy screen.
+- `hierarchy_subject_calibration`: completed repeated subject-fold test of labeled arm/leg/both-branch calibration in the full four-class hierarchy.
 
 These files are meant to make the repo reflect the real research process: long-running Kaggle sessions, resumable checkpoints, and metrics updated only when a run actually finishes.
 
