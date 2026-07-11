@@ -1,6 +1,6 @@
 {
   "experiment_id": "learned_temporal_filter_arm",
-  "status": "extraction_pending",
+  "status": "extracting",
   "question": "Can a training-subject-only temporal filter learned from the full ordered eight-volume event response improve the arm branch beyond the validated mean-window hierarchy?",
   "data_source": {
     "openneuro_dataset": "ds004044",
@@ -35,7 +35,8 @@
     "synthetic_filter_peak_lag": 5
   },
   "kaggle": {
-    "kernel": null,
-    "status": "not_launched"
+    "kernel": "b6uejhvvnmiwb/thesis-event-sequence-full-cohort",
+    "version": 1,
+    "status": "running"
   }
 }

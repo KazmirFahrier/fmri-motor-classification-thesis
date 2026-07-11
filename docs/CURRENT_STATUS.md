@@ -232,6 +232,7 @@ For the running full-scale investigation checklist, see [Full-Scale Investigatio
 - A leave-one-subject-out threshold gate converges to applying calibration in 99.9% of five-run cases and reaches `0.8911`, effectively reproducing the universal policy. The selector already chooses `alpha=0.1` in 82.1% of five-run cases. Close simple calibration-quality gating; at three to five runs, the best validated labeled policy is the light universal arm update.
 - The next zero-label representation test is implemented. Sequence-only continuous extraction preserves all eight ordered `3:8` maps per event, and `run_learned_temporal_filter_hierarchy.py` learns an arm-specific regularized temporal Fisher direction from each outer training-subject set before applying the validated spatial covariance hierarchy.
 - Synthetic validation places arm signal at lag 5 and the learned filter correctly peaks at lag 5. A NIfTI/events smoke extraction produces the expected `(4 events, 8 lags, 64 voxels)` tensor with exact labels. Full-cohort sequence extraction is the remaining prerequisite.
+- Kaggle kernel `b6uejhvvnmiwb/thesis-event-sequence-full-cohort` version 1 is running on CPU. It writes sequence-only subject checkpoints under `continuous_event_sequence_full_cohort`; after completion, verify all 62 tensors before running the repeated learned-filter hierarchy.
 
 ## Current Metrics Snapshot
 
