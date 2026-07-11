@@ -230,6 +230,8 @@ For the running full-scale investigation checklist, see [Full-Scale Investigatio
 - Calibration is not universally safe: with five validation-selected runs, 31 subjects improve, six tie, and 25 regress. The next personalization experiment must use calibration-only quality evidence to gate or tune the arm update; it must not use held-out-run labels or post-hoc residual groups.
 - The calibration-only gate follow-up is negative. Leave-one-calibration-run-out arm gain correlates only `0.03-0.06` with held-out exact-class benefit. A fixed positive-internal-gain gate applies five-run calibration to 43.7% of cases and falls to `0.8836`, significantly below universal calibration (`0.8913`).
 - A leave-one-subject-out threshold gate converges to applying calibration in 99.9% of five-run cases and reaches `0.8911`, effectively reproducing the universal policy. The selector already chooses `alpha=0.1` in 82.1% of five-run cases. Close simple calibration-quality gating; at three to five runs, the best validated labeled policy is the light universal arm update.
+- The next zero-label representation test is implemented. Sequence-only continuous extraction preserves all eight ordered `3:8` maps per event, and `run_learned_temporal_filter_hierarchy.py` learns an arm-specific regularized temporal Fisher direction from each outer training-subject set before applying the validated spatial covariance hierarchy.
+- Synthetic validation places arm signal at lag 5 and the learned filter correctly peaks at lag 5. A NIfTI/events smoke extraction produces the expected `(4 events, 8 lags, 64 voxels)` tensor with exact labels. Full-cohort sequence extraction is the remaining prerequisite.
 
 ## Current Metrics Snapshot
 

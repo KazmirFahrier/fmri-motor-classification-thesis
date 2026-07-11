@@ -68,6 +68,7 @@ Current Phase 1 registry entries:
 Current investigation registry entries:
 - `continuous_temporal_basis_arm`: completed continuous-BOLD extraction and negative nested temporal-basis/arm-hierarchy screen.
 - `hierarchy_subject_calibration`: completed repeated subject-fold test of labeled arm/leg/both-branch calibration in the full four-class hierarchy.
+- `learned_temporal_filter_arm`: ordered eight-volume sequence extraction and training-subject-only learned temporal-filter follow-up.
 
 These files are meant to make the repo reflect the real research process: long-running Kaggle sessions, resumable checkpoints, and metrics updated only when a run actually finishes.
 

@@ -1,0 +1,41 @@
+{
+  "experiment_id": "learned_temporal_filter_arm",
+  "status": "extraction_pending",
+  "question": "Can a training-subject-only temporal filter learned from the full ordered eight-volume event response improve the arm branch beyond the validated mean-window hierarchy?",
+  "data_source": {
+    "openneuro_dataset": "ds004044",
+    "input_signal": "derivatives/fmriprep/*_space-T1w_desc-preproc_bold_denoised.nii.gz",
+    "window": "offset 3, length 8 TRs",
+    "feature_shape": [24, 24, 24],
+    "sequence_key": "offset_3_length_8_sequence"
+  },
+  "implementation": {
+    "extractor": "scripts/run_continuous_temporal_basis_full_cohort.py --output-mode sequence",
+    "evaluator": "scripts/run_learned_temporal_filter_hierarchy.py",
+    "filter": "pair-specific temporal Fisher direction with covariance shrinkage and second-difference regularization",
+    "outer_protocol": "filter learned from source subjects only; saved nested hierarchy configurations reused for the outer evaluation"
+  },
+  "baseline_to_beat": {
+    "fold_weighted_balanced_accuracy": 0.8751641414141414,
+    "subject_weighted_balanced_accuracy": 0.8756720430107527,
+    "independent_accuracy": 0.825,
+    "arm_pair_accuracy": 0.7954545454545453
+  },
+  "acceptance_criteria": [
+    "Extract all 62 ordered event-sequence checkpoints and verify shape/label integrity.",
+    "Reconstruct the mean-window hierarchy baseline exactly from sequence means.",
+    "Learn every outer-fold temporal filter without held-out-subject labels.",
+    "Require repeated balanced and independent improvement with uncertainty before promoting the learned filter.",
+    "If neutral or negative, retain mean-window spatial covariance and redirect temporal work away from global linear filters."
+  ],
+  "current_validation": {
+    "sequence_extractor_smoke_test": "passed",
+    "sequence_smoke_shape": [4, 8, 64],
+    "synthetic_filter_test": "passed",
+    "synthetic_filter_peak_lag": 5
+  },
+  "kaggle": {
+    "kernel": null,
+    "status": "not_launched"
+  }
+}

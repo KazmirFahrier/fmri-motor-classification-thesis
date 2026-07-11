@@ -73,6 +73,7 @@ def process_run(
     repetition_time: float,
     extraction_shape: tuple[int, int, int],
     feature_shape: tuple[int, int, int],
+    output_mode: str = "basis",
 ) -> tuple[dict[str, np.ndarray], np.ndarray, list[dict]]:
     import nibabel as nib
 
@@ -107,13 +108,18 @@ def process_run(
         for volume_idx in needed_volumes
     }
 
-    weights = temporal_basis_weights(length)
+    if output_mode not in {"basis", "sequence", "both"}:
+        raise ValueError(f"Unknown output mode: {output_mode}")
+    weights = temporal_basis_weights(length) if output_mode in {"basis", "both"} else {}
     feature_lists: dict[str, list[np.ndarray]] = {name: [] for name in weights}
+    sequences = []
     for event in valid_events:
         sequence = np.stack(
             [cache[event["event_start"] + offset + step] for step in range(length)],
             axis=0,
-        ).astype(np.float64, copy=False)
+        ).astype(np.float32, copy=False)
+        if output_mode in {"sequence", "both"}:
+            sequences.append(sequence)
         for name, weight in weights.items():
             feature_lists[name].append((weight[:, None] * sequence).sum(axis=0))
 
@@ -122,24 +128,27 @@ def process_run(
         f"{prefix}_{name}": np.stack(values).astype(np.float32)
         for name, values in feature_lists.items()
     }
-    features[f"{prefix}_mean_linear_quadratic"] = np.concatenate(
-        [
-            features[f"{prefix}_mean"],
+    if weights:
+        features[f"{prefix}_mean_linear_quadratic"] = np.concatenate(
+            [
+                features[f"{prefix}_mean"],
+                features[f"{prefix}_linear"],
+                features[f"{prefix}_quadratic"],
+            ],
+            axis=1,
+        ).astype(np.float32)
+        dynamic_parts = [
             features[f"{prefix}_linear"],
             features[f"{prefix}_quadratic"],
-        ],
-        axis=1,
-    ).astype(np.float32)
-    dynamic_parts = [
-        features[f"{prefix}_linear"],
-        features[f"{prefix}_quadratic"],
-        features[f"{prefix}_early_late"],
-    ]
-    if f"{prefix}_tail_vs_body" in features:
-        dynamic_parts.append(features[f"{prefix}_tail_vs_body"])
-    features[f"{prefix}_dynamic"] = np.concatenate(dynamic_parts, axis=1).astype(
-        np.float32
-    )
+            features[f"{prefix}_early_late"],
+        ]
+        if f"{prefix}_tail_vs_body" in features:
+            dynamic_parts.append(features[f"{prefix}_tail_vs_body"])
+        features[f"{prefix}_dynamic"] = np.concatenate(dynamic_parts, axis=1).astype(
+            np.float32
+        )
+    if sequences:
+        features[f"{prefix}_sequence"] = np.stack(sequences).astype(np.float32)
 
     labels = np.asarray([event["class_id"] for event in valid_events], dtype=np.int64)
     records = make_records(subject, run_id, valid_events)
@@ -158,6 +167,7 @@ def process_subject(
     repetition_time: float,
     extraction_shape: tuple[int, int, int],
     feature_shape: tuple[int, int, int],
+    output_mode: str = "basis",
 ) -> dict:
     subject_features: dict[str, list[np.ndarray]] = {}
     labels = []
@@ -181,6 +191,7 @@ def process_subject(
                     repetition_time=repetition_time,
                     extraction_shape=extraction_shape,
                     feature_shape=feature_shape,
+                    output_mode=output_mode,
                 )
             except Exception as exc:
                 run_rows.append(
@@ -250,6 +261,12 @@ def main() -> None:
         help="Event window as offset:length in TRs. Default is 3:8.",
     )
     parser.add_argument("--max-subjects", type=int, default=0)
+    parser.add_argument(
+        "--output-mode",
+        choices=["basis", "sequence", "both"],
+        default="basis",
+        help="Save compact temporal bases, the ordered event sequence, or both.",
+    )
     args = parser.parse_args()
 
     out_dir = Path(args.out_dir)
@@ -288,6 +305,7 @@ def main() -> None:
             repetition_time=args.repetition_time,
             extraction_shape=tuple(args.extraction_shape),
             feature_shape=tuple(args.feature_shape),
+            output_mode=args.output_mode,
         )
         row["status"] = "completed"
         row["subject_index"] = subject_idx
@@ -311,6 +329,19 @@ def main() -> None:
             flush=True,
         )
 
+    feature_keys = []
+    if args.output_mode in {"basis", "both"}:
+        feature_keys.extend(
+            [
+                f"offset_{window[0]}_length_{window[1]}_{name}"
+                for name in (
+                    list(temporal_basis_weights(window[1]))
+                    + ["mean_linear_quadratic", "dynamic"]
+                )
+            ]
+        )
+    if args.output_mode in {"sequence", "both"}:
+        feature_keys.append(f"offset_{window[0]}_length_{window[1]}_sequence")
     result = {
         "bucket": args.bucket,
         "dataset": args.dataset,
@@ -318,20 +349,15 @@ def main() -> None:
         "subject_count": len(subjects),
         "window": window,
         "repetition_time": args.repetition_time,
+        "output_mode": args.output_mode,
         "extraction_shape": args.extraction_shape,
         "feature_shape": args.feature_shape,
         "checkpoint_dir": str(checkpoint_dir),
-        "feature_keys": [
-            f"offset_{window[0]}_length_{window[1]}_{name}"
-            for name in (
-                list(temporal_basis_weights(window[1]))
-                + ["mean_linear_quadratic", "dynamic"]
-            )
-        ],
+        "feature_keys": feature_keys,
         "note": (
-            "Each subject checkpoint stores compact temporal basis maps derived from "
-            "transformed continuous BOLD volumes. Raw NIfTI files are downloaded per run "
-            "and deleted immediately after extraction."
+            "Each subject checkpoint stores the requested temporal representation derived "
+            "from transformed continuous BOLD volumes. Raw NIfTI files are downloaded per "
+            "run and deleted immediately after extraction."
         ),
     }
     (out_dir / "summary.json").write_text(
