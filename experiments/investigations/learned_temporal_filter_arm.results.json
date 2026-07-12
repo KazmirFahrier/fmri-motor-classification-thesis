@@ -44,7 +44,10 @@
     "checkpoint_dir": "/Users/USER/Documents/New project/status_2026-07-11_event_sequence_full_cohort_complete/continuous_event_sequence_full_cohort/subject_checkpoints",
     "fisher_smooth_1": "/Users/USER/Documents/New project/status_2026-07-11_event_sequence_full_cohort_complete/learned_temporal_filter_repeated.json",
     "fisher_smooth_0": "/Users/USER/Documents/New project/status_2026-07-11_event_sequence_full_cohort_complete/learned_temporal_filter_fisher_smooth0_repeated.json",
-    "svd": "/Users/USER/Documents/New project/status_2026-07-11_event_sequence_full_cohort_complete/learned_temporal_filter_svd_repeated.json"
+    "svd": "/Users/USER/Documents/New project/status_2026-07-11_event_sequence_full_cohort_complete/learned_temporal_filter_svd_repeated.json",
+    "multi_filter_dir": "/Users/USER/Documents/New project/status_2026-07-12_event_sequence_multifilter",
+    "mean_plus_contrast_cap1024": "/Users/USER/Documents/New project/status_2026-07-12_event_sequence_multifilter/uniform_mean_plus_learned_contrast_repeated.json",
+    "mean_plus_contrast_cap2048": "/Users/USER/Documents/New project/status_2026-07-12_event_sequence_multifilter/uniform_mean_plus_learned_contrast_cap2048_repeated.json"
   },
   "metrics": {
     "extraction": {
@@ -83,6 +86,39 @@
       "independent_accuracy": 0.8241098484848485,
       "arm_pair_accuracy": 0.7909595959595958
     },
-    "conclusion": "Ordered sequence extraction succeeded and exactly reconstructs the mean hierarchy, but all three training-subject-only global linear temporal filters are neutral or slightly negative. The learned filters are highly stable and close to a gently late-weighted mean, so instability is not the explanation. Keep the mean-window hierarchy; future sequence work must model lag-specific spatial patterns or multiple temporal components rather than another single global weighting."
+    "multi_filter_followup": {
+      "rank_2_cap1024_balanced_accuracy": 0.8788383838383839,
+      "rank_3_cap1024_balanced_accuracy": 0.8787815656565657,
+      "rank_4_cap1024_balanced_accuracy": 0.8786426767676768,
+      "rank_2_cap1024_balanced_difference_ci95": [0.0005048926767676805, 0.006849747474747477],
+      "rank_2_cap1024_independent_accuracy": 0.8262499999999999,
+      "contrast_only_balanced_accuracy": 0.8031060606060606,
+      "uniform_mean_plus_contrast_cap1024_balanced_accuracy": 0.8795012626262628,
+      "uniform_mean_plus_contrast_cap1024_difference_ci95": [0.0011803977272727125, 0.007398989898989894],
+      "uniform_mean_plus_contrast_cap1024_independent_accuracy": 0.8265025252525252,
+      "uniform_mean_plus_contrast_cap1024_subject_balanced_accuracy": 0.8798387096774194,
+      "uniform_mean_plus_contrast_cap1024_subject_difference_ci95": [-0.0010752688172042954, 0.00940860215053764],
+      "uniform_mean_plus_contrast_cap1024_seed_differences": {
+        "11": 0.006029040404040287,
+        "23": 0.006881313131313016,
+        "37": 0.007354797979797878,
+        "51": 0.0011047979797980112,
+        "71": 0.00031565656565657463
+      },
+      "uniform_mean_plus_contrast_cap2048_balanced_accuracy": 0.8799242424242427,
+      "uniform_mean_plus_contrast_cap2048_independent_accuracy": 0.8316224747474747,
+      "cap2048_independent_minus_primary_cap1024_ci95": [0.0025755997474747228, 0.011003787878787873],
+      "cap2048_matched_independent_difference_ci95": [0.0013255997474747349, 0.007424400252525244],
+      "cap2048_subject_balanced_accuracy": 0.880241935483871,
+      "cap2048_subject_balanced_ci95": [0.8439516129032257, 0.9106199596774194],
+      "cap2048_qc_balanced_accuracy": 0.898888888888889,
+      "cap2048_subject_independent_accuracy": 0.8318548387096774,
+      "cap2048_subject_independent_ci95": [0.7978494623655913, 0.8616263440860216],
+      "cap2048_qc_independent_accuracy": 0.8490972222222221,
+      "fixed_cap2048_balanced_accuracy": 0.8837752525252526,
+      "fixed_cap2048_independent_accuracy": 0.8251578282828284,
+      "interpretation": "The first learned component is mean-like and the second is a stable early-to-late contrast. The contrast alone is insufficient, but mean plus contrast gives a small repeated balanced gain. Ranks 3 and 4 do not improve on rank 2. Expanding the matched covariance cap to 2048 yields the clearest independent-decoding gain."
+    },
+    "conclusion": "Ordered sequence extraction succeeded. Single global temporal filters are neutral, but a two-component representation combining the uniform mean with a training-subject-only learned early-to-late contrast produces a small, repeatable gain. The 2048-cap version is the strongest zero-label independent decoder at 0.8316 and improves significantly over the original 1024 mean hierarchy; its 0.8799 balanced score is promising but remains exploratory because subject-level uncertainty crosses zero. Keep 0.8752 as the conservative balanced benchmark while reporting the multi-filter model separately."
   }
 }

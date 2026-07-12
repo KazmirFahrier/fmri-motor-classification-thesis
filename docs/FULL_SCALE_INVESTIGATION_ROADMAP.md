@@ -89,6 +89,9 @@ Interpretation: the useful signal is late in the current extracted event window.
 - Ordered eight-volume sequence extraction completed for all 62 subjects and exactly reconstructs the mean hierarchy baseline.
 - A training-subject-only regularized Fisher temporal filter reaches `0.8740` balanced accuracy, while un-smoothed Fisher and SVD controls reach `0.8736` and `0.8737`; none improves independent or arm-pair performance.
 - Learned filter weights are highly stable and collapse toward a gently late-weighted mean. Close single global temporal filtering; future sequence work must learn multiple temporal components or lag-specific spatial maps.
+- A learned temporal bank succeeds modestly where one filter fails. Rank 2 reaches `0.87884` balanced accuracy; ranks 3 and 4 plateau at `0.87878` and `0.87864`.
+- The useful decomposition is uniform mean plus a learned early-to-late arm contrast. This reaches `0.87950` at the 1,024-feature cap and improves all five repeated seeds; the contrast alone is unusable (`0.8031`).
+- With the bounded 2,048-feature covariance cap, mean plus contrast reaches `0.87992` balanced and `0.83162` independent accuracy. The independent gain over the original primary model is supported by a positive repeated-fold interval; balanced subject-level uncertainty still crosses zero.
 
 Interpretation: mean-window spatial covariance is near its practical limit, and neither handcrafted temporal bases nor a learned global temporal filter unlock the remaining arm errors. If there is more recoverable sequence signal, it requires lag-specific spatial patterns, multiple temporal components, calibration/personalization, or subject-specific geometry.
 
@@ -253,6 +256,8 @@ Priority: medium-low until the preprocessing and representation questions are cl
 | Fixed `3:8` arm pair branch | `0.7955` pair accuracy |
 | Fixed `3:8` temporal-basis selected arm branch | `0.8357` balanced arm accuracy versus `0.8358` mean-only |
 | Fixed `3:8` mean-plus-tail hierarchy | `0.8766` balanced accuracy; not meaningfully above `0.8752` baseline |
+| Learned uniform-mean + arm-contrast hierarchy, 1,024 cap | `0.8795` balanced; exploratory positive temporal result |
+| Learned uniform-mean + arm-contrast hierarchy, 2,048 cap | `0.8799` balanced; `0.8316` independent, strongest zero-label independent decoder |
 | Fixed `3:8` hierarchy + validation-selected arm calibration, 3 runs | `0.8861` subject-averaged balanced accuracy |
 | Fixed `3:8` hierarchy + validation-selected arm calibration, 5 runs | `0.8913` subject-averaged balanced accuracy; `0.9088` QC-60 |
 | Fixed `3:8` hierarchy + arm calibration, independent prediction, 5 runs | `0.8430` accuracy |
@@ -266,7 +271,7 @@ Priority: medium-low until the preprocessing and representation questions are cl
 
 ## Immediate Next Experiments
 
-1. Test a low-rank multi-filter or lag-specific spatial sequence model with strict training-subject-only fitting; single global filters are closed.
+1. Confirm or reject the mean-plus-contrast temporal gain with nested rank/cap selection or an additional independent cohort before promoting its balanced score.
 2. Test hierarchical/Bayesian arm shrinkage only if it uses richer target geometry than calibration accuracy thresholds.
 3. Extend targeted raw/post-detrend QC to the worst run-level cases from `sub-54`, `sub-63`, and `sub-20`, and define a post-repair QC rule.
 4. Compare transductive run detrending with training-only nuisance regression or domain-invariant temporal residualization.

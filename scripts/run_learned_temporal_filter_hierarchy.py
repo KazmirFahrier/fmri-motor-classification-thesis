@@ -63,7 +63,12 @@ def learn_temporal_filter(
     method: str = "fisher",
     covariance_shrinkage: float = 0.5,
     smoothness: float = 1.0,
+    filter_count: int = 1,
 ) -> tuple[np.ndarray, dict]:
+    if filter_count < 1 or filter_count > sequence.shape[1]:
+        raise ValueError(
+            f"filter_count must be in [1, {sequence.shape[1]}], got {filter_count}."
+        )
     pair_idx = train_idx[np.isin(y[train_idx], classes)]
     class_indices = [pair_idx[y[pair_idx] == class_id] for class_id in classes]
     class_means = np.stack(
@@ -85,7 +90,8 @@ def learn_temporal_filter(
 
     if method == "svd":
         eigenvalues, eigenvectors = np.linalg.eigh(signal)
-        weights = eigenvectors[:, int(np.argmax(eigenvalues))]
+        selected_vectors = eigenvectors[:, np.argsort(eigenvalues)[::-1][:filter_count]]
+        weight_bank = selected_vectors.T
     elif method == "fisher":
         regularized = (1.0 - covariance_shrinkage) * covariance
         regularized += covariance_shrinkage * scale * np.eye(len(covariance))
@@ -98,29 +104,40 @@ def learn_temporal_filter(
         ) @ eigenvectors.T
         whitened_signal = inverse_sqrt @ signal @ inverse_sqrt
         signal_values, signal_vectors = np.linalg.eigh(whitened_signal)
-        weights = inverse_sqrt @ signal_vectors[:, int(np.argmax(signal_values))]
+        selected_vectors = signal_vectors[
+            :, np.argsort(signal_values)[::-1][:filter_count]
+        ]
+        weight_bank = (inverse_sqrt @ selected_vectors).T
     else:
         raise ValueError(f"Unknown temporal filter method: {method}")
 
-    weights /= max(float(np.linalg.norm(weights)), 1e-12)
-    if float(np.sum(weights)) < 0:
-        weights = -weights
+    for filter_idx in range(len(weight_bank)):
+        weights = weight_bank[filter_idx]
+        weights /= max(float(np.linalg.norm(weights)), 1e-12)
+        if float(np.sum(weights)) < 0:
+            weights *= -1.0
+    returned_weights = weight_bank[0] if filter_count == 1 else weight_bank
+    weight_sums = [float(np.sum(weights)) for weights in weight_bank]
+    peak_lags = [int(np.argmax(np.abs(weights))) for weights in weight_bank]
     diagnostics = {
         "classes": list(classes),
         "method": method,
         "covariance_shrinkage": covariance_shrinkage,
         "smoothness": smoothness,
-        "weights": weights.tolist(),
-        "weight_sum": float(np.sum(weights)),
-        "peak_lag": int(np.argmax(np.abs(weights))),
+        "filter_count": filter_count,
+        "weights": returned_weights.tolist(),
+        "weight_sum": weight_sums[0] if filter_count == 1 else weight_sums,
+        "peak_lag": peak_lags[0] if filter_count == 1 else peak_lags,
         "signal_trace": float(np.trace(signal)),
         "noise_trace": float(np.trace(covariance)),
     }
-    return weights, diagnostics
+    return returned_weights, diagnostics
 
 
 def filtered_map(sequence: np.ndarray, weights: np.ndarray) -> np.ndarray:
-    return np.einsum("ntf,t->nf", sequence, weights, optimize=True).astype(np.float32)
+    weight_bank = np.atleast_2d(weights)
+    projected = np.einsum("ntf,kt->nkf", sequence, weight_bank, optimize=True)
+    return projected.reshape(len(sequence), -1).astype(np.float32)
 
 
 def subject_metrics(
@@ -227,6 +244,9 @@ def main() -> None:
     parser.add_argument("--filter-method", choices=["fisher", "svd"], default="fisher")
     parser.add_argument("--filter-covariance-shrinkage", type=float, default=0.5)
     parser.add_argument("--filter-smoothness", type=float, default=1.0)
+    parser.add_argument("--filter-count", type=int, default=1)
+    parser.add_argument("--filter-components", nargs="*", type=int)
+    parser.add_argument("--prepend-uniform-mean", action="store_true")
     parser.add_argument("--batch-size", type=int, default=64)
     parser.add_argument("--split-limit", type=int)
     parser.add_argument("--bootstrap-iterations", type=int, default=20000)
@@ -268,10 +288,30 @@ def main() -> None:
             args.filter_method,
             args.filter_covariance_shrinkage,
             args.filter_smoothness,
+            args.filter_count,
         )
         diagnostics["split"] = split_name
+        weight_bank = np.atleast_2d(weights)
+        if args.filter_components is not None:
+            if not args.filter_components:
+                raise ValueError("--filter-components requires at least one index.")
+            if min(args.filter_components) < 0 or max(args.filter_components) >= len(weight_bank):
+                raise ValueError(
+                    f"Filter component indices {args.filter_components} do not match "
+                    f"bank size {len(weight_bank)}."
+                )
+            weight_bank = weight_bank[args.filter_components]
+        if args.prepend_uniform_mean:
+            uniform = np.full(
+                (1, sequence.shape[1]),
+                1.0 / np.sqrt(sequence.shape[1]),
+                dtype=np.float64,
+            )
+            weight_bank = np.concatenate([uniform, weight_bank], axis=0)
+        diagnostics["applied_weights"] = weight_bank.tolist()
+        diagnostics["applied_filter_count"] = len(weight_bank)
         filter_diagnostics.append(diagnostics)
-        arm_native = filtered_map(sequence, weights)
+        arm_native = filtered_map(sequence, weight_bank)
         arm_pair_x, arm_shape = transform_scale(
             arm_native, shape, baseline["pair_transform"], args.batch_size
         )
@@ -353,6 +393,9 @@ def main() -> None:
         "filter_method": args.filter_method,
         "filter_covariance_shrinkage": args.filter_covariance_shrinkage,
         "filter_smoothness": args.filter_smoothness,
+        "filter_count": args.filter_count,
+        "filter_components": args.filter_components,
+        "prepend_uniform_mean": args.prepend_uniform_mean,
         "detrend_by_lag": detrend_rows,
         "filter_diagnostics": filter_diagnostics,
         "rows": rows,
