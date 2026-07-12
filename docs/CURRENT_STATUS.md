@@ -238,6 +238,9 @@ For the running full-scale investigation checklist, see [Full-Scale Investigatio
 - The mechanism is complementary dynamics. Component 1 is mean-like; component 2 is a stable early-to-late contrast peaking at lag 7 in every fold. The contrast alone collapses to `0.8031`, while an explicit uniform mean plus learned contrast improves all five repeated seeds and reaches `0.87950` balanced accuracy at the 1,024 cap.
 - The bounded 2,048-cap interaction reaches `0.87992` balanced and `0.83162` independent accuracy. Independent decoding improves over the original 1,024 mean hierarchy by `+0.00684` with paired interval `+0.00258` to `+0.01100`; the fixed partition moves in the same direction. This is the strongest zero-label independent model.
 - Subject-averaged 2,048-cap mean-plus-contrast performance is `0.88024` balanced and `0.83185` independent across all 62 subjects, or `0.89889`/`0.84910` in the QC-60 stratum. Keep `0.8752` as the conservative primary balanced benchmark because the subject-level balanced gain interval still crosses zero; report `0.8799` as an exploratory temporal improvement.
+- A confirmatory outer-safe selector now chooses among mean-cap-1024, mean-plus-contrast-cap-1024, and mean-plus-contrast-cap-2048 using four inner subject folds. It selects a temporal model in 26/30 outer folds (21 at cap 2,048) and reaches `0.88056` balanced plus `0.83142` independent accuracy.
+- The selected independent gain over the original primary model is confirmed under both fold bootstrap (`+0.00326` to `+0.01039`) and subject bootstrap (`+0.00249` to `+0.01082`), with 40 subjects improving, four tying, and 18 worsening. Subject-averaged independent accuracy is `0.83165`, or `0.84889` in QC-60.
+- Selected balanced improvement has a positive fold interval but its subject interval remains `-0.00175` to `+0.01237`. Use the nested selector as the primary zero-label independent decoder; keep `0.8752` as the conservative balanced headline and report selected `0.8806` as supportive design-aware evidence.
 
 ## Current Metrics Snapshot
 
@@ -246,7 +249,7 @@ For the running full-scale investigation checklist, see [Full-Scale Investigatio
 | Original 9-subject pooled split | Historical baseline: accuracy 0.8522, MCC 0.8055, ROC-AUC 0.95, PR-AUC 0.88. |
 | Full-dataset pooled split | Stopped at epoch 25 by controlled policy. Final validation snapshot: accuracy 0.2629, balanced accuracy 0.2648, macro F1 0.2501, MCC 0.0206. Training accuracy reached 0.5690, so the model is fitting training data without meaningful validation generalization. |
 | Full-dataset subject-wise CV + holdout | Complete. All five CV folds and final holdout are chance-level: accuracy 0.25, balanced accuracy 0.25, macro F1 0.10, MCC 0.0. |
-| Corrected continuous-event modeling | The conservative repeated balanced benchmark remains `0.8752` from the mean-window full-covariance hierarchy (`0.8941` QC-60). A two-component uniform-mean plus learned arm-contrast representation reaches exploratory balanced accuracy `0.8799` and the strongest zero-label independent accuracy `0.8316` (`0.8491` QC-60 independent). Five-run labeled arm calibration remains a separate personalization result at `0.8913`. |
+| Corrected continuous-event modeling | The conservative repeated balanced benchmark remains `0.8752` from the mean-window full-covariance hierarchy (`0.8941` QC-60). A fully inner-selected mean/contrast/cap hierarchy reaches supportive balanced accuracy `0.8806` and the strongest confirmed zero-label independent accuracy `0.8314` (`0.8489` QC-60 independent). Five-run labeled arm calibration remains a separate personalization result at `0.8913`. |
 
 ## Why This Matters
 

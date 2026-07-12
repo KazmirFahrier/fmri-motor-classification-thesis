@@ -47,7 +47,8 @@
     "svd": "/Users/USER/Documents/New project/status_2026-07-11_event_sequence_full_cohort_complete/learned_temporal_filter_svd_repeated.json",
     "multi_filter_dir": "/Users/USER/Documents/New project/status_2026-07-12_event_sequence_multifilter",
     "mean_plus_contrast_cap1024": "/Users/USER/Documents/New project/status_2026-07-12_event_sequence_multifilter/uniform_mean_plus_learned_contrast_repeated.json",
-    "mean_plus_contrast_cap2048": "/Users/USER/Documents/New project/status_2026-07-12_event_sequence_multifilter/uniform_mean_plus_learned_contrast_cap2048_repeated.json"
+    "mean_plus_contrast_cap2048": "/Users/USER/Documents/New project/status_2026-07-12_event_sequence_multifilter/uniform_mean_plus_learned_contrast_cap2048_repeated.json",
+    "nested_candidate_selection": "/Users/USER/Documents/New project/status_2026-07-12_event_sequence_multifilter/nested_candidate_selection_repeated.json"
   },
   "metrics": {
     "extraction": {
@@ -119,6 +120,29 @@
       "fixed_cap2048_independent_accuracy": 0.8251578282828284,
       "interpretation": "The first learned component is mean-like and the second is a stable early-to-late contrast. The contrast alone is insufficient, but mean plus contrast gives a small repeated balanced gain. Ranks 3 and 4 do not improve on rank 2. Expanding the matched covariance cap to 2048 yields the clearest independent-decoding gain."
     },
-    "conclusion": "Ordered sequence extraction succeeded. Single global temporal filters are neutral, but a two-component representation combining the uniform mean with a training-subject-only learned early-to-late contrast produces a small, repeatable gain. The 2048-cap version is the strongest zero-label independent decoder at 0.8316 and improves significantly over the original 1024 mean hierarchy; its 0.8799 balanced score is promising but remains exploratory because subject-level uncertainty crosses zero. Keep 0.8752 as the conservative balanced benchmark while reporting the multi-filter model separately."
+    "nested_candidate_selection": {
+      "selection_protocol": "four inner subject folds choose mean-cap1024, mean-plus-contrast-cap1024, or mean-plus-contrast-cap2048 separately inside every outer split",
+      "candidate_counts": {
+        "mean_cap1024": 4,
+        "mean_contrast_cap1024": 5,
+        "mean_contrast_cap2048": 21
+      },
+      "balanced_accuracy": 0.8805555555555556,
+      "balanced_fold_difference_ci95": [0.0010795454545454606, 0.009709595959595954],
+      "balanced_subject_difference_ci95": [-0.0017473118279569704, 0.012365591397849488],
+      "subject_balanced_accuracy": 0.8809139784946237,
+      "qc_balanced_accuracy": 0.8997222222222222,
+      "independent_accuracy": 0.8314204545454545,
+      "independent_fold_difference_ci95": [0.0032637310606060533, 0.010385101010100999],
+      "independent_subject_difference_ci95": [0.002486559139784969, 0.010819892473118282],
+      "subject_independent_accuracy": 0.8316532258064516,
+      "qc_independent_accuracy": 0.8488888888888889,
+      "independent_subject_outcomes": {
+        "improved": 40,
+        "tied": 4,
+        "worsened": 18
+      }
+    },
+    "conclusion": "Ordered sequence extraction succeeded. Single global temporal filters are neutral, but a two-component representation combining the uniform mean with a training-subject-only learned early-to-late contrast produces a small, repeatable gain. A fully training-subject-only selector chooses temporal candidates in 26 of 30 outer folds and confirms the strongest zero-label independent accuracy at 0.8314 with positive fold and subject intervals. Selected balanced accuracy reaches 0.8806 with a positive fold interval, but its subject interval still crosses zero. Use the nested selector as the primary independent decoder and retain 0.8752 as the conservative balanced benchmark."
   }
 }
