@@ -94,6 +94,7 @@ Interpretation: the useful signal is late in the current extracted event window.
 - With the bounded 2,048-feature covariance cap, mean plus contrast reaches `0.87992` balanced and `0.83162` independent accuracy. The independent gain over the original primary model is supported by a positive repeated-fold interval; balanced subject-level uncertainty still crosses zero.
 - Four-fold inner subject selection among mean-cap-1024 and the two mean-plus-contrast caps chooses temporal candidates in 26/30 outer folds. The selected model reaches `0.88056` balanced and `0.83142` independent accuracy.
 - Independent improvement survives both fold and subject bootstrap, establishing the selector as the strongest zero-label independent decoder. Balanced fold uncertainty is positive but subject uncertainty crosses zero, so retain `0.8752` as the conservative design-aware headline.
+- Selecting candidates separately on inner independent accuracy is worse (`0.8307`) than sharing the balanced selector (`0.8314`). Keep balanced-shared candidate selection; the rule-specific criterion over-selects cap 2,048.
 
 Interpretation: mean-window spatial covariance is near its practical limit, and neither handcrafted temporal bases nor a learned global temporal filter unlock the remaining arm errors. If there is more recoverable sequence signal, it requires lag-specific spatial patterns, multiple temporal components, calibration/personalization, or subject-specific geometry.
 

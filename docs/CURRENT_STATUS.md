@@ -241,6 +241,7 @@ For the running full-scale investigation checklist, see [Full-Scale Investigatio
 - A confirmatory outer-safe selector now chooses among mean-cap-1024, mean-plus-contrast-cap-1024, and mean-plus-contrast-cap-2048 using four inner subject folds. It selects a temporal model in 26/30 outer folds (21 at cap 2,048) and reaches `0.88056` balanced plus `0.83142` independent accuracy.
 - The selected independent gain over the original primary model is confirmed under both fold bootstrap (`+0.00326` to `+0.01039`) and subject bootstrap (`+0.00249` to `+0.01082`), with 40 subjects improving, four tying, and 18 worsening. Subject-averaged independent accuracy is `0.83165`, or `0.84889` in QC-60.
 - Selected balanced improvement has a positive fold interval but its subject interval remains `-0.00175` to `+0.01237`. Use the nested selector as the primary zero-label independent decoder; keep `0.8752` as the conservative balanced headline and report selected `0.8806` as supportive design-aware evidence.
+- A rule-specific selector using inner independent accuracy chooses the 2,048-cap temporal candidate in 25/30 folds but lowers outer independent accuracy to `0.83068`. The balanced inner criterion is the better regularizer and remains the shared candidate-selection metric for both deployment rules.
 
 ## Current Metrics Snapshot
 

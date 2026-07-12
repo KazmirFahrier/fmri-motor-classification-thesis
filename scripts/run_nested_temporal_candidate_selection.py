@@ -84,7 +84,7 @@ def arm_scores(
     return pair_scores(arm_x, val_idx, model)
 
 
-def exact_balanced_accuracy(
+def exact_accuracies(
     coarse_scores: np.ndarray,
     leg_scores: np.ndarray,
     arm_scores_value: np.ndarray,
@@ -92,7 +92,7 @@ def exact_balanced_accuracy(
     y: np.ndarray,
     val_idx: np.ndarray,
     records: list[dict],
-) -> float:
+) -> dict[str, float]:
     result = evaluate_scores(
         coarse_scores,
         {"leg": leg_scores, "arm": arm_scores_value},
@@ -101,7 +101,10 @@ def exact_balanced_accuracy(
         val_idx,
         records,
     )
-    return float(result["balanced"]["balanced_accuracy"])
+    return {
+        rule: float(metric_row["balanced_accuracy"])
+        for rule, metric_row in result.items()
+    }
 
 
 def selected_summary(rows: list[dict]) -> list[dict]:
@@ -201,6 +204,11 @@ def main() -> None:
     parser.add_argument("--out-json", required=True)
     parser.add_argument("--sequence-key", default="offset_3_length_8_sequence")
     parser.add_argument("--inner-subject-fold-count", type=int, default=4)
+    parser.add_argument(
+        "--selection-mode",
+        choices=["balanced_shared", "rule_specific"],
+        default="balanced_shared",
+    )
     parser.add_argument("--batch-size", type=int, default=64)
     parser.add_argument("--split-limit", type=int)
     parser.add_argument("--bootstrap-iterations", type=int, default=20000)
@@ -251,7 +259,10 @@ def main() -> None:
             "subject",
             args.inner_subject_fold_count,
         )
-        candidate_scores: dict[str, list[float]] = defaultdict(list)
+        candidate_scores: dict[str, dict[str, list[float]]] = {
+            candidate: {"balanced": [], "independent": []}
+            for candidate in CANDIDATES
+        }
         for inner_split in inner:
             train_idx = inner_split["train_idx"]
             val_idx = inner_split["val_idx"]
@@ -323,7 +334,7 @@ def main() -> None:
                 hyper2048[split_name],
             )
             values = {
-                "mean_cap1024": exact_balanced_accuracy(
+                "mean_cap1024": exact_accuracies(
                     coarse1024,
                     leg1024,
                     mean_arm1024,
@@ -332,7 +343,7 @@ def main() -> None:
                     val_idx,
                     records,
                 ),
-                "mean_contrast_cap1024": exact_balanced_accuracy(
+                "mean_contrast_cap1024": exact_accuracies(
                     coarse1024,
                     leg1024,
                     temporal_arm1024,
@@ -341,7 +352,7 @@ def main() -> None:
                     val_idx,
                     records,
                 ),
-                "mean_contrast_cap2048": exact_balanced_accuracy(
+                "mean_contrast_cap2048": exact_accuracies(
                     coarse2048,
                     leg2048,
                     temporal_arm2048,
@@ -351,43 +362,64 @@ def main() -> None:
                     records,
                 ),
             }
-            for candidate, accuracy in values.items():
-                candidate_scores[candidate].append(accuracy)
+            for candidate, accuracy_by_rule in values.items():
+                for rule, accuracy in accuracy_by_rule.items():
+                    candidate_scores[candidate][rule].append(accuracy)
                 selection_rows.append(
                     {
                         "outer_split": split_name,
                         "inner_split": inner_split["split"],
                         "candidate": candidate,
-                        "balanced_accuracy": accuracy,
+                        "balanced_accuracy": accuracy_by_rule["balanced"],
+                        "independent_accuracy": accuracy_by_rule["independent"],
                     }
                 )
 
-        means = {
-            candidate: float(np.mean(candidate_scores[candidate]))
-            for candidate in CANDIDATES
+        means_by_rule = {
+            rule: {
+                candidate: float(np.mean(candidate_scores[candidate][rule]))
+                for candidate in CANDIDATES
+            }
+            for rule in ("balanced", "independent")
         }
-        winner = min(
-            CANDIDATES,
-            key=lambda candidate: (-means[candidate], CANDIDATES.index(candidate)),
-        )
         for rule in ("balanced", "independent"):
+            selection_rule = (
+                "balanced" if args.selection_mode == "balanced_shared" else rule
+            )
+            means = means_by_rule[selection_rule]
+            winner = min(
+                CANDIDATES,
+                key=lambda candidate: (
+                    -means[candidate],
+                    CANDIDATES.index(candidate),
+                ),
+            )
             selected = dict(source_rows[winner][(split_name, rule)])
             selected["selected_candidate"] = winner
-            selected["inner_candidate_balanced_accuracy"] = means
+            selected["selection_metric"] = selection_rule
+            selected["inner_candidate_accuracy"] = means
             selected_rows.append(selected)
 
     summary = selected_summary(selected_rows)
     result = {
         "checkpoint_dir": args.checkpoint_dir,
         "candidates": list(CANDIDATES),
-        "selection_metric": "mean inner-subject-fold exact balanced accuracy",
-        "candidate_counts": dict(
-            Counter(
-                row["selected_candidate"]
-                for row in selected_rows
-                if row["prediction_rule"] == "balanced"
-            )
+        "selection_mode": args.selection_mode,
+        "selection_metric": (
+            "inner-subject-fold exact balanced accuracy shared across prediction rules"
+            if args.selection_mode == "balanced_shared"
+            else "matching inner-subject-fold exact accuracy for each prediction rule"
         ),
+        "candidate_counts": {
+            rule: dict(
+                Counter(
+                    row["selected_candidate"]
+                    for row in selected_rows
+                    if row["prediction_rule"] == rule
+                )
+            )
+            for rule in ("balanced", "independent")
+        },
         "detrend_by_lag": detrend_rows,
         "selection_rows": selection_rows,
         "selected_rows": selected_rows,

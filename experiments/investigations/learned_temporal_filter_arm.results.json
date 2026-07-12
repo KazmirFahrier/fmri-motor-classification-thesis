@@ -48,7 +48,8 @@
     "multi_filter_dir": "/Users/USER/Documents/New project/status_2026-07-12_event_sequence_multifilter",
     "mean_plus_contrast_cap1024": "/Users/USER/Documents/New project/status_2026-07-12_event_sequence_multifilter/uniform_mean_plus_learned_contrast_repeated.json",
     "mean_plus_contrast_cap2048": "/Users/USER/Documents/New project/status_2026-07-12_event_sequence_multifilter/uniform_mean_plus_learned_contrast_cap2048_repeated.json",
-    "nested_candidate_selection": "/Users/USER/Documents/New project/status_2026-07-12_event_sequence_multifilter/nested_candidate_selection_repeated.json"
+    "nested_candidate_selection": "/Users/USER/Documents/New project/status_2026-07-12_event_sequence_multifilter/nested_candidate_selection_repeated.json",
+    "rule_specific_nested_selection": "/Users/USER/Documents/New project/status_2026-07-12_event_sequence_multifilter/rule_specific_nested_selection_repeated.json"
   },
   "metrics": {
     "extraction": {
@@ -141,6 +142,15 @@
         "improved": 40,
         "tied": 4,
         "worsened": 18
+      },
+      "rule_specific_independent_control": {
+        "mean_cap1024_count": 4,
+        "mean_contrast_cap1024_count": 1,
+        "mean_contrast_cap2048_count": 25,
+        "independent_accuracy": 0.830675505050505,
+        "fold_difference_ci95": [0.0021464646464646334, 0.009728535353535335],
+        "subject_difference_ci95": [0.001142473118279581, 0.010551075268817201],
+        "conclusion": "Selecting specifically on inner independent accuracy over-selects cap 2048 and underperforms the balanced-shared selector. Keep balanced-shared selection as the primary policy for both prediction rules."
       }
     },
     "conclusion": "Ordered sequence extraction succeeded. Single global temporal filters are neutral, but a two-component representation combining the uniform mean with a training-subject-only learned early-to-late contrast produces a small, repeatable gain. A fully training-subject-only selector chooses temporal candidates in 26 of 30 outer folds and confirms the strongest zero-label independent accuracy at 0.8314 with positive fold and subject intervals. Selected balanced accuracy reaches 0.8806 with a positive fold interval, but its subject interval still crosses zero. Use the nested selector as the primary independent decoder and retain 0.8752 as the conservative balanced benchmark."
