@@ -70,6 +70,7 @@ Current investigation registry entries:
 - `hierarchy_subject_calibration`: completed repeated subject-fold test of labeled arm/leg/both-branch calibration in the full four-class hierarchy.
 - `learned_temporal_filter_arm`: ordered eight-volume sequence extraction and training-subject-only learned temporal-filter follow-up.
 - `targeted_weak_run_qc`: source-image timing, raw event geometry, and six-run motion forensics for weak runs from `sub-54`, `sub-63`, and `sub-20`.
+- `repetition_consistency_assignment`: completed nested exact balanced decoder combining hierarchy evidence with unlabeled within-assigned-class repetition similarity.
 
 These files are meant to make the repo reflect the real research process: long-running Kaggle sessions, resumable checkpoints, and metrics updated only when a run actually finishes.
 

@@ -1,0 +1,67 @@
+{
+  "experiment_id": "repetition_consistency_assignment",
+  "status": "complete",
+  "question": "Can the known two-repetitions-per-class run design improve balanced decoding by combining hierarchy scores with unlabeled within-assigned-class event similarity?",
+  "implementation": {
+    "forensic_decomposition": "scripts/analyze_weak_run_class_geometry.py",
+    "nested_evaluator": "scripts/run_nested_repetition_consistency_assignment.py",
+    "base_model": "inner-selected mean/temporal-contrast/covariance-cap hierarchy",
+    "assignment_solver": "exact enumeration of all 2,520 assignments with two events per class",
+    "similarity_feature": "full native offset-3 length-8 mean map after subject-run centering and linear event-time detrending",
+    "selection_protocol": "consistency weight chosen by four inner subject folds independently for every outer fold"
+  },
+  "acceptance_criteria": [
+    "Lambda zero must exactly reconstruct every stored balanced outer-fold result.",
+    "A nonzero weight must be selected using outer-training subjects only.",
+    "Repeated outer-fold and subject-level paired bootstrap intervals must exclude zero before promotion.",
+    "Independent decoding must remain separately reported because this layer requires known complete-run composition."
+  ],
+  "local_outputs": {
+    "status_dir": "/Users/USER/Documents/New project/status_2026-07-13_targeted_weak_run_qc",
+    "class_geometry": "/Users/USER/Documents/New project/status_2026-07-13_targeted_weak_run_qc/weak_run_class_geometry.json",
+    "one_fold_smoke": "/Users/USER/Documents/New project/status_2026-07-13_targeted_weak_run_qc/repetition_consistency_smoke.json",
+    "repeated_nested": "/Users/USER/Documents/New project/status_2026-07-13_targeted_weak_run_qc/nested_repetition_consistency_repeated.json"
+  },
+  "validation": {
+    "stored_fold_reconstruction_count": 30,
+    "maximum_reconstruction_error": 0.0,
+    "random_group_lambda_zero_checks": 100,
+    "random_group_mismatches": 0
+  },
+  "metrics": {
+    "selected_weight_counts": {"0.25": 22, "0.5": 8},
+    "baseline_fold_weighted_balanced_accuracy": 0.8805555555555556,
+    "selected_fold_weighted_balanced_accuracy": 0.8947916666666667,
+    "selected_subject_weighted_balanced_accuracy": 0.8950268817204301,
+    "selected_qc60_subject_weighted_balanced_accuracy": 0.9141666666666668,
+    "fold_mean_difference": 0.014236111111111126,
+    "fold_difference_ci95": [0.009299242424242444, 0.01910353535353538],
+    "subject_mean_difference": 0.01411290322580645,
+    "subject_difference_ci95": [0.007661290322580621, 0.020362903225806455],
+    "fold_outcomes": {"wins": 25, "ties": 2, "losses": 3},
+    "subject_outcomes": {"wins": 42, "ties": 6, "losses": 14},
+    "seed_differences": {
+      "11": 0.01464646464646463,
+      "23": 0.010669191919191967,
+      "37": 0.009248737373737381,
+      "51": 0.012626262626262652,
+      "71": 0.023989898989899006
+    },
+    "per_class_recall": {
+      "baseline": [0.9274193548, 0.9217741935, 0.8381720430, 0.8362903226],
+      "selected": [0.9370967742, 0.9301075269, 0.8577956989, 0.8551075269]
+    },
+    "focus_subject_changes": {
+      "sub-20": -0.05833333333333335,
+      "sub-54": 0.06666666666666676,
+      "sub-63": 0.03333333333333344,
+      "sub-42": 0.012500000000000067,
+      "sub-52": -0.004166666666666652
+    }
+  },
+  "decision": {
+    "promote_for_complete_balanced_runs": true,
+    "replace_independent_decoder": false,
+    "interpretation": "Nested repetition consistency gives a repeatable 1.42-point balanced gain with positive fold and subject intervals. It improves both leg and arm recalls and is not driven by excluding failed subjects. Use 0.8948 as the strongest zero-label complete-run balanced result and retain 0.8314 from the temporal candidate selector for independent or unbalanced deployment."
+  }
+}

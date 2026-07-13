@@ -26,7 +26,8 @@
     "status_dir": "/Users/USER/Documents/New project/status_2026-07-13_targeted_weak_run_qc",
     "targeted_raw_qc": "/Users/USER/Documents/New project/status_2026-07-13_targeted_weak_run_qc/targeted_weak_run_qc.json",
     "image_derived_motion": "/Users/USER/Documents/New project/status_2026-07-13_targeted_weak_run_qc/image_derived_motion_weak_subjects.json",
-    "summary": "/Users/USER/Documents/New project/status_2026-07-13_targeted_weak_run_qc/targeted_weak_run_qc_summary.json"
+    "summary": "/Users/USER/Documents/New project/status_2026-07-13_targeted_weak_run_qc/targeted_weak_run_qc_summary.json",
+    "class_geometry": "/Users/USER/Documents/New project/status_2026-07-13_targeted_weak_run_qc/weak_run_class_geometry.json"
   },
   "metrics": {
     "default_post_detrend": {
@@ -57,6 +58,12 @@
       "center_fd_p95_mm": -0.3498,
       "event_phase_fd_class_range": -0.1171,
       "event_dvars_class_range": -0.2675
+    },
+    "residual_negative_repeat_class_counts": {
+      "sub-20_run-03": 4,
+      "sub-54_run-06": 3,
+      "sub-63_run-04": 2,
+      "sub-63_run-06": 3
     }
   },
   "decision": {

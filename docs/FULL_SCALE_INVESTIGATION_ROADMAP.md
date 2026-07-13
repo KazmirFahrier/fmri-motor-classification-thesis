@@ -93,8 +93,9 @@ Interpretation: the useful signal is late in the current extracted event window.
 - The useful decomposition is uniform mean plus a learned early-to-late arm contrast. This reaches `0.87950` at the 1,024-feature cap and improves all five repeated seeds; the contrast alone is unusable (`0.8031`).
 - With the bounded 2,048-feature covariance cap, mean plus contrast reaches `0.87992` balanced and `0.83162` independent accuracy. The independent gain over the original primary model is supported by a positive repeated-fold interval; balanced subject-level uncertainty still crosses zero.
 - Four-fold inner subject selection among mean-cap-1024 and the two mean-plus-contrast caps chooses temporal candidates in 26/30 outer folds. The selected model reaches `0.88056` balanced and `0.83142` independent accuracy.
-- Independent improvement survives both fold and subject bootstrap, establishing the selector as the strongest zero-label independent decoder. Balanced fold uncertainty is positive but subject uncertainty crosses zero, so retain `0.8752` as the conservative design-aware headline.
+- Independent improvement survives both fold and subject bootstrap, establishing the selector as the strongest zero-label independent decoder. Its balanced fold uncertainty is positive but subject uncertainty crosses zero, so candidate selection alone did not replace the earlier design-aware headline.
 - Selecting candidates separately on inner independent accuracy is worse (`0.8307`) than sharing the balanced selector (`0.8314`). Keep balanced-shared candidate selection; the rule-specific criterion over-selects cap 2,048.
+- Exact nested repetition-consistency assignment resolves the balanced uncertainty. Training-only selection chooses a nonzero consistency weight in all 30 folds and raises balanced accuracy to `0.89479`, with positive fold and subject intervals and all five seeds improving. Use it only when complete two-repetitions-per-class run composition is known; independent accuracy remains `0.83142`.
 
 Interpretation: mean-window spatial covariance is near its practical limit, and neither handcrafted temporal bases nor a learned global temporal filter unlock the remaining arm errors. If there is more recoverable sequence signal, it requires lag-specific spatial patterns, multiple temporal components, calibration/personalization, or subject-specific geometry.
 
@@ -262,6 +263,7 @@ Priority: medium-low until the preprocessing and representation questions are cl
 | Learned uniform-mean + arm-contrast hierarchy, 1,024 cap | `0.8795` balanced; exploratory positive temporal result |
 | Learned uniform-mean + arm-contrast hierarchy, 2,048 cap | `0.8799` balanced; `0.8316` independent, strongest zero-label independent decoder |
 | Inner-selected mean/contrast/cap hierarchy | `0.8806` balanced; `0.8314` independent with positive fold and subject gain intervals |
+| Nested repetition-consistency assignment | `0.8948` balanced; `0.9142` QC-60; positive fold and subject gain intervals |
 | Fixed `3:8` hierarchy + validation-selected arm calibration, 3 runs | `0.8861` subject-averaged balanced accuracy |
 | Fixed `3:8` hierarchy + validation-selected arm calibration, 5 runs | `0.8913` subject-averaged balanced accuracy; `0.9088` QC-60 |
 | Fixed `3:8` hierarchy + arm calibration, independent prediction, 5 runs | `0.8430` accuracy |
@@ -275,7 +277,7 @@ Priority: medium-low until the preprocessing and representation questions are cl
 
 ## Immediate Next Experiments
 
-1. Preserve the nested temporal selector as the zero-label independent model and seek external-cohort confirmation before promoting `0.8806` as the primary balanced score.
+1. Preserve `0.8948` repetition-consistency decoding as the complete-run balanced model and `0.8314` temporal selection as the independent model; seek external-cohort confirmation for both.
 2. Test hierarchical/Bayesian arm shrinkage only if it uses richer target geometry than calibration accuracy thresholds.
 3. Completed: targeted raw/post-detrend QC and all-run motion for `sub-54`, `sub-63`, and `sub-20` reject a universal motion or exclusion rule. Keep detrending and flag residual weak runs for response-topography/run-state analysis without deleting them from primary estimates.
 4. Compare transductive run detrending with training-only nuisance regression or domain-invariant temporal residualization.
