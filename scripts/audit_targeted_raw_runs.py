@@ -4,10 +4,14 @@ from __future__ import annotations
 import argparse
 import csv
 import json
+import tempfile
 from pathlib import Path
 
+import boto3
 import nibabel as nib
 import numpy as np
+from botocore import UNSIGNED
+from botocore.config import Config
 
 
 CLASS_NAMES = [
@@ -16,6 +20,37 @@ CLASS_NAMES = [
     "Forearm movements",
     "Upper arm movements",
 ]
+
+TRIAL_TYPE_CODE_MAP = {
+    3: "Left leg movements",
+    4: "Right leg movements",
+    5: "Forearm movements",
+    6: "Upper arm movements",
+}
+
+
+def source_keys(dataset: str, subject: str, run_id: int) -> tuple[str, str]:
+    stem = f"{subject}_ses-1_task-motor_run-{run_id:02d}"
+    prefix = f"{dataset}/{subject}/ses-1/func"
+    return (
+        f"{prefix}/{stem}_bold.nii.gz",
+        f"{prefix}/{stem}_events.tsv",
+    )
+
+
+def find_cached(
+    cache_dirs: list[Path], subject: str, run_id: int, suffix: str
+) -> Path | None:
+    names = [
+        f"{subject}_run-{run_id:02d}_{suffix}",
+        f"{subject}_run-{run_id}_{suffix}",
+    ]
+    for cache_dir in cache_dirs:
+        for name in names:
+            candidate = cache_dir / name
+            if candidate.exists():
+                return candidate
+    return None
 
 
 def robust_z(values: np.ndarray) -> np.ndarray:
@@ -27,6 +62,17 @@ def robust_z(values: np.ndarray) -> np.ndarray:
     return 0.67448975 * (values - median) / mad
 
 
+def normalize_trial_type(value: str) -> str:
+    value = str(value).strip()
+    if value in CLASS_NAMES:
+        return value
+    try:
+        code = int(float(value))
+    except ValueError:
+        return value
+    return TRIAL_TYPE_CODE_MAP.get(code, value)
+
+
 def l2_normalize(values: np.ndarray) -> np.ndarray:
     denom = np.maximum(np.linalg.norm(values, axis=1, keepdims=True), 1e-8)
     return np.nan_to_num(values / denom, nan=0.0, posinf=0.0, neginf=0.0)
@@ -35,15 +81,19 @@ def l2_normalize(values: np.ndarray) -> np.ndarray:
 def load_events(path: Path) -> list[dict]:
     with path.open(newline="") as handle:
         rows = list(csv.DictReader(handle, delimiter="\t"))
-    return [
-        {
-            "onset": float(row["onset"]),
-            "duration": float(row["duration"]),
-            "trial_type": row["trial_type"],
-        }
-        for row in rows
-        if row["trial_type"] in CLASS_NAMES
-    ]
+    events = []
+    for row in rows:
+        trial_type = normalize_trial_type(row["trial_type"])
+        if trial_type not in CLASS_NAMES:
+            continue
+        events.append(
+            {
+                "onset": float(row["onset"]),
+                "duration": float(row["duration"]),
+                "trial_type": trial_type,
+            }
+        )
+    return events
 
 
 def pattern_metrics(patterns: np.ndarray, labels: np.ndarray) -> dict:
@@ -233,8 +283,23 @@ def main() -> None:
         action="append",
         nargs=3,
         metavar=("LABEL", "BOLD_NIFTI", "EVENTS_TSV"),
-        required=True,
+        default=[],
         help="Repeat for each run to compare.",
+    )
+    parser.add_argument(
+        "--source-run",
+        action="append",
+        nargs=3,
+        metavar=("LABEL", "SUBJECT", "RUN_ID"),
+        default=[],
+        help="Download a source BIDS run from OpenNeuro for this audit.",
+    )
+    parser.add_argument("--bucket", default="openneuro.org")
+    parser.add_argument("--dataset", default="ds004044")
+    parser.add_argument("--cache-dir", action="append", default=[])
+    parser.add_argument(
+        "--download-dir",
+        help="Preserve newly downloaded source files here instead of temporary storage.",
     )
     parser.add_argument("--out-json", required=True)
     parser.add_argument("--repetition-time", type=float, default=2.0)
@@ -248,6 +313,9 @@ def main() -> None:
         int(value) for value in args.geometry_window_lengths.split(",")
     ]
 
+    if not args.run and not args.source_run:
+        parser.error("At least one --run or --source-run is required.")
+
     runs = {}
     for label, bold_path, events_path in args.run:
         runs[label] = summarize_run(
@@ -259,6 +327,46 @@ def main() -> None:
             geometry_offsets,
             geometry_window_lengths,
         )
+
+    if args.source_run:
+        cache_dirs = [Path(value) for value in args.cache_dir]
+        with tempfile.TemporaryDirectory(prefix="targeted-raw-qc-") as temporary_dir:
+            download_dir = (
+                Path(args.download_dir) if args.download_dir else Path(temporary_dir)
+            )
+            download_dir.mkdir(parents=True, exist_ok=True)
+            s3 = boto3.client("s3", config=Config(signature_version=UNSIGNED))
+            for label, subject, run_value in args.source_run:
+                if label in runs:
+                    raise ValueError(f"Duplicate run label: {label}")
+                run_id = int(run_value)
+                bold_key, events_key = source_keys(args.dataset, subject, run_id)
+                bold_path = find_cached(cache_dirs, subject, run_id, "bold.nii.gz")
+                events_path = find_cached(cache_dirs, subject, run_id, "events.tsv")
+                if bold_path is None:
+                    bold_path = download_dir / f"{subject}_run-{run_id:02d}_bold.nii.gz"
+                    if not bold_path.exists():
+                        print(f"downloading BOLD {label}", flush=True)
+                        s3.download_file(args.bucket, bold_key, str(bold_path))
+                if events_path is None:
+                    events_path = download_dir / f"{subject}_run-{run_id:02d}_events.tsv"
+                    if not events_path.exists():
+                        s3.download_file(args.bucket, events_key, str(events_path))
+                print(f"summarizing {label}", flush=True)
+                runs[label] = summarize_run(
+                    bold_path,
+                    events_path,
+                    args.repetition_time,
+                    args.start_offset,
+                    args.window_length,
+                    geometry_offsets,
+                    geometry_window_lengths,
+                )
+                runs[label]["source"] = {
+                    "bucket": args.bucket,
+                    "bold_key": bold_key,
+                    "events_key": events_key,
+                }
 
     result = {
         "repetition_time": args.repetition_time,

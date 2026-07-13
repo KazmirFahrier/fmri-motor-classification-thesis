@@ -1,0 +1,69 @@
+{
+  "experiment_id": "targeted_weak_run_qc",
+  "status": "complete",
+  "question": "Do the weakest post-detrend runs from sub-54, sub-63, and sub-20 reflect timing drift, gross motion, or residual run-specific response instability?",
+  "data_source": {
+    "openneuro_dataset": "ds004044",
+    "input_signal": "source task-motor BOLD plus source events.tsv",
+    "targeted_runs": [
+      "sub-54/run-01",
+      "sub-54/run-04",
+      "sub-54/run-06",
+      "sub-63/run-01",
+      "sub-63/run-04",
+      "sub-20/run-03"
+    ],
+    "stable_reference": "sub-62/run-03"
+  },
+  "implementation": {
+    "raw_qc": "scripts/audit_targeted_raw_runs.py",
+    "motion_qc": "scripts/audit_image_derived_motion.py",
+    "summarizer": "scripts/summarize_targeted_weak_run_qc.py",
+    "targeted_protocol": "raw offset-2 length-6 geometry plus offsets 0-6 and lengths 2/4/6, before and after unlabeled linear event-time detrending",
+    "motion_protocol": "all six runs for sub-20, sub-54, and sub-63 using raw-image phase-translation, center-of-signal, normalized DVARS, and offset-3 length-8 detrended event geometry"
+  },
+  "local_outputs": {
+    "status_dir": "/Users/USER/Documents/New project/status_2026-07-13_targeted_weak_run_qc",
+    "targeted_raw_qc": "/Users/USER/Documents/New project/status_2026-07-13_targeted_weak_run_qc/targeted_weak_run_qc.json",
+    "image_derived_motion": "/Users/USER/Documents/New project/status_2026-07-13_targeted_weak_run_qc/image_derived_motion_weak_subjects.json",
+    "summary": "/Users/USER/Documents/New project/status_2026-07-13_targeted_weak_run_qc/targeted_weak_run_qc_summary.json"
+  },
+  "metrics": {
+    "default_post_detrend": {
+      "sub-62_run-03": {"geometry": 0.8325, "accuracy": 0.75},
+      "sub-54_run-01": {"geometry": 0.3078, "accuracy": 0.125},
+      "sub-54_run-04": {"geometry": 0.3902, "accuracy": 0.5},
+      "sub-54_run-06": {"geometry": -0.2610, "accuracy": 0.0},
+      "sub-63_run-01": {"geometry": 0.5372, "accuracy": 0.375},
+      "sub-63_run-04": {"geometry": -0.1393, "accuracy": 0.5},
+      "sub-20_run-03": {"geometry": -0.2898, "accuracy": 0.125}
+    },
+    "best_window_post_detrend": {
+      "sub-54_run-01": {"window": "5:2", "geometry": 0.4839, "accuracy": 0.625},
+      "sub-54_run-04": {"window": "1:2", "geometry": 0.5290, "accuracy": 0.625},
+      "sub-54_run-06": {"window": "0:2", "geometry": 0.0015, "accuracy": 0.125},
+      "sub-63_run-01": {"window": "4:4", "geometry": 0.5657, "accuracy": 0.5},
+      "sub-63_run-04": {"window": "6:2", "geometry": -0.0337, "accuracy": 0.5},
+      "sub-20_run-03": {"window": "5:2", "geometry": -0.0730, "accuracy": 0.125}
+    },
+    "subject_mean_phase_fd_p95_mm": {
+      "sub-20": 0.0565,
+      "sub-54": 0.0438,
+      "sub-63": 0.0742
+    },
+    "pooled_within_subject_centered_motion_correlations": {
+      "dvars_p95_percent": -0.2488,
+      "phase_fd_p95_mm": -0.1967,
+      "center_fd_p95_mm": -0.3498,
+      "event_phase_fd_class_range": -0.1171,
+      "event_dvars_class_range": -0.2675
+    }
+  },
+  "decision": {
+    "keep_all_primary_data": true,
+    "retain_linear_detrending": true,
+    "generic_motion_regression": false,
+    "automatic_bad_run_exclusion": false,
+    "interpretation": "Linear event-time drift explains and repairs part of sub-54/run-01, sub-54/run-04, and sub-63/run-01. Sub-54/run-06, sub-63/run-04, and sub-20/run-03 remain weak across the complete timing sweep. Motion-neural relationships are inconsistent across subjects, and the quiet sub-20/run-03 is the weakest targeted run, so no universal motion threshold or regression is justified. Treat the residual runs as response/topography or run-state failures and retain them in primary all-subject estimates."
+  }
+}

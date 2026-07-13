@@ -277,7 +277,7 @@ Priority: medium-low until the preprocessing and representation questions are cl
 
 1. Preserve the nested temporal selector as the zero-label independent model and seek external-cohort confirmation before promoting `0.8806` as the primary balanced score.
 2. Test hierarchical/Bayesian arm shrinkage only if it uses richer target geometry than calibration accuracy thresholds.
-3. Extend targeted raw/post-detrend QC to the worst run-level cases from `sub-54`, `sub-63`, and `sub-20`, and define a post-repair QC rule.
+3. Completed: targeted raw/post-detrend QC and all-run motion for `sub-54`, `sub-63`, and `sub-20` reject a universal motion or exclusion rule. Keep detrending and flag residual weak runs for response-topography/run-state analysis without deleting them from primary estimates.
 4. Compare transductive run detrending with training-only nuisance regression or domain-invariant temporal residualization.
 5. Improve pseudo-labeling only after measuring whether the hierarchy raises target arm pseudo-label quality.
 6. Revisit neural sequence models only after a small eval-mode overfit probe succeeds on the corrected event protocol.
