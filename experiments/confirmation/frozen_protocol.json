@@ -1,0 +1,92 @@
+{
+  "protocol_id": "ds004044_investigation_closeout_v1",
+  "status": "frozen",
+  "frozen_at": "2026-07-13",
+  "dataset": {
+    "accession": "OpenNeuro ds004044",
+    "version": "2.0.3",
+    "subject_count": 62,
+    "run_count": 372,
+    "runs_per_subject": 6,
+    "events_per_run": 8,
+    "event_count": 2976,
+    "classes": [
+      "Left leg movements",
+      "Right leg movements",
+      "Forearm movements",
+      "Upper arm movements"
+    ],
+    "events_per_class_per_run": 2,
+    "qc60_excluded_subjects": ["sub-42", "sub-52"]
+  },
+  "representation": {
+    "source": "continuous denoised BOLD",
+    "window_offset_tr": 3,
+    "window_length_tr": 8,
+    "repetition_time_seconds": 2.0,
+    "extraction_shape": [100, 100, 100],
+    "feature_shape": [24, 24, 24],
+    "sequence_key": "offset_3_length_8_sequence",
+    "sequence_shape_per_subject": [48, 8, 13824],
+    "preprocessing": [
+      "per-volume whole-grid z-score before and after resize",
+      "unlabeled subject-run centering",
+      "unlabeled linear event-time detrending independently at each lag"
+    ]
+  },
+  "validation": {
+    "outer_family": "subject",
+    "outer_fold_count": 6,
+    "outer_seeds": [11, 23, 37, 51, 71],
+    "outer_split_count": 30,
+    "inner_subject_fold_count": 4,
+    "bootstrap_iterations": 20000,
+    "metric_tolerance": 1e-12
+  },
+  "models": {
+    "conservative_mean_hierarchy": {
+      "pair_transform": "smooth_3",
+      "covariance_feature_cap": 1024,
+      "balanced_accuracy": 0.8751641414141414
+    },
+    "independent_decoder": {
+      "name": "nested_temporal_candidate_selector",
+      "candidates": [
+        "mean_cap1024",
+        "mean_contrast_cap1024",
+        "mean_contrast_cap2048"
+      ],
+      "selection_metric": "inner balanced accuracy shared across prediction rules",
+      "balanced_accuracy": 0.8805555555555556,
+      "independent_accuracy": 0.8314204545454545
+    },
+    "complete_balanced_run_decoder": {
+      "name": "nested_repetition_consistency_assignment",
+      "consistency_weights": [0.0, 0.25, 0.5, 1.0, 2.0, 4.0],
+      "legal_assignment_count": 2520,
+      "balanced_accuracy": 0.8947916666666667,
+      "requires_complete_run": true,
+      "requires_exact_class_counts": true,
+      "uses_target_run_unlabeled_event_similarity": true
+    },
+    "labeled_personalization": {
+      "name": "five_run_validation_selected_arm_calibration",
+      "calibration_run_count": 5,
+      "balanced_accuracy": 0.8913306451612903,
+      "independent_accuracy": 0.843010752688172
+    }
+  },
+  "deployment_policy": {
+    "complete_balanced_run": "nested_repetition_consistency_assignment",
+    "incomplete_imbalanced_or_online": "nested_temporal_candidate_selector_independent",
+    "labeled_target_subject_runs_available": "report arm calibration separately as personalization",
+    "legacy_neural_lane": "closed"
+  },
+  "decision_guardrails": [
+    "Do not tune preprocessing, candidate models, consistency weights, splits, seeds, or QC strata on ds004044 after this freeze.",
+    "Do not describe centering, detrending, balanced assignment, or repetition consistency as ordinary inductive supervised prediction.",
+    "Do not use the complete-run decoder for incomplete, imbalanced, or online event streams.",
+    "Do not merge labeled personalization metrics with zero-label generalization metrics.",
+    "Do not resume legacy neural training or start an unrestricted architecture sweep."
+  ]
+}

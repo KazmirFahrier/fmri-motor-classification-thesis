@@ -1,12 +1,14 @@
 # Current Status
 
-Last updated: 2026-07-09.
+Last updated: 2026-07-13.
 
-This repository is tracking the active full-dataset thesis runs for 4-class motor-task fMRI classification. The unpublished manuscript and private paper PDFs are intentionally not part of this public repo.
+This repository records the completed full-dataset investigation and frozen confirmation state for 4-class motor-task fMRI classification. The unpublished manuscript and private paper PDFs are intentionally not part of this public repo.
 
-For the running full-scale investigation checklist, see [Full-Scale Investigation Roadmap](FULL_SCALE_INVESTIGATION_ROADMAP.md).
+Broad discovery is closed. See [Investigation Closeout](INVESTIGATION_CLOSEOUT.md) for the frozen claims and reproduction commands, and [External Confirmation](EXTERNAL_CONFIRMATION.md) for the compatibility search.
 
-## Active Kaggle Runs
+## Kaggle Run Archive
+
+No thesis modeling run is active. The entries below are completed historical lanes; the legacy neural lane must not be resumed.
 
 | Experiment | Kaggle kernel | Status | Purpose |
 | --- | --- | --- | --- |
@@ -38,7 +40,7 @@ For the running full-scale investigation checklist, see [Full-Scale Investigatio
 - Training accuracy reached 0.4273 by epoch 15, while validation remains near chance.
 - The policy checker decision after epoch 15 is `continue_short_baseline`, with 10 epochs left before the 25-epoch patience stop if validation does not improve.
 - The pooled artifact dataset `kazmirfahrier/thesis-legacy-full-artifacts` has been refreshed from the epoch-15 checkpoint and is ready for resume from epoch 16.
-- `kazmirfahrier/thesis-legacy-full-resume` was repushed as version 3 with an epoch-16 guard and is currently running.
+- `kazmirfahrier/thesis-legacy-full-resume` was repushed as version 3 with an epoch-16 guard; that historical hop later ended at Kaggle's duration limit after epochs 16 and 17.
 - The main-account version 3 guarded resume passed the epoch-16 guard, used a Kaggle Tesla P100, saved epochs 16 and 17, then stopped at Kaggle's max allowed execution duration.
 - Latest pooled epoch-17 validation snapshot: accuracy 0.2470, balanced accuracy 0.2497, macro F1 0.2273, MCC -0.0003, ROC-AUC 0.5017, PR-AUC 0.2575. This is not a final result.
 - Training accuracy reached 0.4603 by epoch 17, while validation remains near chance.
@@ -261,72 +263,19 @@ For the running full-scale investigation checklist, see [Full-Scale Investigatio
 
 Phase 1 is designed to separate optimistic pooled-split performance from leakage-aware generalization. The paper should not claim the original 85% result as the final full-dataset result. The key publication-grade evidence will come from subject-wise cross-validation and held-out subject evaluation.
 
-## Decision Policy
+## Closeout Decision
 
-- Continue the pooled legacy lane only as a controlled baseline completion to early stopping.
-- Stop the lane when the configured 25-epoch patience is exhausted unless validation accuracy and macro F1 both exceed 0.30.
-- Do not continue toward the 200-epoch target while validation remains near chance.
-- When the lane stops without meaningful validation improvement, pivot to dataset/label audit, preprocessing checks, leakage analysis, and simpler sanity-check baselines.
+- Broad full-cohort discovery is complete and the `ds004044_investigation_closeout_v1` protocol is frozen.
+- The fresh 30-fold pass reproduced `0.8948` complete-run balanced accuracy exactly; all candidate choices and consistency weights match the frozen reference.
+- The independent/unbalanced decoder remains `0.8314`; the conservative mean-window hierarchy remains `0.8752`.
+- Five-run labeled arm calibration is reported separately as personalization at `0.8913` balanced and `0.8430` independent.
+- All 62 subjects remain in the primary estimate. The prespecified QC-60 result is a sensitivity analysis, not a replacement cohort.
+- No compatible public cohort with the exact four labels was found, so the result is explicitly a strong repeated nested estimate from one public cohort rather than universal external generalization.
 
-## Next Actions
+## Finalization Actions
 
-- Do not launch another pooled legacy resume hop unless the 0.30 accuracy / 0.30 macro-F1 extension rule is explicitly overridden.
-- Treat the pooled legacy lane as complete for Phase 1 baseline purposes and pivot to diagnosis.
-- Continue dataset/label audit, preprocessing and normalization checks, leakage analysis, and simple sanity-check baselines.
-- Prioritize run/subject nuisance control and domain-alignment diagnostics because corrected clip features classify well within runs but fail across held-out runs/subjects.
-- Treat `24³` dense corrected-clip features as the current sweet spot for fast diagnostics; `32³` did not materially improve subject generalization.
-- Convert the transductive run-normalization gains into non-transductive experiments: training-only harmonization, explicit test-time adaptation protocol, run/session covariate control, or domain-invariant feature learning.
-- Do not assume classifier complexity is the missing piece: ridge-style linear classifiers underperformed cosine centroids on the aligned event features.
-- Continue design-aware adaptation probes: known per-run class balance is useful and scientifically tied to the task paradigm, but it must be reported as test-time adaptation rather than ordinary supervised classification.
-- Treat balanced assignment as an overall adaptation baseline, not a weak-subject cure; it helps some subjects while worsening others.
-- Simple confidence gating by balanced-assignment score penalty does not remove the per-subject harm while preserving the aggregate gain.
-- Subject-level balancing across all runs is not a replacement for per-run balancing; it softens a few per-run harms but lowers the cohort average.
-- Prefer independent-prediction class-count imbalance over score-penalty gating for the next adaptation probe. The current best threshold is L1 imbalance `>= 4`, but it should be validated with a separate threshold-selection protocol before being treated as publishable model performance.
-- Add hierarchical baselines: report coarse leg-vs-arm performance separately from exact 4-class performance, and test whether a two-stage classifier can improve within-leg and within-arm discrimination.
-- Do not assume a naive two-stage centroid classifier is enough; the first deployable hierarchy was slightly worse than flat centroids. Use the oracle-coarse result as an upper-bound diagnostic for better hierarchical or multi-task models.
-- After linear detrending, do not prioritize simple coarse-to-fine centroid wrappers. A new hierarchy sweep shows oracle coarse routing adds only about `0.006` subject-fold exact accuracy over flat balanced assignment, so future within-pair work needs better representations, pair-specific alignment, or supervised/semi-supervised calibration rather than just a routing layer.
-- Investigate run-start and event-position effects. The first event and ordinal `6` are disproportionately weak, so future preprocessing/modeling should test temporal context, baseline stabilization, and event-window choices around those positions.
-- Treat late event-window selection as the strongest current preprocessing lead. Offset `2` outperforms event-mean features, so the next extraction should test later/longer windows instead of averaging early and late clips blindly.
-- Do not use equal or learned-looking offset mixtures until a validation protocol justifies them; the first coarse grid says pure late offset is better than simple temporal blends.
-- Offset `2` is a better feature slice, not a complete solution. Continue weak-subject QC and within-pair modeling because the residual structure remains after the temporal improvement.
-- Promote offset-2 linear event-time detrending to the primary test-time preprocessing baseline. Keep it explicitly labeled as unlabeled target-run adaptation, validate it on regenerated later windows, and compare it with training-only nuisance regression before treating it as deployable preprocessing.
-- Do not use quadratic detrending or arbitrary low-rank removal as defaults. True-time linear detrending improves broadly, while shuffled-time and quadratic controls are worse than the centered baseline.
-- Replace offset `2`, length `6` with offset `3`, length `8` as the primary continuous-window baseline. The fixed full-cohort comparison improved subject-fold balanced accuracy from `0.7176` to `0.7421` and held-out-run balanced accuracy from `0.7655` to `0.7960`.
-- Promote nested pair-specific voxel selection plus coarse/fine score fusion as the current best zero-label adaptation baseline. It improves all six subject folds and reaches `0.7643` subject-fold balanced accuracy without using held-out labels for feature or hyperparameter selection.
-- Use the repeated-partition estimate (`0.7621` pair-specific vs `0.7451` all-voxel across 30 outer folds) as the more robust zero-label subject-generalization summary. Next quantify selected-map stability and identify the subjects/groups behind the seven regressing folds before treating the model as uniformly beneficial.
-- Investigate an unlabeled subject-level gate or adaptation signal for choosing between all-voxel and pair-selected scores. Start with score confidence, flat/pair disagreement, coarse consistency, and run-to-run template stability, validated entirely inside outer training subjects. `sub-68`, `sub-25`, `sub-49`, `sub-26`, and `sub-37` are the primary regression cases.
-- Reconstruct affine-aware feature maps before making anatomical claims. The current stability analysis proves reproducible resized-grid selection, not localization to named brain regions.
-- Keep `3:8` as the fixed cohort window in primary zero-label experiments. Do not report oracle per-subject window accuracy as model performance; use it to motivate future unlabeled HRF/timing adaptation and to audit timing-sensitive subjects such as `sub-68` and `sub-60`.
-- Do not continue simple confidence-based subject gating or flat/pair score blending. Their nested results are neutral/slightly worse than always-pair despite nontrivial oracle headroom, showing that wrong cohort templates can be confidently wrong.
-- Use `0.8112` as the current safer five-run labeled-personalization result on `3:8` (`0.8175` with fixed `alpha=0.25`). Next test whether labeled calibration runs can select subject timing/window without touching the held-out run.
-- Treat `sub-42` and `sub-52` as a separate forensic data track. They remain near/below chance after detrending, temporal-window improvement, and five labeled calibration runs, so ordinary adaptation is no longer a plausible cure.
-- Test whether `sub-42`/`sub-52` align across runs by event ordinal rather than class. If not, proceed to affine-aware registration/anatomical and acquisition-level audits; do not attempt to repair them with a single label permutation.
-- The ordinal hypothesis is now rejected. Proceed with affine-aware source-volume checks for `sub-42` and `sub-52`: compare NIfTI affine/orientation across runs, brain masks/coverage, registration to T1w, denoised-versus-preprocessed correspondence, and spatial similarity before the resize operation. Use stable `sub-30`/`sub-62` as controls.
-- Affine/header mismatch, gross coverage failure, and denoising-induced corruption are now rejected. The remaining image-level clue is unstable temporal-variance structure and modest run-to-run coverage-center movement, especially for `sub-52`; source acquisition/task-response instability remains more plausible than a deterministic pipeline bug.
-- The public OpenNeuro derivative does not include confound TSVs or transform sidecars. Further motion/registration forensics require deriving motion proxies directly from image volumes or locating the original fMRIPrep working outputs; do not claim formal framewise-displacement results from the current files.
-- Raw image-derived translation, DVARS, event-linked motion, and class-residual nuisance regression are now complete for two catastrophic and two stable controls. Do not attribute the failure to gross or repetition-level motion. Class-linked motion covaries with legitimate task response, so ordinary nuisance regression without class conditioning is misleading.
-- Saved-window correspondence now rules out a simple subject-specific HRF delay over offsets `2-6`. The next source-level question is response anatomy/amplitude: determine whether failed runs lack expected motor-somatotopic activation, reverse lateralization, or exhibit spatially diffuse/non-neural class maps.
-- Response anatomy and the authors' official GLM now localize the problem to two subjects whose class maps are repeatable within runs but cancel or remap across runs. Do not spend more model capacity trying to force these cases into a consistent four-class decision boundary.
-- Keep the all-62-subject result as the primary estimate. Add a clearly labeled QC-stratified sensitivity analysis excluding only the independently replicated `sub-42`/`sub-52` outliers, and report the exclusion criterion and both results; never silently remove them based on model errors.
-- That sensitivity analysis is now complete. Use `0.762` as the primary repeated nested estimate and `0.778` as the QC-stratified sensitivity estimate. The small gap supports the robustness of the cohort conclusion while preserving honest documentation of two irreducible response outliers.
-- Full-covariance LDA for both coarse and pair decisions is the strongest current model: use `0.875` as the repeated nested all-subject estimate and `0.894` as the QC-stratified sensitivity estimate. Keep `0.825` independent-decoding accuracy alongside it because the stronger result assumes the known balanced composition of each complete experimental run and is not a generic unbalanced/online deployment estimate.
-- Coarse routing is nearly saturated (`0.982` leg-vs-arm accuracy), and the 1,024-feature pair specialists reduce the oracle-coarse gap below one point. The arm branch remains weaker (`0.795`), but the repeated 2,048-feature screen is statistically inconclusive and computationally inefficient. Stop raw covariance scaling and move to arm-specific representation, calibration, or subject-robustness experiments.
-- Separate pair transforms are now supported, but fixed pooling/native arm controls are worse than the shared `smooth_3` representation. Do not spend a repeated-CV run on those variants; test pair-specific temporal windows or arm-focused calibration next.
-- Pair-specific `2:6` and `3:6` temporal controls are also negative. Keep `3:8`; target the 19 identified arm-specific subjects with nested arm calibration or a learned arm representation, while treating `sub-42`/`sub-52` as the separate global-QC track.
-- Labeled arm calibration confirms that target-subject mean shift is recoverable with enough data: five calibration runs improve arm accuracy significantly, while one run hurts when applied universally. Use this as the personalization ceiling; the next deployable question is whether calibration can be safely gated with one to three runs or approximated by unlabeled/learned adaptation.
-- The first cross-subject one-run gate avoids the large ungated loss but its small gain is uncertain. Improve gate evidence/features or move to learned arm representations; do not promote the current threshold as a primary result.
-- Simple multi-window feature concatenation is also negative under nested selection. A learned arm representation must exploit temporal structure explicitly or add stronger regularization/nonlinearity; do not merely stack the existing event means.
-- Explicit tail contrasts and diagonal QDA are now negative as well. The existing mean-window checkpoints have exhausted the obvious structured linear/quadratic variants; the next temporal representation experiment requires per-volume within-event sequences from continuous BOLD rather than further transformations of saved means.
-- Continuous temporal-basis extraction and nested arm screening are complete. Simple temporal coefficients do not solve the arm branch; keep the `3:8` mean-window full-covariance hierarchy as the primary zero-label model. Future temporal work should use richer sequence/HRF models or subject calibration rather than another linear basis concatenation.
-- Split weak-subject follow-up into two tracks: QC/removal or run repair for internally inconsistent subjects such as `sub-52` and `sub-42`, and personalization/domain-adaptation experiments for internally stable but cohort-mismatched subjects such as `sub-17`, `sub-20`, `sub-26`, and `sub-27`.
-- Do not expect broad post-detrend run exclusion to solve the problem. The first policy sweep shows keep-all training data is best or tied, and oracle validation exclusion adds only a small coverage-losing gain. Use run QC to flag special cases and guide repair, not as the main modeling strategy.
-- The targeted `sub-54`/`sub-63`/`sub-20` raw and motion pass is complete. Keep linear detrending, but do not apply generic motion regression or automatic run exclusion. Treat `sub-54/run-06`, `sub-63/run-04`, and `sub-20/run-03` as residual response/topography or run-state cases and preserve them in primary estimates.
-- Treat labeled subject calibration as a serious modeling track. The current best is light source/subject centroid blending (`alpha=0.25`) plus per-run balanced assignment, and the validation-selected variant remains above `0.70` with at least three calibration runs. The first unlabeled pseudo-label version failed, so future semi-supervised calibration needs better pseudo-label confidence, coarse-to-fine labeling, or a representation that improves target-subject pseudo-label quality before prototype updates.
-- Use the detrended calibration curve as the new personalization ceiling: `0.7821` with three labeled runs and `0.7984` with five. Keep zero-label detrended adaptation and labeled calibration in separate result columns.
-- Do not spend more effort on simple pseudo-centroid self-training until the target pseudo-label quality improves; the first sweep was neutral/slightly worse than plain balanced assignment.
-- Raw image-derived QC now covers the catastrophic controls and the prespecified `sub-20`/`sub-54`/`sub-63` weak-run set. Remaining weak-run work should test response topography/run state or carefully validated subject adaptation, not repeat broad timing or gross-motion screens.
-- Repetition-consistency assignment is now the primary complete-run balanced decoder. Its gain is not a license to hide weak data: `sub-54` and `sub-63` improve, `sub-20` worsens, and `sub-52` is nearly unchanged. Keep all-subject and QC-60 reporting, and retain ordinary independent decoding for unknown or incomplete run composition.
-- Do not trust the current temporal ResNet corrected-clip recipe until a small eval-mode overfit probe succeeds.
-- Treat the completed subject-wise result as evidence that the current full-dataset subject-wise setup is not learning; investigate data/model/label issues before making publication claims.
-- Download completed outputs into local status folders after each Kaggle session.
-- Update `experiments/phase1_baselines/*.results.json` when new metrics or fold completions are available.
+- Build thesis tables and figures from the consolidated benchmark and supporting fold, seed, class-recall, and subject-level results.
+- Preserve artifact checksums and the frozen protocol with the final thesis materials.
+- Describe the complete-run decoder as design-constrained transductive assignment, the independent decoder as the applicable online/incomplete rule, and calibration as labeled personalization.
+- Use the affine-aware feature maps only as training-fold selection-stability evidence; do not make named-region or causal anatomical claims from representative geometry.
+- Reopen modeling only if a future exact external cohort identifies a specific timing, registration, or domain-shift failure. Do not resume legacy training or begin an unrestricted architecture search.

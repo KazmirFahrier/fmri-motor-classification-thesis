@@ -1,6 +1,6 @@
 # fMRI Motor Classification Thesis Work
 
-This repository tracks ongoing thesis work on 4-class motor-task fMRI classification using the public whole-body somatotopic mapping dataset (`ds004044`). The project started from a smaller 9-subject prototype and is now being extended toward full-dataset evaluation, stronger leakage control, cleaner Kaggle execution, and better-performing model variants.
+This repository tracks thesis work on 4-class motor-task fMRI classification using the public whole-body somatotopic mapping dataset (`ds004044`). The project started from a smaller 9-subject prototype, completed a broad full-cohort investigation, and is now in confirmation and thesis-finalization mode.
 
 ## What We Are Trying To Do
 - Classify four motor conditions from task-evoked fMRI volumes:
@@ -9,23 +9,19 @@ This repository tracks ongoing thesis work on 4-class motor-task fMRI classifica
   - `Forearm movements`
   - `Upper arm movements`
 - Use the full extracted dataset rather than only the earlier 9-subject subset.
-- Compare multiple model families:
-  - legacy 3D CNN + attention + transformer model from the thesis notebooks
-  - cleaner 3D CNN / temporal clip baselines
-  - ablations that isolate attention, transformer, and other components
-  - newer whole-brain temporal models that may improve full-dataset performance
+- Preserve the completed comparison of legacy neural, continuous-event, covariance-hierarchy, temporal, and calibration approaches.
 - Separate exploratory results from rigorous results:
   - pooled random-split experiments for legacy reproduction
   - subject-wise cross-validation and holdout evaluation for leakage-controlled claims
-- Package the work so it can be reproduced on Kaggle, where the full dataset currently fits best.
+- Package the frozen result so it can be reproduced from saved sequence artifacts without retuning this cohort.
 
 ## Current Status
 - The repository contains the cleaned training pipeline, configs, scripts, and tests for leakage-aware experiments.
 - The older notebooks and `notebook_code.py` preserve the earlier prototype workflow used to build the initial model idea.
 - The unpublished manuscript is intentionally **not** included in this public repo.
 - Phase 1 full-dataset legacy runs are complete: the pooled legacy baseline was stopped at epoch 25 by the controlled decision policy, and the subject-wise legacy run completed at chance-level holdout performance.
-- The active work is now the full-scale diagnostic/modeling investigation: continuous-event baselines, subject/run nuisance control, multi-scale covariance-aware hierarchies, weak-subject forensics, temporal representation tests, and leakage-safe subject personalization for the remaining arm-branch errors.
-- Current run state is tracked in `docs/CURRENT_STATUS.md` and `experiments/phase1_baselines/*.results.json`.
+- Broad internal discovery is closed. The frozen complete-run result is `0.8948`, the independent result is `0.8314`, and five-run labeled personalization is reported separately at `0.8913` balanced / `0.8430` independent.
+- No legacy neural resume or unrestricted architecture sweep is active. Current decisions and reproducibility checks are tracked in `docs/INVESTIGATION_CLOSEOUT.md` and `experiments/confirmation/`.
 
 ## Dataset Context
 - Source dataset: OpenNeuro `ds004044`
@@ -50,14 +46,14 @@ This repository tracks ongoing thesis work on 4-class motor-task fMRI classifica
 - `appendices/`: leakage and reproducibility notes.
 - `*.ipynb` and `notebook_code.py`: earlier thesis experimentation and Kaggle-oriented workflows.
 
-## Main Research Directions In This Repo
-1. Reproduce the original thesis-style model honestly on larger data.
-2. Measure how much each architecture component actually contributes.
-3. Run strict subject-wise evaluation on the full dataset.
-4. Improve accuracy without relying on leakage-prone splits.
-5. Understand the dataset deeply enough to distinguish model limitations, subject-specific response geometry, and true QC/outlier cases.
+## Research Outcome
+1. The original high pooled result does not reproduce as full-dataset generalization.
+2. The useful signal appears after explicit subject/run nuisance control and late event-window modeling.
+3. Independent prediction, design-constrained transductive assignment, and labeled personalization are distinct protocols and are reported separately.
+4. The fixed cohort, splits, seeds, candidates, QC definition, and hyperparameters are frozen against further tuning.
+5. Remaining work is final statistics, interpretation, thesis writing, and exact-protocol external confirmation if a compatible cohort becomes available.
 
-## Active Experiment Registry
+## Experiment Registry
 The `experiments/` directory records what is running and what has completed. Result JSONs are intentionally lightweight: they store status, protocol, metrics, fold progress, Kaggle kernel links, and artifact dataset references, not raw data or model checkpoints.
 
 Current Phase 1 registry entries:
@@ -71,6 +67,7 @@ Current investigation registry entries:
 - `learned_temporal_filter_arm`: ordered eight-volume sequence extraction and training-subject-only learned temporal-filter follow-up.
 - `targeted_weak_run_qc`: source-image timing, raw event geometry, and six-run motion forensics for weak runs from `sub-54`, `sub-63`, and `sub-20`.
 - `repetition_consistency_assignment`: completed nested exact balanced decoder combining hierarchy evidence with unlabeled within-assigned-class repetition similarity.
+- `confirmation/investigation_closeout`: completed fresh reproduction, artifact validation, consolidated benchmark, affine-aware stability maps, and external-cohort compatibility record.
 
 These files are meant to make the repo reflect the real research process: long-running Kaggle sessions, resumable checkpoints, and metrics updated only when a run actually finishes.
 

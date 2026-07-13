@@ -1,12 +1,14 @@
 # Full-Scale Investigation Roadmap
 
-Last updated: 2026-07-09.
+Last updated: 2026-07-13.
 
-This document is the working memory for the full-dataset thesis investigation. The goal is not to find a quick number; the goal is to understand the dataset well enough that the final conclusion is defensible.
+This document is the historical memory for the completed full-dataset thesis investigation. It records what was tested, what failed, and how the final model was reached. Broad discovery is closed under `experiments/confirmation/frozen_protocol.json`; the old backlog below is retained for provenance, not as authorization to tune this cohort again.
 
-## Current Working Hypothesis
+The active record is [Investigation Closeout](INVESTIGATION_CLOSEOUT.md). The frozen complete-run result is `0.8948`, the independent result is `0.8314`, and the conservative mean-window baseline is `0.8752`.
 
-The full dataset contains motor-class signal, but that signal is small compared with subject, run, temporal-window, and subject-specific response geometry effects. The original high pooled-split result is not reproducible as leakage-aware full-dataset generalization with the current legacy model. The project should now focus on separating these failure modes:
+## Final Working Model
+
+The full dataset contains motor-class signal, but that signal is obscured by subject, run, temporal-window, and subject-specific response geometry effects. The original high pooled-split result is not reproducible as leakage-aware full-dataset generalization with the legacy model. The investigation separated these mechanisms into:
 
 - True data/QC failures in specific subjects or runs.
 - Domain shift from subject/run nuisance structure.
@@ -15,7 +17,7 @@ The full dataset contains motor-class signal, but that signal is small compared 
 - Personal subject geometry that can be recovered with labeled calibration.
 - Limits of unlabeled or pseudo-labeled adaptation.
 
-Recent update: the strongest zero-label full-cohort model is now a multi-scale hierarchy with regularized full-covariance LDA for the coarse leg-vs-arm gate and pair specialists. It reaches `0.8752` repeated nested balanced accuracy across all subjects and `0.8941` in the prespecified 60-subject QC sensitivity stratum. Coarse routing is nearly saturated, so the active modeling bottleneck is within-pair discrimination, especially forearm versus upper-arm.
+The conservative zero-label model is a multi-scale hierarchy with regularized full-covariance LDA for the coarse leg-vs-arm gate and pair specialists. It reaches `0.8752` repeated nested balanced accuracy across all subjects and `0.8941` in the prespecified 60-subject QC sensitivity stratum. Nested temporal selection raises independent accuracy to `0.8314`, while the design-constrained repetition-consistency decoder reaches `0.8948` on complete balanced runs. Residual errors remain concentrated within anatomical pairs, especially forearm versus upper arm, but further tuning on this cohort is frozen.
 
 ## What We Have Tried
 
@@ -154,7 +156,9 @@ Interpretation: many subjects contain usable personal class geometry, but the co
 
 Interpretation: simple self-training is not enough. Future semi-supervised methods need better pseudo-label confidence, coarse-to-fine structure, run-consistency filters, or a stronger representation before prototype adaptation.
 
-## What Still Needs To Be Tried
+## Archived Discovery Backlog (Do Not Execute On Frozen Cohort)
+
+The following items were the open backlog during discovery. They are archived to preserve reasoning history. Reopen one item only when external evidence identifies that specific failure mechanism; do not run this as an unrestricted internal sweep.
 
 ### Raw QC And Subject Repair
 
@@ -243,7 +247,7 @@ Priority: medium-low until the preprocessing and representation questions are cl
 - Do not scale architecture or resolution without a diagnostic reason.
 - Do not hide chance-level full-dataset results; they are scientifically important evidence.
 
-## Current Best Benchmarks To Beat
+## Frozen Benchmark History
 
 | Protocol | Current score |
 | --- | --- |
@@ -275,11 +279,10 @@ Priority: medium-low until the preprocessing and representation questions are cl
 | Offset-2 fixed labeled calibration, 5 runs | `0.7224` accuracy |
 | Best naive unlabeled pseudo-subject adaptation | `0.5995` accuracy |
 
-## Immediate Next Experiments
+## Finalization Actions
 
-1. Preserve `0.8948` repetition-consistency decoding as the complete-run balanced model and `0.8314` temporal selection as the independent model; seek external-cohort confirmation for both.
-2. Test hierarchical/Bayesian arm shrinkage only if it uses richer target geometry than calibration accuracy thresholds.
-3. Completed: targeted raw/post-detrend QC and all-run motion for `sub-54`, `sub-63`, and `sub-20` reject a universal motion or exclusion rule. Keep detrending and flag residual weak runs for response-topography/run-state analysis without deleting them from primary estimates.
-4. Compare transductive run detrending with training-only nuisance regression or domain-invariant temporal residualization.
-5. Improve pseudo-labeling only after measuring whether the hierarchy raises target arm pseudo-label quality.
-6. Revisit neural sequence models only after a small eval-mode overfit probe succeeds on the corrected event protocol.
+1. Use the consolidated benchmark for final tables, with independent prediction, complete-run transductive assignment, and labeled personalization in separate columns.
+2. Preserve all-subject, QC-60, class-recall, fold, seed, and subject-level results together with the frozen artifact hashes.
+3. Use affine-aware stability maps for restrained interpretation without named-region or causal claims.
+4. Record that no exact compatible public external cohort was identified; evaluate a future cohort only under the label mapping and protocol frozen before seeing its outcomes.
+5. Reopen only a timing, registration, or domain-shift diagnostic directly implicated by external failure. Do not resume legacy neural training or broad architecture search.

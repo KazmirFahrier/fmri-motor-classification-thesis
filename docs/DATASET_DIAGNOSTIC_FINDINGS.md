@@ -1,8 +1,10 @@
 # Dataset Diagnostic Findings
 
-Last updated: 2026-06-14.
+Last updated: 2026-07-13.
 
-This note summarizes what the completed full-dataset runs tell us about the data and what to do next. It uses the final pooled legacy metadata from:
+This note is the archived diagnostic trail showing what the completed full-dataset runs revealed and how later experiments were selected. Its imperative follow-up language is historical and must not be treated as an active experiment queue after the protocol freeze. Current decisions live in [Investigation Closeout](INVESTIGATION_CLOSEOUT.md).
+
+It uses the final pooled legacy metadata from:
 
 `/Users/USER/Documents/New project/status_2026-05-22_legacy_full_b6_v2_duration/thesis_session/thesis_legacy_full_dataset`
 
@@ -644,7 +646,7 @@ Use offset `3`, length `8` as the primary temporal window. It beat canonical off
 
 Start that follow-up with later shifted windows, not more mixtures of the currently extracted offsets. The coarse weight sweep suggests offset `2` itself is the strongest of the available slices, so the next question is whether even later or longer HRF-aligned windows from the continuous BOLD runs are better.
 
-After offset `2`, keep two parallel tracks: test later/longer windows for additional temporal gain, and continue weak-subject QC because the worst subjects remain poor even with the better temporal slice.
+Historical next step after offset `2`: test later/longer windows for additional temporal gain and continue weak-subject QC. Both tracks were subsequently completed and are frozen in the closeout record.
 
 3. Tiny overfit sanity check.
 

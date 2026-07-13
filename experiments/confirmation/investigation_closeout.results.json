@@ -1,0 +1,103 @@
+{
+  "experiment_id": "investigation_closeout_confirmation",
+  "status": "complete",
+  "completed_at": "2026-07-13",
+  "protocol_id": "ds004044_investigation_closeout_v1",
+  "protocol_sha256": "3122c4a249b77b115673ec859890e3d6771b4704209aeb841b7371e3a56a0270",
+  "dataset": {
+    "accession": "OpenNeuro ds004044",
+    "version": "2.0.3",
+    "subjects": 62,
+    "runs": 372,
+    "events": 2976,
+    "classes": 4,
+    "sequence_shape_per_subject": [
+      48,
+      8,
+      13824
+    ],
+    "combined_checkpoint_sha256": "1a26f31440174892333add9eda8b83ea62bbed91247fdf9527e0d8133f93f166"
+  },
+  "frozen_results": {
+    "complete_balanced_run": {
+      "balanced_accuracy": 0.8947916666666667,
+      "subject_weighted_accuracy": 0.8950268817204301,
+      "qc60_subject_weighted_accuracy": 0.9141666666666667,
+      "subject_bootstrap_gain_ci95": [
+        0.007661290322580621,
+        0.020362903225806455
+      ],
+      "decoder": "nested_repetition_consistency_assignment"
+    },
+    "independent": {
+      "accuracy": 0.8314204545454545,
+      "macro_f1": 0.830584784721085,
+      "subject_weighted_accuracy": 0.8316532258064516,
+      "qc60_subject_weighted_accuracy": 0.8488888888888889,
+      "decoder": "nested_temporal_candidate_selector"
+    },
+    "conservative_mean_hierarchy": {
+      "balanced_accuracy": 0.8751641414141414
+    },
+    "five_run_labeled_personalization": {
+      "balanced_accuracy": 0.8913306451612903,
+      "independent_accuracy": 0.843010752688172
+    },
+    "legacy_full_pooled": {
+      "accuracy": 0.2629147417051659,
+      "balanced_accuracy": 0.2648261538891334,
+      "macro_f1": 0.2500725386282059
+    },
+    "legacy_subjectwise_holdout": {
+      "accuracy": 0.25,
+      "balanced_accuracy": 0.25,
+      "macro_f1": 0.1
+    }
+  },
+  "validation": {
+    "status": "pass",
+    "outer_splits": 30,
+    "inner_split_isolation_checks": 120,
+    "maximum_fresh_reproduction_difference": 0.0,
+    "maximum_lambda_zero_reconstruction_difference": 0.0,
+    "selected_candidates_match": true,
+    "selected_consistency_weights_match": true
+  },
+  "feature_stability": {
+    "status": "complete",
+    "split_count": 30,
+    "feature_grid_shape": [
+      24,
+      24,
+      24
+    ],
+    "reference_grid_shape": [
+      76,
+      82,
+      71
+    ],
+    "orientation": "RAS",
+    "metadata_sha256": "877e0c5c9883499c65afaab179863254171b6ab7943eb6486bf6982b62cd1fc7",
+    "figure_sha256": "d5a5ec46ca9b0b1b172e5609a8f3af5953a54327a5f21fdc2a2725913ea116be",
+    "interpretation": "Training-fold feature-ranking frequency in representative T1w geometry; not atlas-normalized saliency or causal anatomy."
+  },
+  "external_confirmation": {
+    "status": "no_exact_compatible_public_cohort_identified",
+    "evaluated_external_accuracy": null,
+    "decision_record": "docs/EXTERNAL_CONFIRMATION.md"
+  },
+  "output_sha256": {
+    "fresh_reproduction": "8c598160c39284ec21b64702fe966233125766ea5552454e2f5157f5d5e8753d",
+    "validation_report": "b32510e21046f19dcaf89435af91b6396b2c77f64ee73db9a8493a9fd095de4c",
+    "artifact_manifest": "bcfc28b3f4e426f85cea7c81123c2f758aa3a55c84a47ecbefb93ff4b76a8814",
+    "final_benchmark_json": "937de76a5c31b73396315565168b8f96d3979dd98afc13d6b1ecfc73ce9e6523",
+    "final_benchmark_csv": "8b67eb84bab6563ee1b498d290984a272713368af4374f29071aa46dbee86348",
+    "final_benchmark_markdown": "548b11f53561fc949708155dcbbc7eb4687cf2066ad3a887a8fd4938cfe2d82f"
+  },
+  "decision": {
+    "broad_internal_discovery": "closed",
+    "legacy_neural_lane": "closed",
+    "unrestricted_architecture_sweeps": "prohibited",
+    "next_phase": "thesis_tables_statistics_interpretation_and_future_exact_external_confirmation"
+  }
+}
