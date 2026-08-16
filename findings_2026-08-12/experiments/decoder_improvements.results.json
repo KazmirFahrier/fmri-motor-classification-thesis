@@ -1,0 +1,70 @@
+{
+  "experiment_id": "decoder_improvements",
+  "status": "complete",
+  "completed_at": "2026-08-13",
+  "anova_feature_selection": {
+    "fixed_threshold_sweep": {
+      "none": 0.8051,
+      "drop50": 0.8079,
+      "drop80": 0.8134,
+      "drop90": 0.8194,
+      "drop95": 0.8128,
+      "drop98": 0.7797
+    },
+    "nested_selection": {
+      "independent": 0.8111,
+      "balanced": 0.8606,
+      "selected_quantile_counts": {
+        "0.8": 13,
+        "0.9": 11,
+        "0.95": 5,
+        "0.5": 1
+      }
+    },
+    "oracle_vs_nested": {
+      "oracle_gain": 0.0143,
+      "nested_gain": 0.006,
+      "lesson": "Nesting removes more than half the apparent gain. A quantitative demonstration of the design-search effect the project discloses elsewhere."
+    },
+    "connection": "The frozen hierarchy's covariance caps (1024/2048) are themselves feature selection. Giving the baseline the same capability narrows the hierarchy's advantage from +0.026 to +0.020."
+  },
+  "score_level_ensemble": {
+    "members": 6,
+    "weight_grid": 728,
+    "weights_selected_on": "inner subject folds only",
+    "inner_selected": {
+      "independent": 0.8157,
+      "balanced": 0.8656
+    },
+    "best_single": {
+      "independent": 0.8098,
+      "balanced": 0.8503
+    },
+    "uniform": {
+      "independent": 0.8005,
+      "balanced": 0.853
+    },
+    "uniform_worse_than_best_single": true,
+    "contradiction_with_concatenation": "Feature concatenation of volumetric+surface gave exactly nothing (+0.000006). The selected ensemble routinely includes surface members (most common weighting: 2x vol_logistic + 1x surf_logistic). So the surface DOES carry usable information that feature concatenation could not extract. A null from concatenation is not evidence two representations are redundant."
+  },
+  "centering_requirement": {
+    "events_2": 0.6856,
+    "events_4": 0.7503,
+    "events_6": 0.7566,
+    "events_8": 0.7712,
+    "finding": "Four events buy 97% of what eight buy, so predicting before a run completes is viable."
+  },
+  "detrending_isolated": {
+    "centering_only_8_events": 0.7712,
+    "centering_plus_detrending": 0.8051,
+    "value": 0.0339,
+    "note": "Per-lag linear detrending is worth +0.034 alone - roughly a third of the frozen hierarchy's total advantage over conventional MVPA, from preprocessing rather than the decoder. Never separately valued before."
+  },
+  "headline": {
+    "frozen": 0.8314,
+    "ensemble": 0.8157,
+    "nested_anova_svm": 0.8111,
+    "plain_svm": 0.8051,
+    "summary": "Both improvements are real, reliable and small. Conventional MVPA with standard enhancements narrows the gap to the hierarchy from 0.026 to about 0.016 without eliminating it."
+  }
+}

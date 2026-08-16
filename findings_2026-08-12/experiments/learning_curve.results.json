@@ -1,0 +1,593 @@
+{
+  "experiment_id": "subject_count_learning_curve",
+  "status": "complete",
+  "completed_at": "2026-08-12",
+  "purpose": "Determine whether n=62 is near a ceiling, to decide whether effort belongs on more data or on representation and alignment.",
+  "design": "Held-out subjects are fixed per fold; only the training subject set is subsampled. Standardisation, the dual basis, and the classifier are refitted inside every draw.",
+  "limitation": "C is fixed rather than reselected per draw, because inner selection would itself vary with training size and confound the curve.",
+  "protocol": {
+    "outer_split_count": 30,
+    "subject_seeds": [
+      11,
+      23,
+      37,
+      51,
+      71
+    ],
+    "subject_counts": [
+      6,
+      10,
+      16,
+      24,
+      32,
+      40,
+      46,
+      51
+    ],
+    "draws_per_count": 5,
+    "fixed_c": {
+      "linear_svm": 0.0001,
+      "logistic_l2": 0.01,
+      "correlation_centroid": 0.0
+    }
+  },
+  "curve": {
+    "linear_svm|independent": [
+      {
+        "train_subject_count": 6,
+        "mean": 0.60034,
+        "std": 0.061358,
+        "n_estimates": 150
+      },
+      {
+        "train_subject_count": 10,
+        "mean": 0.66564,
+        "std": 0.051648,
+        "n_estimates": 150
+      },
+      {
+        "train_subject_count": 16,
+        "mean": 0.718819,
+        "std": 0.048179,
+        "n_estimates": 150
+      },
+      {
+        "train_subject_count": 24,
+        "mean": 0.755976,
+        "std": 0.046644,
+        "n_estimates": 150
+      },
+      {
+        "train_subject_count": 32,
+        "mean": 0.778011,
+        "std": 0.044535,
+        "n_estimates": 150
+      },
+      {
+        "train_subject_count": 40,
+        "mean": 0.795561,
+        "std": 0.044966,
+        "n_estimates": 150
+      },
+      {
+        "train_subject_count": 46,
+        "mean": 0.802082,
+        "std": 0.043178,
+        "n_estimates": 150
+      },
+      {
+        "train_subject_count": 51,
+        "mean": 0.806033,
+        "std": 0.04455,
+        "n_estimates": 110
+      }
+    ],
+    "linear_svm|balanced": [
+      {
+        "train_subject_count": 6,
+        "mean": 0.636496,
+        "std": 0.067369,
+        "n_estimates": 150
+      },
+      {
+        "train_subject_count": 10,
+        "mean": 0.70448,
+        "std": 0.057515,
+        "n_estimates": 150
+      },
+      {
+        "train_subject_count": 16,
+        "mean": 0.762845,
+        "std": 0.049261,
+        "n_estimates": 150
+      },
+      {
+        "train_subject_count": 24,
+        "mean": 0.799859,
+        "std": 0.047144,
+        "n_estimates": 150
+      },
+      {
+        "train_subject_count": 32,
+        "mean": 0.818202,
+        "std": 0.046818,
+        "n_estimates": 150
+      },
+      {
+        "train_subject_count": 40,
+        "mean": 0.834066,
+        "std": 0.046702,
+        "n_estimates": 150
+      },
+      {
+        "train_subject_count": 46,
+        "mean": 0.840366,
+        "std": 0.046045,
+        "n_estimates": 150
+      },
+      {
+        "train_subject_count": 51,
+        "mean": 0.842786,
+        "std": 0.047371,
+        "n_estimates": 110
+      }
+    ],
+    "logistic_l2|independent": [
+      {
+        "train_subject_count": 6,
+        "mean": 0.6075,
+        "std": 0.062251,
+        "n_estimates": 150
+      },
+      {
+        "train_subject_count": 10,
+        "mean": 0.669494,
+        "std": 0.0512,
+        "n_estimates": 150
+      },
+      {
+        "train_subject_count": 16,
+        "mean": 0.72383,
+        "std": 0.050878,
+        "n_estimates": 150
+      },
+      {
+        "train_subject_count": 24,
+        "mean": 0.75927,
+        "std": 0.048154,
+        "n_estimates": 150
+      },
+      {
+        "train_subject_count": 32,
+        "mean": 0.778557,
+        "std": 0.046381,
+        "n_estimates": 150
+      },
+      {
+        "train_subject_count": 40,
+        "mean": 0.792905,
+        "std": 0.047766,
+        "n_estimates": 150
+      },
+      {
+        "train_subject_count": 46,
+        "mean": 0.798712,
+        "std": 0.048031,
+        "n_estimates": 150
+      },
+      {
+        "train_subject_count": 51,
+        "mean": 0.80171,
+        "std": 0.049343,
+        "n_estimates": 110
+      }
+    ],
+    "logistic_l2|balanced": [
+      {
+        "train_subject_count": 6,
+        "mean": 0.637835,
+        "std": 0.067804,
+        "n_estimates": 150
+      },
+      {
+        "train_subject_count": 10,
+        "mean": 0.705999,
+        "std": 0.056955,
+        "n_estimates": 150
+      },
+      {
+        "train_subject_count": 16,
+        "mean": 0.765462,
+        "std": 0.051364,
+        "n_estimates": 150
+      },
+      {
+        "train_subject_count": 24,
+        "mean": 0.80097,
+        "std": 0.049498,
+        "n_estimates": 150
+      },
+      {
+        "train_subject_count": 32,
+        "mean": 0.820735,
+        "std": 0.048168,
+        "n_estimates": 150
+      },
+      {
+        "train_subject_count": 40,
+        "mean": 0.836558,
+        "std": 0.048276,
+        "n_estimates": 150
+      },
+      {
+        "train_subject_count": 46,
+        "mean": 0.841557,
+        "std": 0.047115,
+        "n_estimates": 150
+      },
+      {
+        "train_subject_count": 51,
+        "mean": 0.843313,
+        "std": 0.050182,
+        "n_estimates": 110
+      }
+    ],
+    "correlation_centroid|independent": [
+      {
+        "train_subject_count": 6,
+        "mean": 0.602158,
+        "std": 0.058748,
+        "n_estimates": 150
+      },
+      {
+        "train_subject_count": 10,
+        "mean": 0.633777,
+        "std": 0.053995,
+        "n_estimates": 150
+      },
+      {
+        "train_subject_count": 16,
+        "mean": 0.661966,
+        "std": 0.050482,
+        "n_estimates": 150
+      },
+      {
+        "train_subject_count": 24,
+        "mean": 0.674794,
+        "std": 0.05283,
+        "n_estimates": 150
+      },
+      {
+        "train_subject_count": 32,
+        "mean": 0.68379,
+        "std": 0.051757,
+        "n_estimates": 150
+      },
+      {
+        "train_subject_count": 40,
+        "mean": 0.691301,
+        "std": 0.050329,
+        "n_estimates": 150
+      },
+      {
+        "train_subject_count": 46,
+        "mean": 0.693299,
+        "std": 0.049478,
+        "n_estimates": 150
+      },
+      {
+        "train_subject_count": 51,
+        "mean": 0.693636,
+        "std": 0.051609,
+        "n_estimates": 110
+      }
+    ],
+    "correlation_centroid|balanced": [
+      {
+        "train_subject_count": 6,
+        "mean": 0.642222,
+        "std": 0.06457,
+        "n_estimates": 150
+      },
+      {
+        "train_subject_count": 10,
+        "mean": 0.677731,
+        "std": 0.05667,
+        "n_estimates": 150
+      },
+      {
+        "train_subject_count": 16,
+        "mean": 0.709295,
+        "std": 0.051173,
+        "n_estimates": 150
+      },
+      {
+        "train_subject_count": 24,
+        "mean": 0.724298,
+        "std": 0.049094,
+        "n_estimates": 150
+      },
+      {
+        "train_subject_count": 32,
+        "mean": 0.733379,
+        "std": 0.050252,
+        "n_estimates": 150
+      },
+      {
+        "train_subject_count": 40,
+        "mean": 0.738865,
+        "std": 0.048853,
+        "n_estimates": 150
+      },
+      {
+        "train_subject_count": 46,
+        "mean": 0.740727,
+        "std": 0.045863,
+        "n_estimates": 150
+      },
+      {
+        "train_subject_count": 51,
+        "mean": 0.739855,
+        "std": 0.047777,
+        "n_estimates": 110
+      }
+    ]
+  },
+  "marginal_gain_per_subject_linear_svm_independent": {
+    "6_to_10": 0.0163,
+    "10_to_16": 0.0089,
+    "16_to_24": 0.0046,
+    "24_to_32": 0.0028,
+    "32_to_40": 0.0022,
+    "40_to_46": 0.0011,
+    "46_to_51": 0.0008
+  },
+  "key_finding": "Marginal value of one more subject collapses twentyfold across the observed range, to +0.0008 balanced accuracy at the current cohort size. The correlation classifier is fully saturated at +0.0001. Sample size is not the binding constraint; the remaining 0.19 gap to a perfect decoder is a representation and alignment problem.",
+  "extrapolation": {
+    "model": "accuracy = A - B*n^(-c) fitted to linear_svm independent",
+    "n_100": 0.8436,
+    "n_200": 0.8707,
+    "n_500": 0.8962,
+    "caution": "Indicative only. Power-law extrapolation beyond the observed range is unreliable, the fitted asymptote of 0.95 is unsupported, and the fit is driven by the steep small-n points. The marginal-gain table is the robust result."
+  },
+  "consequences": [
+    "Inter-subject normalization and functional alignment are worth more than more data.",
+    "An external cohort remains valuable for generalization claims but should not be pursued expecting higher accuracy; the manuscript must not conflate these.",
+    "QC-60 removes two subjects, worth about 0.0016 by this curve; any larger difference is about WHICH subjects, not how many."
+  ],
+  "runs_per_subject_axis": {
+    "protocol": {
+      "outer_split_count": 30,
+      "run_counts": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "draws_per_count": 5,
+      "vary_axis": "runs"
+    },
+    "curve": {
+      "linear_svm|independent": [
+        {
+          "runs": 1,
+          "mean": 0.696827,
+          "std": 0.042466
+        },
+        {
+          "runs": 2,
+          "mean": 0.746639,
+          "std": 0.047126
+        },
+        {
+          "runs": 3,
+          "mean": 0.774687,
+          "std": 0.045916
+        },
+        {
+          "runs": 4,
+          "mean": 0.788437,
+          "std": 0.046227
+        },
+        {
+          "runs": 5,
+          "mean": 0.800741,
+          "std": 0.043923
+        },
+        {
+          "runs": 6,
+          "mean": 0.80976,
+          "std": 0.041449
+        }
+      ],
+      "linear_svm|balanced": [
+        {
+          "runs": 1,
+          "mean": 0.736391,
+          "std": 0.045204
+        },
+        {
+          "runs": 2,
+          "mean": 0.789374,
+          "std": 0.048071
+        },
+        {
+          "runs": 3,
+          "mean": 0.816838,
+          "std": 0.046363
+        },
+        {
+          "runs": 4,
+          "mean": 0.828189,
+          "std": 0.049196
+        },
+        {
+          "runs": 5,
+          "mean": 0.838773,
+          "std": 0.045668
+        },
+        {
+          "runs": 6,
+          "mean": 0.848479,
+          "std": 0.044911
+        }
+      ],
+      "logistic_l2|independent": [
+        {
+          "runs": 1,
+          "mean": 0.703561,
+          "std": 0.041911
+        },
+        {
+          "runs": 2,
+          "mean": 0.74996,
+          "std": 0.047735
+        },
+        {
+          "runs": 3,
+          "mean": 0.777641,
+          "std": 0.046996
+        },
+        {
+          "runs": 4,
+          "mean": 0.788867,
+          "std": 0.048557
+        },
+        {
+          "runs": 5,
+          "mean": 0.798255,
+          "std": 0.046479
+        },
+        {
+          "runs": 6,
+          "mean": 0.804949,
+          "std": 0.046903
+        }
+      ],
+      "logistic_l2|balanced": [
+        {
+          "runs": 1,
+          "mean": 0.739328,
+          "std": 0.047354
+        },
+        {
+          "runs": 2,
+          "mean": 0.790106,
+          "std": 0.049536
+        },
+        {
+          "runs": 3,
+          "mean": 0.817563,
+          "std": 0.04799
+        },
+        {
+          "runs": 4,
+          "mean": 0.830216,
+          "std": 0.049254
+        },
+        {
+          "runs": 5,
+          "mean": 0.838609,
+          "std": 0.045661
+        },
+        {
+          "runs": 6,
+          "mean": 0.846452,
+          "std": 0.049107
+        }
+      ],
+      "correlation_centroid|independent": [
+        {
+          "runs": 1,
+          "mean": 0.662366,
+          "std": 0.048743
+        },
+        {
+          "runs": 2,
+          "mean": 0.679419,
+          "std": 0.052424
+        },
+        {
+          "runs": 3,
+          "mean": 0.689266,
+          "std": 0.049817
+        },
+        {
+          "runs": 4,
+          "mean": 0.690586,
+          "std": 0.05156
+        },
+        {
+          "runs": 5,
+          "mean": 0.694198,
+          "std": 0.049226
+        },
+        {
+          "runs": 6,
+          "mean": 0.69625,
+          "std": 0.049203
+        }
+      ],
+      "correlation_centroid|balanced": [
+        {
+          "runs": 1,
+          "mean": 0.707235,
+          "std": 0.049703
+        },
+        {
+          "runs": 2,
+          "mean": 0.731049,
+          "std": 0.047254
+        },
+        {
+          "runs": 3,
+          "mean": 0.737725,
+          "std": 0.04504
+        },
+        {
+          "runs": 4,
+          "mean": 0.739029,
+          "std": 0.046864
+        },
+        {
+          "runs": 5,
+          "mean": 0.741117,
+          "std": 0.044461
+        },
+        {
+          "runs": 6,
+          "mean": 0.743359,
+          "std": 0.044586
+        }
+      ]
+    },
+    "increments_linear_svm_independent": {
+      "1_to_2": 0.0498,
+      "2_to_3": 0.028,
+      "3_to_4": 0.0138,
+      "4_to_5": 0.0123,
+      "5_to_6": 0.009
+    },
+    "per_event_normalisation": {
+      "note": "The two axes are not directly comparable in raw units. One extra run adds 8 events for each of ~51 training subjects (408 events); one extra subject adds 48. The run step is 8.5x more data.",
+      "subjects_46_to_51": {
+        "gain": 0.004,
+        "events_added": 240,
+        "gain_per_1000_events": 0.0165
+      },
+      "runs_5_to_6": {
+        "gain": 0.009,
+        "events_added": 408,
+        "gain_per_1000_events": 0.0221
+      },
+      "ratio_runs_over_subjects": 1.34
+    },
+    "correction": "A one-fold preliminary suggested the run axis was still climbing while the subject axis had saturated, implying different regimes. The full run reproduces the raw numbers but the interpretation does not survive per-event normalisation: runs are worth ~1.3x subjects per unit of data, not an order of magnitude. Both axes are decelerating.",
+    "surviving_claims": [
+      "Per unit of data, runs are modestly better than subjects (~1.3x), plausibly because extra runs also improve each subject's own centering estimate.",
+      "On cost, runs win comfortably: one extra run across the cohort buys +0.0090, which would take ~11 additional subjects to match. A follow-up acquisition should extend sessions before extending the roster."
+    ]
+  }
+}

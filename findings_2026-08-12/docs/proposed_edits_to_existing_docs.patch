@@ -1,0 +1,174 @@
+diff --git a/README.md b/README.md
+index 5656301..2ae18d2 100644
+--- a/README.md
++++ b/README.md
+@@ -19,8 +19,11 @@ This repository tracks thesis work on 4-class motor-task fMRI classification usi
+ - The repository contains the cleaned training pipeline, configs, scripts, and tests for leakage-aware experiments.
+ - The older notebooks and `notebook_code.py` preserve the earlier prototype workflow used to build the initial model idea.
+ - The unpublished manuscript is intentionally **not** included in this public repo.
+-- Phase 1 full-dataset legacy runs are complete: the pooled legacy baseline was stopped at epoch 25 by the controlled decision policy, and the subject-wise legacy run completed at chance-level holdout performance.
+-- Broad internal discovery is closed. The frozen complete-run result is `0.8948`, the independent result is `0.8314`, and five-run labeled personalization is reported separately at `0.8913` balanced / `0.8430` independent.
++- Broad internal discovery is closed. The comparable independent result is `0.8314`; the complete-run result is `0.8948` and applies only to runs containing exactly two events per class; five-run labeled personalization is reported separately at `0.8913` balanced / `0.8430` independent.
++- Conventional MVPA comparators under the identical 30-fold protocol reach `0.8051` (linear SVM) and `0.6963` (correlation classifier). The frozen decoder's paired advantage over the SVM is `+0.0262`, CI95 `[+0.0107, +0.0426]`. See `docs/STANDARD_MVPA_BASELINE.md`.
++- The unlabeled subject-run centering is the dominant ingredient: removing it drops independent accuracy to `0.2860`, against a `0.25` chance level.
++- The earlier chance-level neural figures are **withdrawn and the conclusion reverses**. They were training-path artifacts from BatchNorm statistics, uncentered inputs, and global average pooling that discards spatial position. Since somatotopic class identity *is* spatial position, a location-preserving CNN trains in one epoch and is competitive with linear MVPA. See `docs/NEURAL_LANE_GATE.md`.
++- Inter-subject normalization remains open and is scoped in `docs/INTER_SUBJECT_NORMALIZATION.md`.
+ - No legacy neural resume or unrestricted architecture sweep is active. Current decisions and reproducibility checks are tracked in `docs/INVESTIGATION_CLOSEOUT.md` and `experiments/confirmation/`.
+ 
+ ## Dataset Context
+diff --git a/docs/CURRENT_STATUS.md b/docs/CURRENT_STATUS.md
+index c8b7a7e..3c4abef 100644
+--- a/docs/CURRENT_STATUS.md
++++ b/docs/CURRENT_STATUS.md
+@@ -1,6 +1,34 @@
+ # Current Status
+ 
+-Last updated: 2026-07-13.
++Last updated: 2026-08-12.
++
++## Publication-readiness work (2026-08-12)
++
++Three gaps blocking a Q1 neuroimaging submission were addressed. None of them
++retunes the frozen cohort and no frozen decoder value changed.
++
++| Gap | State | Record |
++| --- | --- | --- |
++| No conventional MVPA comparator | **Closed.** Linear SVM `0.8051`, logistic `0.8028`, correlation centroid `0.6963` under the identical 30-fold nested protocol. Frozen decoder leads the SVM by `+0.0262`, CI95 `[+0.0107, +0.0426]`, winning 40 of 62 subjects. | [Standard MVPA Baseline](STANDARD_MVPA_BASELINE.md) |
++| Broken neural negative control | **Diagnosed and fixed; old claim withdrawn and reversed.** Three compounding causes: BatchNorm running statistics (between-sample signal decays to `0.000224` by layer4 in eval mode), uncentered inputs (discriminative variation only ~1.4% of total), and global average pooling, which is translation-invariant while somatotopic class identity *is* spatial position. A location-preserving CNN trains in one epoch and reaches `0.7936` independent / `0.8636` balanced on a held-out fold, competitive with the linear SVM's `0.8030`/`0.8750` on that fold. | [Neural Lane Gate](NEURAL_LANE_GATE.md) |
++| No inter-subject normalization | **Scoped, not closed.** The release ships no MNI BOLD and no anatomical transforms, and ciftify carries only level-2 GLM dtseries. The viable route projects existing `space-T1w` BOLD onto the shipped `native/` surfaces and MSMSulc spheres with Connectome Workbench. | [Inter-Subject Normalization](INTER_SUBJECT_NORMALIZATION.md) |
++
++The most consequential new finding is the centering ablation, now complete across
++all 30 folds. Removing the unlabeled subject-run centering drops independent
++accuracy from `0.8051` to `0.2860` (linear SVM) and `0.8028` to `0.2883`
++(logistic), against a `0.25` chance level, with tight subject-bootstrap intervals.
++That `-0.52` effect is roughly **twenty times** the frozen hierarchy's `+0.026`
++advantage over standard linear MVPA, and the same step is what makes the neural
++lane trainable at all.
++
++The honest ordering of contributions is therefore **centering first**,
++leakage-aware evaluation second, the covariance hierarchy third. The manuscript
++currently implies the reverse.
++
++Required framing changes are recorded in the Headline Rule and Required
++Limitations sections of the [Publication Plan](PUBLICATION_PLAN.md).
++
++## Historical record (frozen 2026-07-13)
+ 
+ This repository records the completed full-dataset investigation and frozen confirmation state for 4-class motor-task fMRI classification. The unpublished manuscript and private paper PDFs are intentionally not part of this public repo.
+ 
+diff --git a/docs/INVESTIGATION_CLOSEOUT.md b/docs/INVESTIGATION_CLOSEOUT.md
+index 2be18d3..3d4bb7b 100644
+--- a/docs/INVESTIGATION_CLOSEOUT.md
++++ b/docs/INVESTIGATION_CLOSEOUT.md
+@@ -14,8 +14,29 @@ Broad discovery on the 62-subject `ds004044` cohort is closed. The project has m
+ | Independent/unbalanced events | `0.8314` accuracy | Nested temporal candidate selector; use for incomplete, imbalanced, or online events. |
+ | Conservative balanced baseline | `0.8752` balanced accuracy | Fixed `3:8` mean-window covariance hierarchy. |
+ | Five-run labeled personalization | `0.8913` balanced / `0.8430` independent | Validation-selected arm calibration using five labeled target-subject runs; not zero-label generalization. |
+-| Full legacy pooled baseline | `0.2629` validation accuracy | Stopped at epoch 25; negative evidence against the original full-dataset neural recipe. |
+-| Full legacy subject-wise holdout | `0.2500` accuracy | Chance-level negative control. |
++| Standard linear SVM comparator | `0.8051` independent accuracy | Conventional MVPA under the identical 30-fold nested protocol. Frozen decoder leads by `+0.0262`, CI95 `[+0.0107, +0.0426]`, winning on 40 of 62 subjects. |
++| Classic correlation classifier | `0.6963` independent accuracy | Haxby-style nearest-centroid comparator under the same protocol. |
++| Full legacy pooled baseline | `0.2629` validation accuracy | Stopped at epoch 25. **Withdrawn as architecture evidence** — see below. |
++| Full legacy subject-wise holdout | `0.2500` accuracy | **Not a valid negative control.** Constant single-class output caused by a BatchNorm train/eval mismatch; see [Neural Lane Gate](NEURAL_LANE_GATE.md). |
++
++## Amendments after freeze (2026-08-12)
++
++Two additions were made after the freeze. Neither tunes the frozen cohort, and
++neither alters any frozen decoder value; both are reporting corrections required
++before submission.
++
++1. **Standard MVPA comparators were added** ([Standard MVPA Baseline](STANDARD_MVPA_BASELINE.md)).
++   The frozen protocol previously had no conventional reference point, so the
++   claim that published ceilings are evaluation artifacts could not be assessed.
++   The comparators run under the identical protocol and do not change any frozen
++   number. They show the hierarchy's advantage over standard linear MVPA is
++   reliable but modest.
++
++2. **The neural negative controls were withdrawn** ([Neural Lane Gate](NEURAL_LANE_GATE.md)).
++   `0.2500` with macro F1 `0.1000`, MCC `0.0`, and `best_epoch: 0` is the exact
++   signature of constant single-class output, reproduced deterministically as a
++   BatchNorm train/eval artifact. It is evidence about the training path, not
++   about architectures, and must not be reported as the latter.
+ 
+ ## Reproducibility Commands
+ 
+diff --git a/docs/PUBLICATION_PLAN.md b/docs/PUBLICATION_PLAN.md
+index 43df617..52bad72 100644
+--- a/docs/PUBLICATION_PLAN.md
++++ b/docs/PUBLICATION_PLAN.md
+@@ -4,10 +4,21 @@ Last updated: 2026-07-13.
+ 
+ The contribution is a leakage-aware analysis of 4-class motor-task fMRI classification on the full public `ds004044` cohort. Broad model discovery is complete. Publication work now uses the frozen protocol and consolidated benchmark described in [Investigation Closeout](INVESTIGATION_CLOSEOUT.md).
+ 
++## Headline Rule
++
++`0.8314` is the headline number. It is the only result directly comparable to an
++ordinary independent classifier, and it must lead every abstract, table, and
++summary. `0.8948` is reported in its own row, always adjacent to its deployment
++precondition, and never as the paper's top-line accuracy. The documents here are
++scrupulous about the distinction; a manuscript table will not be read as
++scrupulously, so the ordering must enforce it.
++
+ ## Claims
+ 
+ - The historical `0.8522` pooled result is not evidence of full-cohort subject generalization. The full pooled legacy model ended at `0.2629`, and the legacy subject-wise holdout ended at `0.2500`.
+ - The frozen independent decoder reaches `0.8314` across 30 repeated nested subject folds and applies to incomplete, imbalanced, or online event streams.
++- A conventional linear SVM under the identical protocol reaches `0.8051`, and the classic correlation classifier reaches `0.6963`. The frozen decoder's paired subject-level advantage over the linear SVM is `+0.0262`, CI95 `[+0.0107, +0.0426]`, winning on 40 of 62 subjects. The advantage is reliable but modest, and must be described that way. See [Standard MVPA Baseline](STANDARD_MVPA_BASELINE.md).
++- Because a correctly evaluated conventional SVM also reaches `0.8051`, the legacy collapse from `0.8522` to `0.2629`/`0.2500` cannot be attributed to using a weak model. This strengthens rather than weakens the evaluation-artifact argument.
+ - The frozen complete-run decoder reaches `0.8948` only when the design supplies exactly two events per class in each complete run. It is a transductive assignment protocol using unlabeled target-run event relationships, not ordinary independent classification.
+ - The fixed `3:8` mean-window hierarchy remains the conservative baseline at `0.8752`.
+ - Five-run target-subject arm calibration is labeled personalization and must be reported separately at `0.8913` balanced and `0.8430` independent.
+@@ -40,6 +51,53 @@ If a future exact cohort becomes available, freeze its label mapping and protoco
+ 5. Reconcile every thesis number with `experiments/confirmation/investigation_closeout.results.json` and the artifact hashes.
+ 6. Do not resume legacy neural training, retune the frozen cohort, or start an unrestricted architecture sweep.
+ 
++## Required Limitations
++
++These must appear in the manuscript in the author's own words. A reviewer who
++finds them unaided treats them as concealment; a reviewer who sees them declared
++treats them as maturity.
++
++1. **The design space was searched with full cohort visibility.** The `3:8`
++   window, the `24^3` grid, the `1024`/`2048` covariance caps, and the hierarchy
++   structure itself were selected across roughly 74 analysis scripts while all 62
++   subjects were visible. The frozen protocol stops further tuning; it does not
++   undo that history. The nested folds are honest at the final step, but the
++   *architecture of the estimator* was chosen with knowledge of the cohort. This
++   is the single strongest reason the external-cohort search mattered, and the
++   reason `0.8314` should be read as a strong within-cohort estimate rather than
++   an expected out-of-cohort accuracy.
++
++2. **No inter-subject spatial normalization was applied.** The representation is
++   `zscore(resize(volume))` on `space-T1w` denoised BOLD, which rescales a
++   bounding box of native-space anatomy rather than registering subjects to a
++   common template. Some part of the cross-subject difficulty characterised here
++   may be unperformed alignment rather than a property of the problem. See
++   [Inter-Subject Normalization](INTER_SUBJECT_NORMALIZATION.md) for the
++   available remedy and what it would cost.
++
++3. **The unlabeled subject-run centering is the dominant ingredient, and it is
++   transductive.** Removing it collapses independent accuracy from `0.8051` to
++   `0.2860` for a linear SVM, and from `0.8028` to `0.2883` for logistic
++   regression — chance is `0.25`, and the subject-bootstrap intervals are tight.
++   That `-0.52` effect is roughly twenty times the frozen hierarchy's `+0.026`
++   advantage over standard linear MVPA, and the same step is what makes the neural
++   lane trainable at all. Centering and per-lag detrending use the target run's own
++   events; the balanced and repetition-consistency rules additionally use the
++   target run's design structure. All are label-free, none are inductive. This
++   belongs in the abstract, not in a preprocessing list.
++
++4. **The earlier neural figures are withdrawn, and the conclusion reverses.**
++   The `0.2500` subject-wise and `0.2629` pooled results are training-path
++   artifacts with three compounding causes: BatchNorm running statistics from tiny
++   batches, uncentered inputs, and global average pooling that discards spatial
++   position. Since somatotopic class identity *is* a spatial position, the pooling
++   destroys the discriminative variable. A location-preserving convolutional
++   decoder trains in one epoch and is competitive with conventional linear MVPA.
++   The manuscript must therefore **not** claim that neural architectures fail on
++   this task; the published recipe contained an architecture-design error.
++   Every neural number must be reported with its training accuracy beside it.
++   See [Neural Lane Gate](NEURAL_LANE_GATE.md).
++
+ ## Repository Rule
+ 
+ Keep private manuscript drafts, unpublished paper PDFs, Kaggle API tokens, raw data, checkpoints, and local logs out of this public repository. Track only code, configs, lightweight result summaries, and reproducibility notes.

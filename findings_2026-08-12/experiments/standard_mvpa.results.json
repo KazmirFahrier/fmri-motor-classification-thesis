@@ -1,0 +1,426 @@
+{
+  "experiment_id": "standard_mvpa_baseline_frozen_protocol",
+  "status": "complete",
+  "completed_at": "2026-08-12",
+  "purpose": "Conventional MVPA comparators evaluated under the frozen closeout protocol. Supplies the reference point the leakage claim requires: what a correctly evaluated standard linear decoder achieves on the same data and splits.",
+  "protocol": {
+    "outer_split_count": 30,
+    "outer_seeds": [
+      11,
+      23,
+      37,
+      51,
+      71
+    ],
+    "outer_fold_count": 6,
+    "inner_subject_fold_count": 4,
+    "selection_metric": "inner-subject-fold balanced accuracy, argmax rule",
+    "events": 2976,
+    "features": 13824,
+    "dual_rank_example": 1968,
+    "preprocess": "frozen",
+    "c_grid": [
+      0.0001,
+      0.001,
+      0.01,
+      0.1,
+      1.0
+    ]
+  },
+  "models": {
+    "correlation_centroid": {
+      "independent": {
+        "balanced_accuracy": 0.69625,
+        "accuracy": 0.69625,
+        "macro_f1": 0.694695,
+        "std_balanced_accuracy": 0.049203,
+        "per_class_recall": {
+          "Left leg movements": 0.699343,
+          "Right leg movements": 0.74303,
+          "Forearm movements": 0.7325,
+          "Upper arm movements": 0.610126
+        }
+      },
+      "balanced": {
+        "balanced_accuracy": 0.743359,
+        "accuracy": 0.743359,
+        "macro_f1": 0.743359,
+        "std_balanced_accuracy": 0.044586,
+        "per_class_recall": {
+          "Left leg movements": 0.78803,
+          "Right leg movements": 0.760379,
+          "Forearm movements": 0.707601,
+          "Upper arm movements": 0.717424
+        }
+      }
+    },
+    "linear_svm": {
+      "independent": {
+        "balanced_accuracy": 0.805088,
+        "accuracy": 0.805088,
+        "macro_f1": 0.804293,
+        "std_balanced_accuracy": 0.044408,
+        "per_class_recall": {
+          "Left leg movements": 0.854747,
+          "Right leg movements": 0.807854,
+          "Forearm movements": 0.824293,
+          "Upper arm movements": 0.73346
+        }
+      },
+      "balanced": {
+        "balanced_accuracy": 0.844122,
+        "accuracy": 0.844122,
+        "macro_f1": 0.844122,
+        "std_balanced_accuracy": 0.046383,
+        "per_class_recall": {
+          "Left leg movements": 0.875884,
+          "Right leg movements": 0.865808,
+          "Forearm movements": 0.818864,
+          "Upper arm movements": 0.815934
+        }
+      }
+    },
+    "logistic_l2": {
+      "independent": {
+        "balanced_accuracy": 0.802841,
+        "accuracy": 0.802841,
+        "macro_f1": 0.802161,
+        "std_balanced_accuracy": 0.047295,
+        "per_class_recall": {
+          "Left leg movements": 0.854874,
+          "Right leg movements": 0.809015,
+          "Forearm movements": 0.804268,
+          "Upper arm movements": 0.743207
+        }
+      },
+      "balanced": {
+        "balanced_accuracy": 0.845619,
+        "accuracy": 0.845619,
+        "macro_f1": 0.845619,
+        "std_balanced_accuracy": 0.049054,
+        "per_class_recall": {
+          "Left leg movements": 0.8875,
+          "Right leg movements": 0.872626,
+          "Forearm movements": 0.816667,
+          "Upper arm movements": 0.805682
+        }
+      }
+    }
+  },
+  "subject_bootstrap_ci95": {
+    "correlation_centroid|independent": {
+      "mean": 0.696438,
+      "ci95": [
+        0.659207,
+        0.731116
+      ],
+      "subject_count": 62
+    },
+    "correlation_centroid|balanced": {
+      "mean": 0.743548,
+      "ci95": [
+        0.704906,
+        0.779435
+      ],
+      "subject_count": 62
+    },
+    "linear_svm|independent": {
+      "mean": 0.805444,
+      "ci95": [
+        0.76875,
+        0.836492
+      ],
+      "subject_count": 62
+    },
+    "linear_svm|balanced": {
+      "mean": 0.844489,
+      "ci95": [
+        0.807796,
+        0.876815
+      ],
+      "subject_count": 62
+    },
+    "logistic_l2|independent": {
+      "mean": 0.803024,
+      "ci95": [
+        0.76586,
+        0.835484
+      ],
+      "subject_count": 62
+    },
+    "logistic_l2|balanced": {
+      "mean": 0.845833,
+      "ci95": [
+        0.80746,
+        0.879167
+      ],
+      "subject_count": 62
+    }
+  },
+  "paired_vs_frozen_decoder": {
+    "independent|frozen_vs_correlation_centroid": {
+      "frozen": 0.831653,
+      "baseline": 0.696438,
+      "mean_difference": 0.135215,
+      "ci95": [
+        0.113911,
+        0.156922
+      ],
+      "excludes_zero": true,
+      "subject_wins_ties_losses": [
+        59,
+        1,
+        2
+      ]
+    },
+    "independent|frozen_vs_linear_svm": {
+      "frozen": 0.831653,
+      "baseline": 0.805444,
+      "mean_difference": 0.02621,
+      "ci95": [
+        0.010685,
+        0.042609
+      ],
+      "excludes_zero": true,
+      "subject_wins_ties_losses": [
+        40,
+        1,
+        21
+      ]
+    },
+    "independent|frozen_vs_logistic_l2": {
+      "frozen": 0.831653,
+      "baseline": 0.803024,
+      "mean_difference": 0.028629,
+      "ci95": [
+        0.013105,
+        0.044489
+      ],
+      "excludes_zero": true,
+      "subject_wins_ties_losses": [
+        41,
+        1,
+        20
+      ]
+    },
+    "balanced|frozen_vs_correlation_centroid": {
+      "frozen": 0.880914,
+      "baseline": 0.743548,
+      "mean_difference": 0.137366,
+      "ci95": [
+        0.11371,
+        0.163239
+      ],
+      "excludes_zero": true,
+      "subject_wins_ties_losses": [
+        60,
+        0,
+        2
+      ]
+    },
+    "balanced|frozen_vs_linear_svm": {
+      "frozen": 0.880914,
+      "baseline": 0.844489,
+      "mean_difference": 0.036425,
+      "ci95": [
+        0.019489,
+        0.053763
+      ],
+      "excludes_zero": true,
+      "subject_wins_ties_losses": [
+        41,
+        2,
+        19
+      ]
+    },
+    "balanced|frozen_vs_logistic_l2": {
+      "frozen": 0.880914,
+      "baseline": 0.845833,
+      "mean_difference": 0.035081,
+      "ci95": [
+        0.017944,
+        0.052354
+      ],
+      "excludes_zero": true,
+      "subject_wins_ties_losses": [
+        41,
+        4,
+        17
+      ]
+    }
+  },
+  "selected_c_counts": {
+    "logistic_l2": {
+      "0.1": 11,
+      "0.01": 15,
+      "0.001": 1,
+      "1.0": 3
+    },
+    "linear_svm": {
+      "0.0001": 21,
+      "0.001": 9
+    },
+    "correlation_centroid": {
+      "0.0": 30
+    }
+  },
+  "interpretation": "A conventional linear SVM under the identical nested subject protocol reaches 0.8054 independent balanced accuracy against the frozen decoder's 0.8317. The paired subject-level advantage of the frozen hierarchy is +0.0262 with 95% CI [+0.0107, +0.0426], reliable but modest, and the hierarchy loses on 21 of 62 subjects. The classic correlation/nearest-centroid classifier reaches 0.6964. These are the comparators the central claim requires, and they show the frozen result is well above the classic baseline and modestly above a modern linear one.",
+  "note": "L2-penalised models are fitted in an exact dual basis spanning the outer training row space, which is mathematically equivalent to fitting all 13824 standardised features. Verified in tests/test_dual_basis_equivalence.py.",
+  "raw_preprocessing_ablation": {
+    "description": "Identical 30-fold protocol with the unlabeled subject-run centering and per-lag detrending removed, i.e. a strictly inductive conventional pipeline.",
+    "models": {
+      "correlation_centroid": {
+        "independent": {
+          "balanced_accuracy": 0.261181,
+          "accuracy": 0.261181
+        },
+        "balanced": {
+          "balanced_accuracy": 0.531629,
+          "accuracy": 0.531629
+        }
+      },
+      "linear_svm": {
+        "independent": {
+          "balanced_accuracy": 0.286029,
+          "accuracy": 0.286029
+        },
+        "balanced": {
+          "balanced_accuracy": 0.671225,
+          "accuracy": 0.671225
+        }
+      },
+      "logistic_l2": {
+        "independent": {
+          "balanced_accuracy": 0.288295,
+          "accuracy": 0.288295
+        },
+        "balanced": {
+          "balanced_accuracy": 0.720082,
+          "accuracy": 0.720082
+        }
+      }
+    },
+    "subject_bootstrap_ci95": {
+      "correlation_centroid|independent": {
+        "mean": 0.261223,
+        "ci95": [
+          0.256922,
+          0.265927
+        ]
+      },
+      "correlation_centroid|balanced": {
+        "mean": 0.531922,
+        "ci95": [
+          0.503159,
+          0.560148
+        ]
+      },
+      "linear_svm|independent": {
+        "mean": 0.286022,
+        "ci95": [
+          0.27621,
+          0.296707
+        ]
+      },
+      "linear_svm|balanced": {
+        "mean": 0.671237,
+        "ci95": [
+          0.638508,
+          0.700874
+        ]
+      },
+      "logistic_l2|independent": {
+        "mean": 0.288374,
+        "ci95": [
+          0.277621,
+          0.300134
+        ]
+      },
+      "logistic_l2|balanced": {
+        "mean": 0.720363,
+        "ci95": [
+          0.686089,
+          0.752623
+        ]
+      }
+    },
+    "centering_effect_independent": {
+      "linear_svm": 0.519,
+      "logistic_l2": 0.515,
+      "correlation_centroid": 0.435
+    },
+    "interpretation": "Removing the unlabeled subject-run centering drops independent accuracy to chance (0.2612-0.2883, tight subject-bootstrap intervals), a -0.52 effect roughly twenty times the frozen hierarchy's +0.026 advantage over a standard linear decoder. The centering step is the dominant methodological ingredient and is label-free but transductive. The balanced rule partially compensates (0.53-0.72) because forcing two events per class per run cancels the per-run offset that defeats argmax."
+  },
+  "centering_level_decomposition": {
+    "description": "Per-feature standardisation already removes a global training mean, so the raw collapse cannot be repaired by any single global offset. The subject_center condition removes one offset per subject pooling that subject's six runs, separating subject-level from run-level nuisance structure.",
+    "independent_balanced_accuracy": {
+      "linear_svm": {
+        "raw": 0.286029,
+        "subject_center": 0.629371,
+        "frozen": 0.805088,
+        "subject_gain": 0.343342,
+        "run_gain": 0.175717
+      },
+      "logistic_l2": {
+        "raw": 0.288312,
+        "subject_center": 0.61113,
+        "frozen": 0.802781,
+        "subject_gain": 0.322818,
+        "run_gain": 0.191651
+      },
+      "correlation_centroid": {
+        "raw": 0.261188,
+        "subject_center": 0.409091,
+        "frozen": 0.696349,
+        "subject_gain": 0.147903,
+        "run_gain": 0.287258
+      }
+    },
+    "subject_center_bootstrap_ci95": {
+      "correlation_centroid|independent": {
+        "mean": 0.409073,
+        "ci95": [
+          0.382124,
+          0.436492
+        ]
+      },
+      "correlation_centroid|balanced": {
+        "mean": 0.654839,
+        "ci95": [
+          0.617337,
+          0.690995
+        ]
+      },
+      "linear_svm|independent": {
+        "mean": 0.629503,
+        "ci95": [
+          0.59953,
+          0.658199
+        ]
+      },
+      "linear_svm|balanced": {
+        "mean": 0.770363,
+        "ci95": [
+          0.7375,
+          0.799933
+        ]
+      },
+      "logistic_l2|independent": {
+        "mean": 0.611425,
+        "ci95": [
+          0.57809,
+          0.64422
+        ]
+      },
+      "logistic_l2|balanced": {
+        "mean": 0.815323,
+        "ci95": [
+          0.780778,
+          0.845094
+        ]
+      }
+    },
+    "caveat": "The frozen condition applies run-level centering AND per-lag linear detrending together, so run_gain combines the two. The subject-versus-run contrast is unaffected.",
+    "interpretation": "Nuisance structure is hierarchical and neither level alone suffices. Removing subject offsets recovers roughly two thirds of the raw-to-frozen gap; removing run offsets within subject recovers most of the remainder."
+  }
+}

@@ -1,0 +1,50 @@
+{
+  "experiment_id": "ceiling_and_design_structure",
+  "status": "complete",
+  "completed_at": "2026-08-13",
+  "within_subject_ceiling_attempt": {
+    "split_half_reliability": {
+      "half_r": 0.4561,
+      "spearman_brown_full": 0.5983
+    },
+    "centroid_curve": {
+      "1": 0.5731,
+      "2": 0.6351,
+      "3": 0.6642,
+      "4": 0.6897,
+      "5": 0.6969
+    },
+    "extrapolated": 0.7217,
+    "VERDICT": "NOT a valid ceiling and must not be cited as one. Cross-subject decoders already exceed it (SVM 0.8051, frozen 0.8314). The extrapolation covers at most five of a subject's own runs, so it estimates a data limit rather than a noise limit, and it uses nearest-centroid, the weakest decoder in the project.",
+    "genuine_ceiling": "still open; needs a different construction"
+  },
+  "pooling_beats_own_data": {
+    "cross_subject_svm": 0.8051,
+    "within_subject_asymptote": 0.7217,
+    "within_subject_observed": 0.6912,
+    "interpretation": "Training on 51 other subjects beats the asymptote of training on a subject's own runs. The cross-subject decoder is not overcoming a transfer penalty to reach parity; it exploits averaging over ~2450 events to denoise class templates far beyond what ~40 within-subject events allow, and that gain exceeds the cost of imperfect correspondence.",
+    "consistent_with": [
+      "steep early rise of the subject learning curve",
+      "class-pattern reliability of only 0.5983",
+      "surface projection improving within-subject but hurting cross-subject accuracy"
+    ]
+  },
+  "design_structure": {
+    "palindromic_runs": "372/372 - universal, no exceptions",
+    "confound": "repetition and serial position are confounded by construction",
+    "repetition_suppression": {
+      "amplitude_ratio_second_over_first": 1.0185,
+      "ci95": [
+        1.0037,
+        1.0333
+      ],
+      "verdict": "slight ENHANCEMENT, not suppression; real but under 2% and too small to motivate weighting"
+    },
+    "within_run_similarity": {
+      "same_class_same_run": 0.3713,
+      "same_class_across_runs": 0.1472,
+      "difference": 0.2241,
+      "interpretation": "Same-class repeats in the same run are ~2.5x more similar than across runs, measured AFTER subject-run centering. This quantifies what the repetition-consistency decoder exploits to reach 0.8948 - but the structure is largely NOT class identity (same class across runs shares only 0.1472). It is run-specific state: residual physiological, motion and attentional structure shared by events acquired close together."
+    }
+  }
+}
