@@ -1,0 +1,91 @@
+{
+  "experiment_id": "permutation_null_within_run",
+  "status": "complete",
+  "completed_at": "2026-08-12",
+  "purpose": "Calibrate every reported accuracy against a label-shuffled null, and test whether the transductive subject-run centering manufactures apparent class structure.",
+  "protocol": {
+    "permutations": 200,
+    "outer_split_count": 30,
+    "exchangeability": "labels shuffled within each subject-run, preserving two events per class",
+    "fixed_c": {
+      "linear_svm": 0.0001,
+      "logistic_l2": 0.01,
+      "correlation_centroid": 0.0
+    }
+  },
+  "label_free_precomputation": "Centering, detrending, standardisation, the dual basis, and the kernels depend only on features, subject/run identifiers, and event time. They are invariant under label permutation and are computed once per fold.",
+  "summary": {
+    "linear_svm|independent": {
+      "observed": 0.8097601010101009,
+      "null_mean": 0.24979378156565654,
+      "null_std": 0.007332001163297052,
+      "null_q95": 0.2618787878787879,
+      "null_max": 0.2709154040404041,
+      "exceedances": 0,
+      "p_value": 0.004975124378109453,
+      "p_value_is_upper_bound": true,
+      "z_against_null": 76.37291743044935
+    },
+    "linear_svm|balanced": {
+      "observed": 0.8484785353535352,
+      "null_mean": 0.2501477588383838,
+      "null_std": 0.007580060465138019,
+      "null_q95": 0.2621685606060606,
+      "null_max": 0.2667171717171717,
+      "exceedances": 0,
+      "p_value": 0.004975124378109453,
+      "p_value_is_upper_bound": true,
+      "z_against_null": 78.93482898546469
+    },
+    "logistic_l2|independent": {
+      "observed": 0.8049494949494949,
+      "null_mean": 0.24972380050505052,
+      "null_std": 0.007866494030208575,
+      "null_q95": 0.26195075757575753,
+      "null_max": 0.2700757575757576,
+      "exceedances": 0,
+      "p_value": 0.004975124378109453,
+      "p_value_is_upper_bound": true,
+      "z_against_null": 70.58108635337297
+    },
+    "logistic_l2|balanced": {
+      "observed": 0.8464520202020202,
+      "null_mean": 0.24987316919191918,
+      "null_std": 0.007583802866873472,
+      "null_q95": 0.2611316287878788,
+      "null_max": 0.27545454545454545,
+      "exceedances": 0,
+      "p_value": 0.004975124378109453,
+      "p_value_is_upper_bound": true,
+      "z_against_null": 78.66486794059415
+    },
+    "correlation_centroid|independent": {
+      "observed": 0.6962500000000001,
+      "null_mean": 0.2503885732323232,
+      "null_std": 0.008386803432755555,
+      "null_q95": 0.2642342171717172,
+      "null_max": 0.2691603535353535,
+      "exceedances": 0,
+      "p_value": 0.004975124378109453,
+      "p_value_is_upper_bound": true,
+      "z_against_null": 53.16226025118433
+    },
+    "correlation_centroid|balanced": {
+      "observed": 0.7433585858585858,
+      "null_mean": 0.2501932133838384,
+      "null_std": 0.008287154075694778,
+      "null_q95": 0.26319318181818174,
+      "null_max": 0.27091540404040404,
+      "exceedances": 0,
+      "p_value": 0.004975124378109453,
+      "p_value_is_upper_bound": true,
+      "z_against_null": 59.50961789417454
+    }
+  },
+  "key_finding": "Every null mean lands within 0.0004 of the 0.25 chance level. The unlabeled subject-run centering, the detrending, and the balanced assignment rule do not create apparent class structure: with labels shuffled, the pipeline recovers nothing. This is the quantitative answer to the strongest methodological objection to the project.",
+  "secondary_finding": "The balanced rule's null is also at chance (0.2501), so its gain over argmax comes from combining real per-event evidence with the design constraint, not from the constraint alone.",
+  "limitations": [
+    "C is fixed at the value most often selected by the unpermuted nested analysis rather than reselected inside each permutation, which would multiply cost by the grid size times the inner fold count.",
+    "The frozen decoder itself was not permuted, only the three standard comparators, which share its representation, folds, and preprocessing. Its own null is expected to behave identically but is not demonstrated."
+  ]
+}

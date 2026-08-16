@@ -1,0 +1,202 @@
+{
+  "experiment_id": "neural_lane_eval_mode_gate",
+  "status": "complete: diagnosis, corrected architecture, and full 30-fold subject-wise result",
+  "completed_at": "2026-08-12",
+  "purpose": "Determine whether the reported chance-level neural results are evidence about architectures or about the training path, using a train==validation memorization gate scored in eval mode.",
+  "withdrawn_claims": {
+    "legacy_subjectwise_holdout": {
+      "accuracy": 0.25,
+      "macro_f1": 0.1,
+      "mcc": 0.0,
+      "roc_auc": 0.4983,
+      "best_epoch": 0,
+      "verdict": "Exact arithmetic signature of constant single-class output. Reproduced deterministically as a BatchNorm train/eval artifact. Not valid architecture evidence."
+    },
+    "legacy_full_pooled": {
+      "accuracy": 0.2629,
+      "verdict": "Same training path and same defects; withdrawn as architecture evidence."
+    }
+  },
+  "gate": {
+    "protocol": "train == validation on 24 balanced events from one subject; accuracy required in eval mode",
+    "input": "frozen (48,8,13824) sequences reshaped to [24,8,1,24,24,24]"
+  },
+  "capacity_ladder": [
+    {
+      "architecture": "linear",
+      "norm": "none",
+      "epochs": 304,
+      "min_loss": 0.6232,
+      "best_train_mode": 1.0,
+      "best_eval_mode": 1.0,
+      "gate_passed": true,
+      "single_class_eval_epochs": "29/305"
+    },
+    {
+      "architecture": "mlp",
+      "norm": "none",
+      "epochs": 510,
+      "min_loss": 0.4149,
+      "best_train_mode": 1.0,
+      "best_eval_mode": 1.0,
+      "gate_passed": true,
+      "single_class_eval_epochs": "33/511"
+    },
+    {
+      "architecture": "shallow_cnn",
+      "norm": "group",
+      "epochs": 1199,
+      "min_loss": 1.0892,
+      "best_train_mode": 0.6667,
+      "best_eval_mode": 0.6667,
+      "gate_passed": false,
+      "single_class_eval_epochs": "22/1200"
+    },
+    {
+      "architecture": "temporal_resnet3d",
+      "norm": "batch",
+      "epochs": 46,
+      "min_loss": 0.0017,
+      "best_train_mode": 1.0,
+      "best_eval_mode": 0.2917,
+      "gate_passed": false,
+      "single_class_eval_epochs": "45/47"
+    }
+  ],
+  "between_sample_std_by_stage": {
+    "note": "Untrained encoder, 24 events. Shows where the BatchNorm eval-mode signal is destroyed.",
+    "batch_eval": {
+      "stem": 0.016816,
+      "layer1": 0.01709,
+      "layer2": 0.003438,
+      "layer3": 0.00135,
+      "layer4": 0.000224,
+      "logits": 0.001167
+    },
+    "group": {
+      "stem": 0.032824,
+      "layer1": 0.043944,
+      "layer2": 0.029692,
+      "layer3": 0.029153,
+      "layer4": 0.029939,
+      "logits": 0.017114
+    }
+  },
+  "root_causes": [
+    {
+      "cause": "BatchNorm running statistics from tiny fMRI batches",
+      "evidence": "Between-sample signal decays ~2 orders of magnitude to 0.000224 by layer4 in eval mode; identical logits for all samples."
+    },
+    {
+      "cause": "Uncentered inputs",
+      "evidence": "Between-sample std at a voxel is 0.0142 while each volume is z-scored to unit variance, so discriminative variation is ~1.4% of total. GroupNorm settles at exactly ln(4)=1.3863."
+    }
+  ],
+  "corrected_configuration": {
+    "architecture": "temporal_resnet3d",
+    "norm": "group",
+    "preprocess": "unlabeled subject-run centering",
+    "gate_passed": true,
+    "epochs_to_pass": {
+      "sub-01": 96,
+      "sub-07": 165,
+      "sub-23": 205
+    },
+    "train_eval_gap": 0.0
+  },
+  "interpretation": "The reported 0.2500 is a training-path artifact with two independent and individually sufficient causes. The identical architecture reaches 1.00 eval-mode accuracy once GroupNorm replaces BatchNorm and the same unlabeled subject-run centering used by the linear pipeline is applied. No architecture comparison may be reported in either direction until the corrected model is retrained end to end under the subject-wise protocol.",
+  "full_fold_training": {
+    "description": "Corrected configuration (GroupNorm + subject-run centering) on a full outer fold, ~1860 training events from ~50 subjects, lr 3e-3 with warmup, batch 24.",
+    "trajectory": [
+      {
+        "epoch": 1,
+        "loss": 1.4206,
+        "train_accuracy": 0.25,
+        "inner_select_accuracy": 0.25
+      },
+      {
+        "epoch": 4,
+        "loss": 1.3949,
+        "train_accuracy": 0.25,
+        "inner_select_accuracy": 0.25
+      },
+      {
+        "epoch": 6,
+        "loss": 1.3936,
+        "train_accuracy": 0.25,
+        "inner_select_accuracy": 0.25
+      },
+      {
+        "epoch": 8,
+        "loss": 1.3901,
+        "train_accuracy": 0.25,
+        "inner_select_accuracy": 0.25
+      }
+    ],
+    "verdict": "Underfitting, not overfitting: training accuracy is at chance and the loss descends toward ln(4)=1.3863 with uniform logits. Passing a memorization gate proves the training path works; it does not prove the architecture can learn cross-subject structure.",
+    "leading_hypothesis": "The encoder downsamples 24^3 to 1^3 by layer4 and then global-average-pools. Global pooling is translation-invariant, but somatotopic decoding is entirely about location: left leg versus right leg differs in where activation sits. An architecture that discards spatial position cannot represent the discriminative variable. Linear decoders, which keep an independent weight per voxel and so preserve location, reach 0.8051 on the same data.",
+    "decisive_next_test": "A variant retaining spatial layout (flatten the layer3 2^3 map, or reduce stride so the final map is not 1^3), evaluated under the same protocol.",
+    "reporting_rule": "Every future neural number in this project must be reported with its training accuracy beside it. The withdrawn figures reported only the validation side, which is why a total training failure was mistaken for a generalisation result."
+  },
+  "corrected_subjectwise_result": {
+    "architecture": "spatial_cnn",
+    "norm": "group",
+    "preprocess": "frozen",
+    "protocol": "30 outer folds, subject seeds 11/23/37/51/71 \u2014 full frozen protocol",
+    "independent_balanced_accuracy": 0.791263,
+    "balanced_balanced_accuracy": 0.85114,
+    "per_fold_independent": [
+      0.7936,
+      0.6894,
+      0.8521,
+      0.7875,
+      0.8125,
+      0.7687
+    ],
+    "fold_sd": 0.045293,
+    "fold_range": 0.1627,
+    "selected_epochs": [
+      6,
+      3,
+      11,
+      4,
+      6,
+      4
+    ],
+    "train_eval_gap_independent": 0.0,
+    "min_distinct_predicted_classes": 4,
+    "same_fold_comparison": {
+      "note": "All decoders on the full 30 folds.",
+      "frozen_decoder": {
+        "independent": 0.8314,
+        "balanced": 0.8806
+      },
+      "linear_svm": {
+        "independent": 0.8051,
+        "balanced": 0.8441
+      },
+      "logistic_l2": {
+        "independent": 0.8028,
+        "balanced": 0.8456
+      },
+      "spatial_cnn": {
+        "independent": 0.7913,
+        "balanced": 0.8511
+      },
+      "correlation_centroid": {
+        "independent": 0.6963,
+        "balanced": 0.7434
+      }
+    },
+    "verdict": "Across all 30 folds the corrected convolutional decoder reaches 0.7913 independent and 0.8511 balanced. It sits ~0.012-0.014 below the linear decoders on the independent rule and 0.040 below the frozen hierarchy, while matching the linear decoders on the balanced rule. The published chance-level figure was an artifact; a correctly designed CNN is competitive but does not win.",
+    "caveats": [
+      "Fold sd is 0.045 with a 0.17 range, so single-fold comparisons remain uninformative.",
+      "The architecture has never been hyperparameter-searched; these are the first settings that trained."
+    ],
+    "harness_fix": "The train/eval gap initially compared train-mode argmax against balanced-assignment accuracy, two different rules, producing a spurious -0.06 to -0.09 on balanced rows. Now computed under the matching rule, which is what makes the exact 0.0 meaningful.",
+    "fold_min": 0.6894,
+    "fold_max": 0.859848,
+    "folds": 30,
+    "train_eval_gap_independent_all_folds": 0.0
+  }
+}

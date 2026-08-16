@@ -1,0 +1,205 @@
+{
+  "experiment_id": "surface_projection_vs_volumetric",
+  "status": "complete",
+  "completed_at": "2026-08-13",
+  "purpose": "Test whether anatomy-based inter-subject surface alignment improves cross-subject motor decoding over the frozen volumetric bounding-box rescale.",
+  "extraction": {
+    "subjects": 62,
+    "shape": "(48, 8, 20484)",
+    "vertices_per_hemisphere": 10242,
+    "median_valid_vertex_fraction": 0.936,
+    "worst_subject": "sub-53 at 0.667",
+    "intersection_across_cohort": 0.6265
+  },
+  "cross_subject_30fold": {
+    "volumetric": {
+      "linear_svm_independent": 0.8051,
+      "logistic_independent": 0.8028,
+      "centroid_independent": 0.6963,
+      "linear_svm_balanced": 0.8441
+    },
+    "surface_per_subject_valid": {
+      "linear_svm_independent": 0.746,
+      "logistic_independent": 0.7382,
+      "centroid_independent": 0.6722,
+      "linear_svm_balanced": 0.7916
+    },
+    "surface_intersected": {
+      "linear_svm_independent": 0.6003,
+      "logistic_independent": 0.5936,
+      "centroid_independent": 0.4904,
+      "linear_svm_balanced": 0.6256
+    }
+  },
+  "within_subject_leave_one_run_out": {
+    "volumetric": {
+      "linear_svm_independent": 0.6912,
+      "logistic_independent": 0.705,
+      "centroid_independent": 0.709
+    },
+    "surface": {
+      "linear_svm_independent": 0.7332,
+      "logistic_independent": 0.7399,
+      "centroid_independent": 0.7006
+    },
+    "interpretation": "Surface carries MORE information within subject (+0.042 SVM), so the cross-subject loss is a transfer failure, not information loss from the projection."
+  },
+  "correspondence": {
+    "inter_subject_correlation_of_class_maps": {
+      "volumetric": 0.0465,
+      "surface": 0.0393
+    },
+    "leave_one_subject_out_group_map_match": {
+      "volumetric": 0.823,
+      "surface": 0.798
+    }
+  },
+  "pipeline_verification": {
+    "note": "Checked before believing the negative result.",
+    "inter_subject_anatomical_position_correlation": {
+      "sphere.MSMSulc.native": 0.9887,
+      "sphere.native": 0.9786
+    },
+    "conclusion": "MSMSulc registration is correctly applied and does improve anatomical correspondence over the unregistered sphere."
+  },
+  "established": "Surface projection preserves and slightly improves representation information content while transferring worse across subjects than a volumetric bounding-box rescale. Anatomical alignment of cortical folding is not sufficient to improve cross-subject motor decoding on this cohort.",
+  "not_established": "Whether the deficit is because surface alignment adds nothing over bounding-box rescaling for functional correspondence, or because the discarded subcortex and cerebellum carry unusually cross-subject-consistent signal. The within-subject result weakens but does not eliminate the second. A ribbon-masked volumetric control separates them and must be run before the manuscript commits.",
+  "next": "Connectivity hyperalignment. The dissociation (more signal, worse correspondence) is exactly the deficit functional alignment is designed to repair.",
+  "connectivity_hyperalignment": {
+    "method": "per-fold template from training subjects only; 324 parcels; orthogonal Procrustes on vertex-to-parcel connectivity profiles; 3 refinement iterations",
+    "leakage": "No labels at any stage. Template rebuilt inside every fold so held-out subjects never shape the feature space. Each subject's rotation comes from their own unlabeled profile.",
+    "results": {
+      "linear_svm_independent": {
+        "volumetric": 0.8051,
+        "surface": 0.746,
+        "hyperaligned": 0.7789,
+        "gain": 0.0329
+      },
+      "logistic_independent": {
+        "volumetric": 0.8028,
+        "surface": 0.7382,
+        "hyperaligned": 0.7777,
+        "gain": 0.0396
+      },
+      "linear_svm_balanced": {
+        "volumetric": 0.8441,
+        "surface": 0.7916,
+        "hyperaligned": 0.8037,
+        "gain": 0.0121
+      },
+      "correlation_centroid_independent": {
+        "volumetric": 0.6963,
+        "surface": 0.6722,
+        "hyperaligned": 0.6074,
+        "gain": -0.0648
+      }
+    },
+    "paired_test_linear_svm_independent": {
+      "mean_difference": 0.0329,
+      "ci95": [
+        0.0238,
+        0.0429
+      ],
+      "folds_improved": "27/30",
+      "note": "hyperaligned minus unaligned surface, paired per fold"
+    },
+    "interpretation": "Functional alignment recovers a little over half the surface-to-volumetric transfer deficit (+0.033 of 0.059) using only label-free connectivity structure, confirming the deficit was genuinely a correspondence problem. It does not overtake the volumetric baseline: 0.7789 vs 0.8051. It harms the correlation classifier (-0.065) because per-parcel rotations fitted to noisy connectivity profiles add estimation noise a nearest-centroid classifier cannot discount.",
+    "residual_gap": {
+      "value": -0.026,
+      "candidate": "the volumetric bounding box retains subcortex and cerebellum; the surface does not",
+      "decisive_test": "ribbon-masked volumetric decoder \u2014 removes the coverage advantage while keeping everything else"
+    }
+  },
+  "arc": {
+    "surface_within_subject_advantage": 0.042,
+    "surface_cross_subject_deficit": -0.059,
+    "recovered_by_hyperalignment": 0.033,
+    "residual_deficit": -0.026
+  },
+  "combined_representation": {
+    "question": "Do volumetric and hyperaligned-surface features carry complementary information?",
+    "why_not_ribbon_mask": "The direct ribbon-masked volumetric control needs every subject's surfaces and BOLD affines re-downloaded (~12GB) to label the 24^3 grid anatomically. Concatenation bounds the same question cheaply.",
+    "c_sweep_linear_svm_independent": {
+      "1e-5": 0.7716,
+      "1e-4": 0.8051,
+      "1e-3": 0.8042,
+      "1e-2": 0.8042
+    },
+    "best_combined": 0.805095,
+    "volumetric_alone": 0.805088,
+    "paired_test": {
+      "mean_difference": 6e-06,
+      "ci95": [
+        -0.0081,
+        0.0084
+      ],
+      "folds_better": 14,
+      "folds_worse": 16,
+      "folds_identical": 0,
+      "per_fold_sd_of_difference": 0.0233,
+      "max_per_fold_move": 0.058
+    },
+    "interpretation": "The surface features demonstrably change predictions - no fold is unchanged and individual folds move by up to 0.058 - yet contribute exactly nothing on net. This is a null from active features, not inert ones.",
+    "strengthens": "The coverage explanation. If the surface carried information the volumetric grid lacked, concatenation would capture it; the decoder is free to use both.",
+    "does_not_prove": "That the residual gap IS coverage. The surface information could be a strict subset for reasons unrelated to which structures are included. The ribbon-masked control remains decisive.",
+    "practical": "Surface alignment offers no route to a better headline number. The 0.8314 frozen result is not improved by adding a functionally aligned cortical surface representation."
+  },
+  "radial_partition_probe": {
+    "premise": "Cortex lies peripherally in the bounding box, subcortex centrally; radial shells would separate them.",
+    "premise_was_wrong": "The signal is concentrated centrally. The outer 40% of the radius (6616 voxels, 48% of the grid) decodes near chance because those shells are largely OUTSIDE the brain - the transform rescales the bounding box of the whole imaged volume, so they contain skull, scalp and air. The partition separates brain from non-brain, not cortex from subcortex, and does not answer the coverage question.",
+    "results_linear_svm_independent": {
+      "r<0.40": 0.7411,
+      "r0.40-0.60": 0.7861,
+      "r0.60-0.80": 0.3943,
+      "r0.80-1.00": 0.3524,
+      "all": 0.8098
+    },
+    "voxels": {
+      "r<0.40": 2176,
+      "r0.40-0.60": 5032,
+      "r0.60-0.80": 5488,
+      "r0.80-1.00": 1128,
+      "all": 13824
+    },
+    "surviving_findings": [
+      "Nearly half the volumetric feature space is dead weight: the outer 48% of voxels contribute almost nothing, consistent with the signal living in many low-variance directions rather than leading components.",
+      "The central region alone (2176 voxels, 16% of the grid) supports 0.7411 - within 0.04 of the hyperaligned surface and 0.065 of full volumetric. Those voxels carry substantial class information a cortical surface cannot access."
+    ],
+    "status": "Consistent with the coverage explanation but not confirmation. 'Central in a bounding box' is not an anatomical label. The coverage explanation has now survived two cheap probes without being confirmed by either; the ribbon-masked control remains the decisive test."
+  },
+  "ribbon_masked_control": {
+    "status": "DECISIVE - refutes the coverage explanation",
+    "how_it_became_affordable": "Labelling the grid needs BOLD geometry, not BOLD data. A NIfTI header is 348 bytes, so a 64KB HTTP range request per subject yields shape and affine (verified against sub-01 vs the full 190MB file). Cost fell from ~12GB to ~870MB of surfaces plus 4MB of headers. This should have been checked before running two proxies that could not answer the question.",
+    "results_linear_svm_independent": {
+      "ribbon_freq_0.25": {
+        "voxels": 6662,
+        "accuracy": 0.8177
+      },
+      "ribbon_freq_0.50": {
+        "voxels": 5348,
+        "accuracy": 0.8097
+      },
+      "ribbon_freq_0.75": {
+        "voxels": 3882,
+        "accuracy": 0.7894
+      },
+      "full_grid": {
+        "voxels": 13824,
+        "accuracy": 0.8051
+      },
+      "hyperaligned_surface": {
+        "voxels": 20484,
+        "accuracy": 0.7789
+      }
+    },
+    "conclusion": "Restricting the volumetric decoder to cortex does NOT cost accuracy - it slightly improves it (0.8177 vs 0.8051 at the 0.25 threshold). The volumetric advantage does not come from subcortex or cerebellum. The coverage hypothesis, which survived three probes, is refuted.",
+    "what_remains": "Correspondence itself. The surface is more reliable (0.6665 vs 0.5983) and more informative within subject (0.7332 vs 0.6912); its cross-subject deficit is not coverage; and functional alignment recovers only half. For this task MSMSulc folding-based registration provides no cross-subject advantage over a bounding-box rescale. Cortical folding and somatotopic functional location evidently do not correspond tightly enough across subjects to pay for the resampling.",
+    "publishable_claim": "On this cohort, anatomy-based surface normalisation does not improve cross-subject motor decoding, and a bounding-box rescale is a competitive alternative."
+  },
+  "stacked_improvements": {
+    "ensemble_alone": 0.8157,
+    "anova_alone": 0.8111,
+    "stacked": 0.8167,
+    "note": "ANOVA selection and ensembling do not compound (+0.001 over ensemble alone), suggesting both are capturing the same noise reduction."
+  }
+}
