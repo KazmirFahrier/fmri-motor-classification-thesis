@@ -125,6 +125,11 @@ def main() -> None:
     ap.add_argument("--out-dir", required=True)
     ap.add_argument("--work-dir", required=True)
     ap.add_argument("--run-count", type=int, default=6)
+    ap.add_argument("--shard", type=int, default=0,
+                    help="Index of this worker, 0-based. Extraction is network-bound at "
+                         "under 1%% CPU, so several workers on disjoint subject slices "
+                         "scale almost linearly until bandwidth saturates.")
+    ap.add_argument("--shards", type=int, default=1)
     ap.add_argument("--offset", type=int, default=3)
     ap.add_argument("--length", type=int, default=8)
     ap.add_argument("--repetition-time", type=float, default=2.0)
@@ -136,6 +141,9 @@ def main() -> None:
     out_dir.mkdir(parents=True, exist_ok=True)
     work.mkdir(parents=True, exist_ok=True)
     subjects = sorted(p.stem for p in Path(args.subjects_from).glob("sub-*.npz"))
+    if args.shards > 1:
+        subjects = subjects[args.shard :: args.shards]
+        print(f"shard {args.shard}/{args.shards}: {len(subjects)} subjects", flush=True)
     key = f"offset_{args.offset}_length_{args.length}_sequence"
     expected = args.run_count * len(CONDITIONS) * 2
     print(f"{len(subjects)} subjects; expecting {expected} events each", flush=True)
