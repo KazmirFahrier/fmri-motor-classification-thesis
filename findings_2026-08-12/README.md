@@ -92,6 +92,12 @@ bounding-box rescale on this cohort.**
 
 ## Where to start
 
+**[`LITERATURE_REVIEW.md`](LITERATURE_REVIEW.md)** checks the project's choices against
+the published literature and the dataset paper. It found that the dataset defines
+**twelve** movement conditions while this project decodes **four** — so about two
+thirds of the available events are unused, and the 12-class problem the dataset was
+built for has never been attempted. Read it first.
+
 **[`RESEARCH_PLAN.md`](RESEARCH_PLAN.md)** is the decision layer: what is settled, what
 is closed and why, what is open in priority order, and the standing methodological
 rules this round produced. Read it before proposing any new experiment.
@@ -100,6 +106,7 @@ rules this round produced. Read it before proposing any new experiment.
 ## Contents
 
 ```
+LITERATURE_REVIEW.md                     project choices checked against the literature and the dataset paper
 RESEARCH_PLAN.md                         decision layer: settled / closed / open, prioritised
 docs/
   RESEARCH_COVERAGE_MAP.md               live ledger: tried / open, verified against all 129 commits

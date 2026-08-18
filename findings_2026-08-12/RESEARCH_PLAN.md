@@ -120,6 +120,16 @@ make and defend.
 
 ---
 
+# Part 2b — Superseded by the literature review
+
+`LITERATURE_REVIEW.md` (2026-08-17) checked this project's choices against the
+published methods literature and the dataset's own documentation. It reorders what
+follows and adds four items that were not previously on the list. **Read it before
+Part 3.** The headline: the dataset defines **twelve** movement conditions and this
+project decodes **four**, so roughly two thirds of the available movement events are
+unused and the full 12-class problem — including any somatotopic-gradient result — has
+never been attempted.
+
 # Part 3 — Open, in priority order
 
 Each entry states the question, the method, the cost, and — the test of whether it is
