@@ -1,0 +1,66 @@
+{
+  "frozen_json": "/Users/USER/Documents/New project/status_2026-07-12_event_sequence_multifilter/nested_candidate_selection_repeated.json",
+  "baseline_json": "/Users/USER/Documents/New project/status_2026-08-18_interpretation/results/smoothed_baseline.json",
+  "preprocess": "frozen + smooth_3",
+  "unit": "per-subject mean balanced accuracy across the splits holding that subject out",
+  "positive_difference_means": "frozen hierarchy above the standard baseline",
+  "comparisons": {
+    "independent|frozen_vs_linear_svm": {
+      "subject_count": 62,
+      "reference_mean": 0.8316532258064515,
+      "comparison_mean": 0.8276881720430108,
+      "mean_difference": 0.0039650537634408805,
+      "ci95": [
+        -0.011895161290322552,
+        0.019825268817204308
+      ],
+      "excludes_zero": false,
+      "subject_wins": 37,
+      "subject_ties": 0,
+      "subject_losses": 25
+    },
+    "independent|frozen_vs_logistic_l2": {
+      "subject_count": 62,
+      "reference_mean": 0.8316532258064515,
+      "comparison_mean": 0.8174731182795699,
+      "mean_difference": 0.014180107526881711,
+      "ci95": [
+        -0.0016817876344086293,
+        0.029838709677419355
+      ],
+      "excludes_zero": false,
+      "subject_wins": 37,
+      "subject_ties": 1,
+      "subject_losses": 24
+    },
+    "balanced|frozen_vs_linear_svm": {
+      "subject_count": 62,
+      "reference_mean": 0.8809139784946237,
+      "comparison_mean": 0.8729166666666666,
+      "mean_difference": 0.00799731182795699,
+      "ci95": [
+        -0.006586021505376326,
+        0.022379032258064497
+      ],
+      "excludes_zero": false,
+      "subject_wins": 33,
+      "subject_ties": 3,
+      "subject_losses": 26
+    },
+    "balanced|frozen_vs_logistic_l2": {
+      "subject_count": 62,
+      "reference_mean": 0.8809139784946237,
+      "comparison_mean": 0.8622983870967742,
+      "mean_difference": 0.018615591397849452,
+      "ci95": [
+        0.001814516129032266,
+        0.035551075268817185
+      ],
+      "excludes_zero": true,
+      "subject_wins": 36,
+      "subject_ties": 2,
+      "subject_losses": 24
+    }
+  },
+  "note": "Paired subject-level bootstrap on identical splits and subjects. Overlapping marginal intervals do not test this difference; the paired interval does."
+}

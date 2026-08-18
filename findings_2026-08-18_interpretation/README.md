@@ -11,6 +11,14 @@ comparable with the previous round.
 
 ## Headline
 
+**The hierarchy's advantage over conventional MVPA does not survive a
+preprocessing-matched baseline.** The frozen decoder's pair specialists use `smooth_3`;
+the baselines built to test it never received it. Giving the baseline the same step
+takes the paired difference from `+0.0262`, CI `[+0.0107, +0.0426]`, to **`+0.0040`, CI
+`[-0.0119, +0.0198]` — no longer distinguishable from zero**. About 85% of the measured
+advantage was preprocessing, not the decoder. See
+[`HEADLINE_REASSESSMENT.md`](docs/HEADLINE_REASSESSMENT.md).
+
 **The two fine contrasts share a decision axis, and the plan predicted they would
 not.** A decoder trained on left-versus-right leg reads forearm-versus-upper-arm at
 `0.6525` on held-out subjects, 30/30 folds above chance, against a 200-draw

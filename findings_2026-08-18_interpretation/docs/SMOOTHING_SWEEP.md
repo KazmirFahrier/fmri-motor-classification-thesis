@@ -73,21 +73,19 @@ step the baseline was not given, rather than to the decoder.* That is a material
 different claim from the one the manuscript currently makes, and it is the single most
 important thing this round found.
 
-### Why it is not yet safe to state that
+### The paired test has now been run, and it confirms this
 
-**These are point estimates from separate runs, not a paired comparison.** Every other
-head-to-head claim in this project carries a paired difference with a bootstrap CI over
-subjects, and this one does not yet. A `0.0039` gap is well inside the range where
-fold-level noise could account for it in either direction — the hierarchy's advantage
-over a plain SVM had a CI of `[+0.0107, +0.0426]`, so the uncertainty on a difference
-of this kind is of the same order as the difference itself.
+The frozen decoder's stored per-fold rows were compared against a `smooth_3` linear SVM
+on identical folds and subjects, 20000-iteration paired bootstrap:
 
-**The required follow-up is a direct paired run**: the frozen hierarchy and a
-`smooth_3` linear SVM scored on identical folds, with the paired difference and its
-CI95 over subjects. Until that exists, the finding should be described as *the gap
-appears to close*, not *the gap closes*. It is recorded here at full strength because
-suppressing it would be worse, and because it is exactly the comparison the external
-review asked for.
+| | Difference | CI95 | Excludes zero |
+| --- | ---: | --- | :---: |
+| Original (unsmoothed baseline) | +0.0262 | `[+0.0107, +0.0426]` | Yes |
+| **Preprocessing-matched** | **+0.0040** | `[-0.0119, +0.0198]` | **No** |
+
+**The hierarchy's advantage over a linear SVM is no longer statistically
+distinguishable from zero.** Full write-up and the claims that survive:
+[`HEADLINE_REASSESSMENT.md`](HEADLINE_REASSESSMENT.md).
 
 ## Why smoothing helps here, briefly
 
