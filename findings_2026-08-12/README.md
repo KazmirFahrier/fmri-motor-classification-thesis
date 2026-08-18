@@ -90,9 +90,17 @@ bounding-box rescale on this cohort.**
 - **The class signal is high-dimensional**: the top 40 principal components, over a
   quarter of the variance, recover only `0.616` of `0.805`.
 
+## Where to start
+
+**[`RESEARCH_PLAN.md`](RESEARCH_PLAN.md)** is the decision layer: what is settled, what
+is closed and why, what is open in priority order, and the standing methodological
+rules this round produced. Read it before proposing any new experiment.
+`docs/RESEARCH_COVERAGE_MAP.md` remains the per-method ledger beneath it.
+
 ## Contents
 
 ```
+RESEARCH_PLAN.md                         decision layer: settled / closed / open, prioritised
 docs/
   RESEARCH_COVERAGE_MAP.md               live ledger: tried / open, verified against all 129 commits
   STANDARD_MVPA_BASELINE.md              comparators, centering decomposition, QC-60, alignment ablations
@@ -126,10 +134,19 @@ python -m pytest findings_2026-08-12/tests/ -q
 
 ## Nothing beat the frozen decoder
 
-Every enhancement tried lands below `0.8314`: ensemble `0.8157`, nested ANOVA
-selection `0.8111`, tuned CNN `0.8030`, beta-series LSS `0.7948`. The hierarchy's
-advantage over plain conventional MVPA narrows from `+0.026` to about `+0.016` once
-the baseline is given standard enhancements, but it does not disappear.
+Every enhancement tried lands below `0.8314`: ensemble `0.8157`, hierarchical-fused SVM
+`0.8143`, nested ANOVA selection `0.8111`, tuned CNN `0.8030`, beta-series LSS `0.7948`.
+The hierarchy's advantage over plain conventional MVPA narrows from `+0.026` to about
+`+0.016` once the baseline is given standard enhancements, but it does not disappear.
+
+### And its advantage is the covariance scoring, not the structure
+
+Decomposing the hierarchy against flat-SVM analogues: two-stage **structure** recovers
+about a fifth of the gap (`0.8143` fused versus `0.8098` flat), ANOVA feature selection
+roughly another quarter, and per-pair selection actively hurts. Hard routing and score
+fusion are indistinguishable. **The majority of the advantage must come from the
+covariance-aware scoring itself**, so the method is not replaceable by an ordinary
+two-stage classifier — a specific claim the manuscript can defend.
 
 ## Still open
 

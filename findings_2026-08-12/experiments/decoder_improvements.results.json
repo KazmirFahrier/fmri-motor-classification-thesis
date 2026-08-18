@@ -139,5 +139,34 @@
       "min_distinct_classes": 4
     },
     "finding": "Doubling base channels is worth +0.012 over 30 folds. The tuned CNN at 0.8030 is indistinguishable from the linear SVM's 0.8051 on the independent rule and AHEAD of both linear decoders on balanced (0.8580 vs 0.8441/0.8456). Still below the frozen hierarchy's 0.8314."
+  },
+  "hierarchy_decomposition": {
+    "question": "Which ingredient of the frozen hierarchy earns its +0.026 over a flat SVM: two-stage structure, pair-specific selection, or covariance scoring?",
+    "results_independent": {
+      "flat": 0.8098,
+      "hierarchical_hard": 0.814,
+      "hierarchical_fused": 0.8143,
+      "pairwise_selected": 0.7973,
+      "frozen_reference": 0.8314
+    },
+    "fusion_weights_selected": {
+      "2.0": 15,
+      "4.0": 15
+    },
+    "finding": "Two-stage STRUCTURE recovers only +0.0045 of the +0.0216 gap between flat SVM and the frozen decoder on these folds - about a fifth. Hard routing and score fusion are indistinguishable (0.8140 vs 0.8143), contradicting the expectation that fusion is what makes hierarchy work. Per-pair ANOVA selection HURTS (-0.0125).",
+    "implication": "The hierarchy's advantage is NOT its shape. Since structure explains a fifth and feature selection explains roughly a quarter (from the earlier ANOVA result), the majority must come from the covariance-aware scoring itself. That is a specific, testable claim about the project's own method, and it means the method cannot be replaced by an ordinary two-stage classifier.",
+    "prior_consistency": "Matches the earlier diagnostic that a naive two-stage centroid classifier did not beat flat centroids."
+  },
+  "within_run_pc_removal": {
+    "question": "Centering removes the run MEAN, yet same-class repeats within a run stay 2.5x more similar than across runs. Is the surviving structure separable nuisance?",
+    "results_independent": {
+      "baseline_mean_only": 0.8051,
+      "remove_1_pc": 0.7632,
+      "remove_2_pcs": 0.6955,
+      "remove_3_pcs": 0.6128
+    },
+    "finding": "Monotonically destructive. Removing even one within-run component costs -0.042.",
+    "why": "With 8 events per run spanning 4 classes, the leading within-run variance directions ARE largely the class differences. The run-specific structure is not separable from class signal by unsupervised component removal, because at this event count they occupy the same subspace.",
+    "implication": "The repetition-consistency decoder's strategy - EXPLOIT the within-run structure - is better founded than the opposite strategy of removing it. Do not revisit unsupervised within-run denoising at this event count."
   }
 }

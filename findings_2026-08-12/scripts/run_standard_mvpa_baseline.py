@@ -463,6 +463,19 @@ def main() -> None:
         ),
     )
     parser.add_argument(
+        "--run-pcs-removed",
+        type=int,
+        default=0,
+        help=(
+            "After centering, also project out the top K principal components computed "
+            "within each subject-run from that run's own events. Centering removes only "
+            "the run MEAN, yet same-class repeats within a run remain 2.5x more similar "
+            "than across runs (0.371 vs 0.147), so substantial run-specific structure "
+            "survives it. This strips more of that structure. Label-free, and each run's "
+            "components come from that run alone."
+        ),
+    )
+    parser.add_argument(
         "--center-events",
         type=int,
         help=(
@@ -544,6 +557,25 @@ def main() -> None:
         )
     elif args.preprocess == "frozen":
         sequence, detrend_rows = preprocess_sequence(sequence, records)
+
+    if args.run_pcs_removed > 0:
+        keys = np.asarray(
+            [f'{r["subject_id"]}|run-{int(r["run_id"])}' for r in records]
+        )
+        for key in sorted(set(keys.tolist())):
+            rows_in_run = np.flatnonzero(keys == key)
+            for lag in range(sequence.shape[1]):
+                block = sequence[rows_in_run, lag]
+                block = block - block.mean(axis=0, keepdims=True)
+                # Right singular vectors span the run's own event-to-event variation.
+                _, _, vt = np.linalg.svd(block, full_matrices=False)
+                basis = vt[: args.run_pcs_removed]
+                sequence[rows_in_run, lag] = block - (block @ basis.T) @ basis
+        print(
+            f"projected out top {args.run_pcs_removed} within-run components "
+            f"from each of {len(set(keys.tolist()))} runs",
+            flush=True,
+        )
     mean_x = sequence.mean(axis=1, dtype=np.float32)
     del sequence
     ribbon_info: dict = {}
