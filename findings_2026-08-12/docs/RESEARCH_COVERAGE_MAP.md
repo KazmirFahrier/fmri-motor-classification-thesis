@@ -78,7 +78,7 @@ proposal in that family should be treated as closed unless it brings exactly tha
 | Per-lag linear detrending | Done | Bundled with run centering; **not separately ablated** |
 | Motion residualization | Done | `test_motion_residualized_classification` |
 | Run-level QC filtering | Done | `run_detrended_run_qc_policy`; negative |
-| **Beta-series GLM features (LSS / LSA)** | **Open** | The canonical MVPA feature is a per-trial GLM beta, not a raw window mean. Verified absent. Needs continuous BOLD, so ~138 GB of re-download. |
+| Beta-series GLM features (LSS) | **Done — negative** | Full cohort re-extracted. Reliably *worse* for the linear SVM (`-0.0103`, CI `[-0.0194, -0.0011]`), no reliable difference elsewhere. Expected for a 16 s block design, where the window mean is near-optimal. |
 | Per-lag linear detrending, valued separately | **Done** | Worth `+0.034` alone — about a third of the hierarchy's total advantage over conventional MVPA, from preprocessing rather than the decoder |
 | Univariate ANOVA feature selection | **Done** | `+0.006` with the threshold nested, `+0.014` with it fixed. The gap is a measured demonstration of the design-search effect. |
 | Variance-based voxel masking | **Done — negative** | Hurts. High variance in this grid is edge and motion artefact, not signal. |
@@ -250,7 +250,7 @@ be optimistic.
 | Feature-selection stability maps | Done | Explicitly not anatomical claims |
 | Response topography checks | Done | `analyze_response_topography`, `audit_official_glm_topography` |
 | Error anatomy | Done | `analyze_event_error_anatomy` |
-| **Searchlight analysis** | **Open** | Verified absent. The standard localization method in MVPA. |
+| Searchlight analysis | **Done** | Best 33-voxel sphere `0.6549` against whole-grid `0.8051`; median neighbourhood `0.2994`, barely above chance. Third independent line showing the signal is distributed, not focal. |
 | **Anatomically-labelled results** | **Open** | Blocked until normalization is resolved (§B) |
 
 ---

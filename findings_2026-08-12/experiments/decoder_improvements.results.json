@@ -66,5 +66,78 @@
     "nested_anova_svm": 0.8111,
     "plain_svm": 0.8051,
     "summary": "Both improvements are real, reliable and small. Conventional MVPA with standard enhancements narrows the gap to the hierarchy from 0.026 to about 0.016 without eliminating it."
+  },
+  "temporal_window_nested": {
+    "question": "The 3:8 window was chosen with full cohort visibility. What is that choice worth?",
+    "candidates": "all 28 contiguous lag ranges within the 8 retained lags",
+    "frozen_full_window": 0.8098,
+    "nested": 0.8095,
+    "oracle_best_window": {
+      "window": "1:8",
+      "accuracy": 0.8152
+    },
+    "selected_window_counts": {
+      "0:8": 12,
+      "1:8": 11,
+      "1:7": 3,
+      "0:7": 3,
+      "1:6": 1
+    },
+    "finding": "Nesting removes the ENTIRE apparent gain: oracle +0.0054, nested -0.0003. The frozen choice is essentially optimal and the disclosed design search bought nothing on this axis. Contrast ANOVA selection, where nesting removed half of +0.0143 but left +0.0060.",
+    "limit": "Says nothing about the other searched choices (24^3 grid, covariance caps, hierarchy structure)."
+  },
+  "beta_series_lss": {
+    "method": "Least-Squares-Separate: per trial, one regressor for that trial, one for all others, cubic drift. Same spatial transform as the frozen pipeline.",
+    "cohort": "62 subjects, 2976 events, shape (48, 1, 13824), all finite, 12 events per class per subject",
+    "results": {
+      "linear_svm": {
+        "window_mean": 0.8051,
+        "beta": 0.7948,
+        "diff": -0.0103,
+        "ci95": [
+          -0.0194,
+          -0.0011
+        ],
+        "reliable": true
+      },
+      "logistic_l2": {
+        "window_mean": 0.8028,
+        "beta": 0.7968,
+        "diff": -0.0061,
+        "ci95": [
+          -0.015,
+          0.0026
+        ],
+        "reliable": false
+      },
+      "correlation_centroid": {
+        "window_mean": 0.6963,
+        "beta": 0.7046,
+        "diff": 0.0084,
+        "ci95": [
+          -0.0036,
+          0.0197
+        ],
+        "reliable": false
+      }
+    },
+    "finding": "The canonical trial-wise feature does NOT beat the window mean. Reliably worse for the linear SVM, no reliable difference elsewhere.",
+    "why": "This is a BLOCK design with 16s events, not a rapid event-related design. LSS exists to separate overlapping responses when trials are seconds apart; here the response is long and well sampled by the eight-volume window, so the window mean is near-optimal while LSS adds per-trial estimation noise from only 232 timepoints. The small centroid gain fits: that decoder is the most sensitive to per-trial amplitude scaling, which is what a GLM beta does estimate better."
+  },
+  "cnn_hyperparameter_search": {
+    "note": "The corrected architecture had never been tuned; 16 channels was simply the first setting that trained.",
+    "single_seed_sweep": {
+      "bc16_h128_lr1e-3": 0.784,
+      "bc32_h128_lr1e-3": 0.7977,
+      "bc16_h256_lr3e-4": 0.7863
+    },
+    "best_config_30_folds": {
+      "base_channels": 32,
+      "independent": 0.803,
+      "balanced": 0.858,
+      "train_eval_gap_all_folds": 0.0,
+      "min_distinct_classes": 4
+    },
+    "finding": "Doubling base channels is worth +0.012 over 30 folds. The tuned CNN at 0.8030 is indistinguishable from the linear SVM's 0.8051 on the independent rule and AHEAD of both linear decoders on balanced (0.8580 vs 0.8441/0.8456). Still below the frozen hierarchy's 0.8314."
   }
 }

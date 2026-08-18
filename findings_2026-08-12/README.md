@@ -26,7 +26,8 @@ opened several more questions and answered most of them.
 | Nested ANOVA + linear SVM | 0.8111 | 0.8606 |
 | Linear SVM | 0.8051 | 0.8441 |
 | Logistic L2 | 0.8028 | 0.8456 |
-| Corrected CNN | 0.7913 | 0.8511 |
+| Corrected CNN (32ch, tuned) | 0.8030 | 0.8580 |
+| Beta-series LSS + SVM | 0.7948 | 0.8431 |
 | Correlation centroid | 0.6963 | 0.7434 |
 
 The hierarchy's paired advantage over a linear SVM is `+0.0262`, CI95
@@ -123,14 +124,21 @@ python findings_2026-08-12/scripts/run_standard_mvpa_baseline.py --help
 python -m pytest findings_2026-08-12/tests/ -q
 ```
 
+## Nothing beat the frozen decoder
+
+Every enhancement tried lands below `0.8314`: ensemble `0.8157`, nested ANOVA
+selection `0.8111`, tuned CNN `0.8030`, beta-series LSS `0.7948`. The hierarchy's
+advantage over plain conventional MVPA narrows from `+0.026` to about `+0.016` once
+the baseline is given standard enhancements, but it does not disappear.
+
 ## Still open
 
-- **Beta-series GLM (LSS/LSA)** — the canonical trial-wise feature, never attempted.
-  Needs continuous BOLD, so a full re-download.
-- **Searchlight** — now that surface alignment is closed, worth running volumetrically
-  for localisation.
 - **Permutation null for the frozen decoder itself** — only the comparators were
-  permuted.
-- **A valid noise ceiling** — the within-subject construction was invalid.
-- **CNN hyperparameter search** — current settings are the first that trained.
-- **HCP leakage replication** — framed as a generalisation claim, not an accuracy one.
+  permuted. Its nested pipeline would have to run inside each permutation.
+- **A valid noise ceiling** — the within-subject construction was invalid, and the
+  learning curve suggests a ceiling may be genuinely ill-defined here, since more
+  subjects keep helping.
+- **HCP leakage replication** — needs a data agreement, and is a generalisation claim
+  rather than an accuracy one.
+- **Ribbon-masked surface comparison at matched coverage** — the volumetric ribbon
+  control is done; the reciprocal surface restriction is not.
