@@ -1,0 +1,13 @@
+{
+  "id": "kazmirfahrierniloy/thesis-openneuro-benchmark",
+  "title": "thesis openneuro benchmark",
+  "code_file": "thesis-openneuro-benchmark.py",
+  "language": "python",
+  "kernel_type": "script",
+  "is_private": true,
+  "enable_gpu": false,
+  "enable_internet": true,
+  "dataset_sources": [],
+  "competition_sources": [],
+  "kernel_sources": []
+}

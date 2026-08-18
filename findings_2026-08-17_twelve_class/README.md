@@ -62,3 +62,30 @@ rather than silently accepting a short file.
 5. **Does the extra data help the original four-class problem?** Train on all twelve,
    evaluate on the four. This is the direct test of whether the unused events carry
    transferable signal.
+
+---
+
+## Results (added 2026-08-18)
+
+Extraction complete: **62/62 subjects**, `(144, 8, 13824)` each, twelve events per
+class. The four-class subset reproduces the frozen checkpoints to `1.9e-06`.
+
+| | Value |
+| --- | ---: |
+| **Twelve-class balanced accuracy** | **0.6838** (sd 0.0353) |
+| Chance | 0.0833 |
+| Ratio to chance | **8.2x** |
+| Somatotopic ordering (Spearman rho) | **+0.4752** |
+| Within body part / between body part RDM distance | 0.8348 / 1.1724 |
+
+Per-class accuracy tracks cortical magnification — eye `0.8919`, tongue `0.7718`,
+finger `0.7680`, lip `0.7102` at the top; upper arm `0.5917`, leg `0.5922`, ankle
+`0.5922` at the bottom. That pattern is predicted by a somatotopic account and by
+neither a movement-amplitude nor a laterality account, which **resolves the ambiguity
+left by the four-class cross-contrast transfer result**.
+
+It also reframes the headline: the frozen four are three of the four worst-decoded
+conditions in the set, so `0.8314` was obtained on the most confusable four-way subset
+the dataset contains.
+
+Full write-up: [`docs/TWELVE_CLASS_DECODING.md`](docs/TWELVE_CLASS_DECODING.md).

@@ -1,0 +1,66 @@
+{
+  "checkpoint_dir": "/Users/USER/Documents/New project/status_2026-07-11_event_sequence_full_cohort_complete/continuous_event_sequence_full_cohort/subject_checkpoints",
+  "model": "linear_svm",
+  "outer_split_count": 30,
+  "kernels": [
+    1,
+    3,
+    5,
+    7
+  ],
+  "fixed": {
+    "1": {
+      "independent": {
+        "mean": 0.8097601010101009,
+        "sd": 0.04144912025226551
+      },
+      "balanced": {
+        "mean": 0.8484785353535352,
+        "sd": 0.044911435570555575
+      }
+    },
+    "3": {
+      "independent": {
+        "mean": 0.8275126262626262,
+        "sd": 0.04757755028362343
+      },
+      "balanced": {
+        "mean": 0.872828282828283,
+        "sd": 0.0492750409978548
+      }
+    },
+    "5": {
+      "independent": {
+        "mean": 0.8058080808080809,
+        "sd": 0.04738605411865638
+      },
+      "balanced": {
+        "mean": 0.8574494949494949,
+        "sd": 0.050112584959359746
+      }
+    },
+    "7": {
+      "independent": {
+        "mean": 0.7901388888888888,
+        "sd": 0.043124988447642794
+      },
+      "balanced": {
+        "mean": 0.8432070707070708,
+        "sd": 0.046958997369357394
+      }
+    }
+  },
+  "nested": {
+    "independent": {
+      "mean": 0.8275126262626262,
+      "sd": 0.04757755028362343
+    },
+    "balanced": {
+      "mean": 0.872828282828283,
+      "sd": 0.0492750409978548
+    }
+  },
+  "selected_kernel_counts": {
+    "3": 30
+  }
+}

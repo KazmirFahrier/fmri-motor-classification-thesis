@@ -67,8 +67,17 @@ time.
   significance argument. Expensive because the upstream candidate JSONs regenerate per
   permutation. The Gram-caching trick used in the transfer null (below) may make it
   affordable.
-- **P6** Spatial smoothing sweep — needs re-extraction, so it is gated on bandwidth
-  rather than compute.
+
+### Correction: P6 needed no re-extraction
+
+An earlier version of this file said the smoothing sweep was "gated on bandwidth rather
+than compute" because it required re-extracting the cohort at several kernels. **That
+was wrong.** `mean_smooth` in `scripts/run_spatial_scale_feature_sweep.py` operates on
+the extracted `13824`-feature vectors, reshaping them to the `24^3` grid and
+box-filtering there. The whole sweep runs on the frozen checkpoints, and it is
+recorded in [`SMOOTHING_SWEEP.md`](docs/SMOOTHING_SWEEP.md).
+- **P3** was the only genuinely expensive item left. **P6 turned out to need no
+  re-extraction at all** and is now closed — see below.
 
 ## A new item this round created
 
