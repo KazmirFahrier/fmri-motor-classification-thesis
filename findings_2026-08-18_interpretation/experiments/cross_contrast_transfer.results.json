@@ -1,0 +1,121 @@
+{
+  "checkpoint_dir": "/Users/USER/Documents/New project/status_2026-07-11_event_sequence_full_cohort_complete/continuous_event_sequence_full_cohort/subject_checkpoints",
+  "class_names": [
+    "Left leg",
+    "Right leg",
+    "Forearm",
+    "Upper arm"
+  ],
+  "pairs": {
+    "leg": [
+      0,
+      1
+    ],
+    "arm": [
+      2,
+      3
+    ]
+  },
+  "outer_split_count": 30,
+  "chance": 0.5,
+  "conditions": {
+    "leg_to_arm_aligned": {
+      "mean": 0.6524621212121211,
+      "sd": 0.054185137076368094,
+      "ci95": [
+        0.6330722189314067,
+        0.6718520234928355
+      ],
+      "folds_above_chance": 30,
+      "fold_count": 30
+    },
+    "leg_to_arm_swapped": {
+      "mean": 0.34753787878787873,
+      "sd": 0.0541851370763681,
+      "ci95": [
+        0.3281479765071643,
+        0.36692778106859314
+      ],
+      "folds_above_chance": 0,
+      "fold_count": 30
+    },
+    "arm_to_leg_aligned": {
+      "mean": 0.6234848484848485,
+      "sd": 0.0403105277789946,
+      "ci95": [
+        0.6090599113767792,
+        0.6379097855929179
+      ],
+      "folds_above_chance": 30,
+      "fold_count": 30
+    },
+    "arm_to_leg_swapped": {
+      "mean": 0.3765151515151516,
+      "sd": 0.0403105277789946,
+      "ci95": [
+        0.36209021440708217,
+        0.390940088623221
+      ],
+      "folds_above_chance": 0,
+      "fold_count": 30
+    },
+    "leg_within": {
+      "mean": 0.8385101010101011,
+      "sd": 0.029184613847052357,
+      "ci95": [
+        0.8280665210705105,
+        0.8489536809496918
+      ],
+      "folds_above_chance": 30,
+      "fold_count": 30
+    },
+    "arm_within": {
+      "mean": 0.8031818181818181,
+      "sd": 0.04878227250251349,
+      "ci95": [
+        0.785725306158571,
+        0.8206383302050653
+      ],
+      "folds_above_chance": 30,
+      "fold_count": 30
+    }
+  },
+  "null": {
+    "leg_to_arm_aligned": {
+      "observed": 0.6524621212121211,
+      "null_mean": 0.5005385732323232,
+      "null_sd": 0.011479328031980438,
+      "null_max": 0.5265404040404041,
+      "p_value": 0.004975124378109453,
+      "z": 13.234533202340044,
+      "permutations": 200
+    },
+    "arm_to_leg_aligned": {
+      "observed": 0.6234848484848485,
+      "null_mean": 0.5001075126262626,
+      "null_sd": 0.011785275074604038,
+      "null_max": 0.535871212121212,
+      "p_value": 0.004975124378109453,
+      "z": 10.46877014559044,
+      "permutations": 200
+    },
+    "leg_within": {
+      "observed": 0.8385101010101011,
+      "null_mean": 0.5005895202020202,
+      "null_sd": 0.014967865704855511,
+      "null_max": 0.5326136363636362,
+      "p_value": 0.004975124378109453,
+      "z": 22.57640384216308,
+      "permutations": 200
+    },
+    "arm_within": {
+      "observed": 0.8031818181818181,
+      "null_mean": 0.501830744949495,
+      "null_sd": 0.013793451750731328,
+      "null_max": 0.5417045454545454,
+      "p_value": 0.004975124378109453,
+      "z": 21.847401120342884,
+      "permutations": 200
+    }
+  }
+}
