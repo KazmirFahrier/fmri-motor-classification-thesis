@@ -119,11 +119,24 @@ useful, and better supported by the evidence assembled here.
 
 ## Caveats
 
-`smooth_3` was itself selected on inner folds in all 30 of them, so the baseline's
-smoothing is nested and not cohort-fitted. The hierarchy's own caps of `1024` and `2048`
-remain choices made with full cohort visibility and are not nested here; if they were,
-the hierarchy's number would likely fall somewhat further, so this comparison is if
-anything generous to the hierarchy.
+`smooth_3` was itself selected on inner folds in all 30 of them, and `32^3` in 29 of 30,
+so neither of the baseline's improvements is cohort-fitted. The hierarchy's own caps of
+`1024` and `2048` remain choices made with full cohort visibility and are not nested
+here; if they were, the hierarchy's number would likely fall somewhat further.
+
+**But the third comparison is unfair in the opposite direction, and this must be stated.**
+The baseline was given a better grid; the hierarchy was not. It has only ever been run on
+`24^3`, and there is no reason to think it would fail to benefit from `32^3` as the
+baseline did — the gain is a property of the representation, not of the classifier. A
+symmetric comparison would re-run the hierarchy's full nested candidate-selection
+pipeline on `32^3`, which has not been done.
+
+That is why the conclusion drawn here is **equivalence**, not a baseline win. The second
+comparison — `24^3` with `smooth_3`, where both sides use the same representation and
+differ only in the decoder — is the one that carries the argument, and it lands at
+`+0.0040` with an interval spanning zero. The third comparison shows the difference is
+not robust to configuration choices the hierarchy was never given the chance to make,
+which is a weaker and more careful claim than "the baseline is better".
 
 The comparison uses the frozen decoder's stored `selected_rows` rather than a fresh run.
 Those rows reproduce the closeout numbers exactly (`0.83142` independent, `0.88056`
