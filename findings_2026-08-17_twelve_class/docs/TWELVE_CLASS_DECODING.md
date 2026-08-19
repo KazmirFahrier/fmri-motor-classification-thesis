@@ -94,6 +94,25 @@ accuracy pattern do not depend on the ranking at all, and carry the argument on 
 own.
 
 Accuracy is not corrected for the differing difficulty of the eleven-way alternatives
-each class faces, and no permutation null has been run at twelve classes yet. Chance is
-analytic (`1/12`) rather than empirical, and the project's standing practice is to
-measure the null rather than assume it — that run is the immediate next step.
+each class faces.
+
+## The null has now been measured
+
+Chance was quoted analytically as `1/12`. The project's standing practice is to measure
+it, because the transductive preprocessing is worth `+0.52` and is exactly the kind of
+mechanism that could inflate an effect without any class information. 100 within-run
+permutations across all 30 folds, preserving the two-per-class composition:
+
+| | Value |
+| --- | ---: |
+| Observed | 0.6838 |
+| Analytic chance | 0.0833 |
+| **Empirical null** | **0.0832** (sd 0.0026) |
+| Null maximum over 100 draws | 0.0892 |
+| z | **231.2** |
+| p | < 0.01 (floor for 100 draws) |
+
+**The empirical null matches analytic chance to `0.0001`.** No permutation came within
+`0.59` of the observed value. The preprocessing carries no class information at twelve
+classes, exactly as it carried none at four, and the `8.2x` figure stands on a measured
+null rather than an assumed one.

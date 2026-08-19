@@ -77,6 +77,7 @@ class. The four-class subset reproduces the frozen checkpoints to `1.9e-06`.
 | Ratio to chance | **8.2x** |
 | Somatotopic ordering (Spearman rho) | **+0.4752** |
 | Within body part / between body part RDM distance | 0.8348 / 1.1724 |
+| Empirical permutation null (100 draws, 30 folds) | **0.0832**, z = 231.2 |
 
 Per-class accuracy tracks cortical magnification — eye `0.8919`, tongue `0.7718`,
 finger `0.7680`, lip `0.7102` at the top; upper arm `0.5917`, leg `0.5922`, ankle
