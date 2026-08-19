@@ -1,0 +1,67 @@
+{
+  "checkpoint_dir": "/Users/USER/Documents/New project/status_2026-08-18_t12_offset0/seq",
+  "phase_pairs": {
+    "peak_vs_undershoot": {
+      "same_class": 0.14337531386789365,
+      "different_class": -0.01124639893315658,
+      "difference": 0.15462171280105022,
+      "subjects_same_above_different": 55,
+      "subjects_same_class_negative": 7,
+      "subject_count": 62
+    },
+    "peak_vs_transition": {
+      "same_class": 0.4842133387075828,
+      "different_class": -0.0411344527369987,
+      "difference": 0.5253477914445815,
+      "subjects_same_above_different": 62,
+      "subjects_same_class_negative": 0,
+      "subject_count": 62
+    },
+    "transition_vs_undershoot": {
+      "same_class": 0.3802931390137301,
+      "different_class": -0.03353832769259855,
+      "difference": 0.41383146670632864,
+      "subjects_same_above_different": 62,
+      "subjects_same_class_negative": 0,
+      "subject_count": 62
+    },
+    "plateau_vs_late_blockwide": {
+      "same_class": 0.22754010579959863,
+      "different_class": -0.019139827783650837,
+      "difference": 0.24667993358324944,
+      "subjects_same_above_different": 62,
+      "subjects_same_class_negative": 0,
+      "subject_count": 62
+    }
+  },
+  "cross_phase_class_similarity": {
+    "matched_same_class": 0.22754010579959866,
+    "mismatched_different_class": -0.019139827783650833,
+    "difference": 0.24667993358324944,
+    "subjects_with_positive_difference": 62,
+    "subject_count": 62
+  },
+  "lag_count": 16,
+  "plateau_lags": [
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+  ],
+  "late_lags": [
+    11,
+    12,
+    13,
+    14,
+    15
+  ],
+  "within_plateau": 0.5796425251226428,
+  "within_late": 0.623369636974026,
+  "plateau_vs_late": 0.22857161685495014,
+  "subject_count": 62
+}

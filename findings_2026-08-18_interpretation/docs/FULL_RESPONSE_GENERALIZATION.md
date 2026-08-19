@@ -68,6 +68,14 @@ neighbours, so including them averages the inversion away. The refutation was wi
 but the confirmation has not been earned either — the within- and cross-subject measures
 disagree, and this analysis cannot say why.
 
+**The discrepancy replicates on independent data.** Running the same phase analysis on
+the twelve-class extraction at the full response window gives peak-versus-undershoot
+same-class similarity of `+0.1434` against `-0.0112` for different classes, with only 7
+of 62 subjects negative — the same within-subject picture as the four-class data
+(`+0.1178`, 15 of 62). Whatever the disagreement between the within- and cross-subject
+measures reflects, it is a stable property of the data and not sampling noise in one
+extraction.
+
 ## What can be said now
 
 **The frozen window is well chosen, for a reason that was not previously known.** Lags
