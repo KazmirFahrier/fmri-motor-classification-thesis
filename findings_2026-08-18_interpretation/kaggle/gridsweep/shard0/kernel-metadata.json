@@ -1,0 +1,13 @@
+{
+  "id": "kazmirfahrierniloy/thesis-gridsweep-shard0",
+  "title": "thesis gridsweep shard0",
+  "code_file": "thesis-gridsweep-shard0.py",
+  "language": "python",
+  "kernel_type": "script",
+  "is_private": true,
+  "enable_gpu": false,
+  "enable_internet": true,
+  "dataset_sources": [],
+  "competition_sources": [],
+  "kernel_sources": []
+}

@@ -1,0 +1,34 @@
+{
+  "checkpoint_dir": "/Users/USER/Documents/New project/status_2026-08-17_twelve_class/seq",
+  "class_count": 12,
+  "chance": 0.08333333333333333,
+  "outer_split_count": 30,
+  "stages": {
+    "none": {
+      "mean": 0.0945223063973064,
+      "sd": 0.007057178829729416
+    },
+    "subject_centering": {
+      "mean": 0.5228198653198652,
+      "sd": 0.03547597369862041
+    },
+    "run_centering": {
+      "mean": 0.6547243265993267,
+      "sd": 0.03455343534800747
+    },
+    "run_centering_detrend": {
+      "mean": 0.6837962962962963,
+      "sd": 0.035280499404144655
+    },
+    "run_centering_detrend_smooth": {
+      "mean": 0.7039604377104378,
+      "sd": 0.041582610645762554
+    }
+  },
+  "increments": {
+    "subject_centering -> run_centering": 0.13190446127946143,
+    "run_centering -> run_centering_detrend": 0.02907196969696968,
+    "run_centering_detrend -> run_centering_detrend_smooth": 0.020164141414141468,
+    "none -> subject_centering": 0.42829755892255883
+  }
+}

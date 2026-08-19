@@ -59,6 +59,15 @@ def main() -> None:
     parser.add_argument("--outer-fold-count", type=int, default=6)
     parser.add_argument("--subject-seeds", nargs="+", type=int, default=[11, 23, 37, 51, 71])
     parser.add_argument("--split-limit", type=int)
+    parser.add_argument(
+        "--per-lag-standardization", action="store_true",
+        help="Standardize the test lag with its own training-subject statistics rather "
+             "than carrying the training lag's. Across lags with very different signal "
+             "amplitude, reusing the training lag's mean leaves a systematic offset in "
+             "the test features, which shifts every decision value and can drive "
+             "transfer below chance without the underlying code having changed. "
+             "Estimated on training subjects only, so no leakage is introduced.",
+    )
     args = parser.parse_args()
 
     feature_dict, y, records = load_checkpoints(
@@ -95,11 +104,19 @@ def main() -> None:
             model.fit(kernel_train, y[train_idx])
 
             for test_lag in range(lag_count):
-                # The training lag's standardization is carried over deliberately:
-                # refitting it per test lag would re-adapt the decoder and stop this
-                # being a transport test.
+                # By default the training lag's standardization is carried over, so the
+                # decoder is transported unchanged. With --per-lag-standardization the
+                # test lag is instead standardized by its own training-subject
+                # statistics, which removes the cross-phase offset described above while
+                # still transporting the fitted weights.
+                if args.per_lag_standardization:
+                    test_mean, test_scale = standardize(
+                        sequence[:, test_lag, :], train_idx
+                    )
+                else:
+                    test_mean, test_scale = mean, scale
                 x_val = (
-                    (sequence[:, test_lag, :][val_idx] - mean) / scale
+                    (sequence[:, test_lag, :][val_idx] - test_mean) / test_scale
                 ).astype(np.float64)
                 scores = model.decision_function(x_val @ x_train.T).astype(np.float64)
                 for rule, prediction in (
@@ -128,6 +145,7 @@ def main() -> None:
         "outer_split_count": len(splits),
         "lag_count": lag_count,
         "fixed_c": args.fixed_c,
+        "per_lag_standardization": bool(args.per_lag_standardization),
         "matrix": summary,
         "diagonal_mean": diagonal,
         "off_diagonal_mean": off,
