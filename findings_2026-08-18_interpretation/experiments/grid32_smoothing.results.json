@@ -1,0 +1,56 @@
+{
+  "checkpoint_dir": "/Users/USER/Documents/New project/status_2026-08-18_gridsweep/seq",
+  "model": "linear_svm",
+  "outer_split_count": 30,
+  "kernels": [
+    1,
+    3,
+    5
+  ],
+  "fixed": {
+    "1": {
+      "independent": {
+        "mean": 0.8232828282828285,
+        "sd": 0.04826623034731009
+      },
+      "balanced": {
+        "mean": 0.8684343434343434,
+        "sd": 0.048913805712150385
+      }
+    },
+    "3": {
+      "independent": {
+        "mean": 0.8423295454545457,
+        "sd": 0.04544688356089907
+      },
+      "balanced": {
+        "mean": 0.8774810606060607,
+        "sd": 0.04372707404693518
+      }
+    },
+    "5": {
+      "independent": {
+        "mean": 0.8353598484848486,
+        "sd": 0.04479170403825292
+      },
+      "balanced": {
+        "mean": 0.8769444444444443,
+        "sd": 0.04130582773294346
+      }
+    }
+  },
+  "nested": {
+    "independent": {
+      "mean": 0.8409217171717175,
+      "sd": 0.04442435087273913
+    },
+    "balanced": {
+      "mean": 0.8770012626262627,
+      "sd": 0.04328590600908268
+    }
+  },
+  "selected_kernel_counts": {
+    "3": 27,
+    "5": 3
+  }
+}

@@ -16,8 +16,16 @@ preprocessing-matched baseline.** The frozen decoder's pair specialists use `smo
 the baselines built to test it never received it. Giving the baseline the same step
 takes the paired difference from `+0.0262`, CI `[+0.0107, +0.0426]`, to **`+0.0040`, CI
 `[-0.0119, +0.0198]` — no longer distinguishable from zero**. About 85% of the measured
-advantage was preprocessing, not the decoder. See
-[`HEADLINE_REASSESSMENT.md`](docs/HEADLINE_REASSESSMENT.md).
+advantage was preprocessing, not the decoder.
+
+Sweeping the `24^3` grid — the last disclosed cohort-visible choice, and one that needed
+re-extraction — found it **suboptimal**: `32^3` wins 29 of 30 folds. A linear SVM given
+both the finer grid and the smoothing reaches **`0.8423`** against the hierarchy's
+`0.8314`, winning on 36 of 62 subjects, though that interval also spans zero. Across
+three progressively fairer comparisons the difference runs `+0.0262` → `+0.0040` →
+`−0.0110`, and **only the first was significant — the unfair one**. See
+[`HEADLINE_REASSESSMENT.md`](docs/HEADLINE_REASSESSMENT.md) and
+[`GRID_RESOLUTION_SWEEP.md`](docs/GRID_RESOLUTION_SWEEP.md).
 
 **The two fine contrasts share a decision axis, and the plan predicted they would
 not.** A decoder trained on left-versus-right leg reads forearm-versus-upper-arm at

@@ -41,22 +41,56 @@ prediction rule.**
 
 | | Difference | CI95 | Excludes zero | Subject w/t/l |
 | --- | ---: | --- | :---: | --- |
-| Original (unsmoothed baseline) | +0.0262 | `[+0.0107, +0.0426]` | Yes | 40/1/21 |
-| **Preprocessing-matched** | **+0.0040** | `[-0.0119, +0.0198]` | **No** | 37/0/25 |
+| Original (unsmoothed, `24^3`) | +0.0262 | `[+0.0107, +0.0426]` | Yes | 40/1/21 |
+| **Preprocessing-matched** (`24^3` + `smooth_3`) | **+0.0040** | `[-0.0119, +0.0198]` | **No** | 37/0/25 |
+| **Best conventional** (`32^3` + `smooth_3`) | **−0.0110** | `[-0.0297, +0.0094]` | **No** | 26/0/36 |
 
 Roughly **85% of the hierarchy's measured advantage was a preprocessing difference**,
 not a decoder difference.
 
+### The grid sweep extends this, and flips the sign
+
+`24^3` is the grid the hierarchy runs on, and it was one of the manuscript's disclosed
+cohort-visible choices. Sweeping it found it **suboptimal**: `32^3` is selected in 29 of
+30 folds and is worth `+0.0135` on its own
+([`GRID_RESOLUTION_SWEEP.md`](GRID_RESOLUTION_SWEEP.md)).
+
+Giving the baseline both improvements — the finer grid and the smoothing, each chosen by
+nested selection rather than cohort-wide — puts a plain linear SVM at **`0.8423`** against
+the hierarchy's `0.8314`, winning on **36 of 62 subjects**.
+
+**That is still not a reliable win for the baseline.** The paired interval
+`[-0.0297, +0.0094]` spans zero, exactly as the matched comparison did. The correct
+statement is not that conventional MVPA beats the hierarchy; it is that across three
+progressively fairer comparisons the difference goes from significant, to nil, to
+slightly negative, and **only the first was significant** — and that one was the unfair
+one.
+
+| Configuration | `linear_svm` independent |
+| --- | ---: |
+| `24^3`, no smoothing (original baseline) | 0.8098 |
+| `24^3` + `smooth_3` | 0.8275 |
+| `32^3`, no smoothing | 0.8233 |
+| **`32^3` + `smooth_3`** | **0.8423** |
+| Frozen hierarchy (`24^3`, `smooth_3`, covariance caps) | 0.8314 |
+
+The two preprocessing gains **combine rather than substitute**, which was not obvious:
+both trade spatial detail against noise, so they could easily have been redundant.
+
 ## What can and cannot now be claimed
 
 **Cannot:** that the frozen hierarchy outperforms conventional MVPA. Against a linear
-SVM with matched preprocessing there is no reliable difference, and the manuscript must
-not assert one.
+SVM with matched preprocessing there is no reliable difference, and against a
+better-configured one the point estimate favours the baseline. The manuscript must not
+assert an advantage.
 
-**Can:** that the hierarchy *matches* conventional MVPA. The point estimate still
-favours it slightly and it wins on 37 of 62 subjects, so nothing here shows it is
-worse. "Equivalent to a well-configured conventional baseline" is what the data
-support.
+**Cannot, in the other direction either:** that conventional MVPA beats the hierarchy.
+The `−0.0110` interval spans zero. Claiming a baseline win would repeat the original
+error with the sign reversed.
+
+**Can:** that the hierarchy *matches* conventional MVPA and is not distinguishable from
+it in either direction. "Equivalent to a well-configured conventional baseline" is what
+the data support, and it survives all three comparisons.
 
 **Can:** that the hierarchy retains a reliable advantage over `logistic_l2` under the
 balanced rule (`+0.0186`, CI excludes zero). This is a narrower claim about one
