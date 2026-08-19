@@ -83,6 +83,15 @@ The lags are `offset_3` onwards, so this describes the plateau and decay of the
 response, not its onset. A window starting at the stimulus would be needed to say
 anything about the rising phase, and that requires re-extraction.
 
+> **Update, same day.** That re-extraction has been done — `offset 0, length 16`, the
+> longest window keeping all 2976 events. **The stationarity does not extend to the full
+> response.** Over lags 0-15 the ratio falls from `0.9288` to `0.6549`, and the matrix
+> has two blocks whose cross-transfer lands far below chance (`0.126` training at lag 12,
+> testing at lag 4). Everything on this page remains correct **for the plateau**, which is
+> what it measured; the claim should be stated as "stationary across the response
+> plateau" rather than without qualification. See
+> [`FULL_RESPONSE_GENERALIZATION.md`](FULL_RESPONSE_GENERALIZATION.md).
+
 The stationarity is measured at the resolution of a 2 s TR on a 16 s block design. It
 does not rule out faster dynamics that this sampling cannot see, and no claim about
 sub-TR dynamics should be made from it.

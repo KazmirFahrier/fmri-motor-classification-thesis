@@ -29,7 +29,7 @@ predicted in advance from the RDM, not selected on the result.
 
 | Item | Result | Doc |
 | --- | --- | --- |
-| **P1** Temporal generalization | Code is **stationary**: off/on-diagonal ratio `0.9288` | [`TEMPORAL_GENERALIZATION.md`](docs/TEMPORAL_GENERALIZATION.md) |
+| **P1** Temporal generalization | Stationary **across the plateau**: ratio `0.9288`; falls to `0.6549` over the full response | [`TEMPORAL_GENERALIZATION.md`](docs/TEMPORAL_GENERALIZATION.md) |
 | **P2** Decodability predictors | Split-half reliability `r = +0.607`, R² = `0.433` | [`DECODABILITY_PREDICTORS.md`](docs/DECODABILITY_PREDICTORS.md) |
 | **P4** Representational geometry | `0.888` of errors are **within-pair**; coarse:fine `1.671` | [`REPRESENTATIONAL_GEOMETRY.md`](docs/REPRESENTATIONAL_GEOMETRY.md) |
 | **P5** Cross-contrast transfer | `0.6525` / `0.6235`, 30/30 folds, null at chance | [`CROSS_CONTRAST_TRANSFER.md`](docs/CROSS_CONTRAST_TRANSFER.md) |

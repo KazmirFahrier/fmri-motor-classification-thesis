@@ -44,7 +44,15 @@ for _extra in (
 from run_detrended_pair_feature_selection import load_checkpoints  # noqa: E402
 from run_learned_temporal_filter_hierarchy import preprocess_sequence  # noqa: E402
 
-PLATEAU = range(2, 11)
+# Three phases, not two. Lags 8-10 are the response crossing back through baseline and
+# correlate positively with both neighbours, so including them in a "plateau" block
+# averages the peak-versus-undershoot inversion away — which is exactly the mistake an
+# earlier version of this analysis made. PEAK and UNDERSHOOT are kept disjoint and the
+# transition is reported separately.
+PEAK = range(3, 8)
+TRANSITION = range(8, 11)
+UNDERSHOOT = range(11, 16)
+PLATEAU = range(2, 11)   # retained for continuity with the eight-lag window
 LATE = range(11, 16)
 
 
@@ -110,6 +118,40 @@ def main() -> None:
     # Note the across-class mean is already zero here: subject-run centering with two
     # events per class per run forces the centroids to sum to zero, so no further
     # removal of a class-common component is needed or possible.
+    def phase_similarity(rows, cols):
+        """Same-class versus different-class centroid similarity between two phases."""
+        per_subject_m, per_subject_x = [], []
+        for subject_index in range(patterns.shape[0]):
+            m_vals, x_vals = [], []
+            for i in rows:
+                for j in cols:
+                    a = patterns[subject_index, i].reshape(class_count, -1)
+                    b = patterns[subject_index, j].reshape(class_count, -1)
+                    a = a / np.maximum(np.linalg.norm(a, axis=1, keepdims=True), 1e-12)
+                    b = b / np.maximum(np.linalg.norm(b, axis=1, keepdims=True), 1e-12)
+                    similarity = a @ b.T
+                    m_vals.append(float(np.diag(similarity).mean()))
+                    x_vals.append(float(
+                        similarity[~np.eye(class_count, dtype=bool)].mean()))
+            per_subject_m.append(float(np.mean(m_vals)))
+            per_subject_x.append(float(np.mean(x_vals)))
+        m = np.asarray(per_subject_m); x = np.asarray(per_subject_x)
+        return {
+            "same_class": float(m.mean()),
+            "different_class": float(x.mean()),
+            "difference": float((m - x).mean()),
+            "subjects_same_above_different": int(((m - x) > 0).sum()),
+            "subjects_same_class_negative": int((m < 0).sum()),
+            "subject_count": len(m),
+        }
+
+    phase_pairs = {
+        "peak_vs_undershoot": phase_similarity(PEAK, UNDERSHOOT),
+        "peak_vs_transition": phase_similarity(PEAK, TRANSITION),
+        "transition_vs_undershoot": phase_similarity(TRANSITION, UNDERSHOOT),
+        "plateau_vs_late_blockwide": phase_similarity(PLATEAU, LATE),
+    }
+
     matched, mismatched = [], []
     per_subject_matched, per_subject_mismatched = [], []
     for subject_index in range(patterns.shape[0]):
@@ -132,6 +174,7 @@ def main() -> None:
     difference = np.asarray(per_subject_matched) - np.asarray(per_subject_mismatched)
     payload = {
         "checkpoint_dir": args.checkpoint_dir,
+        "phase_pairs": phase_pairs,
         "cross_phase_class_similarity": {
             "matched_same_class": float(np.mean(matched)),
             "mismatched_different_class": float(np.mean(mismatched)),
@@ -163,6 +206,11 @@ def main() -> None:
     print(f"  different class   {c['mismatched_different_class']:+.4f}")
     print(f"  difference        {c['difference']:+.4f}  "
           f"({c['subjects_with_positive_difference']}/{c['subject_count']} subjects positive)")
+    print("\nby phase pair: same-class vs different-class centroid similarity")
+    print("                              same     diff     n subj same<0")
+    for name, entry in phase_pairs.items():
+        print(f"  {name:<28} {entry['same_class']:+.4f}  {entry['different_class']:+.4f}"
+              f"   {entry['subjects_same_class_negative']}/{entry['subject_count']}")
 
 
 if __name__ == "__main__":
