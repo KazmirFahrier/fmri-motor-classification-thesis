@@ -65,8 +65,18 @@ strip entirely.
 **Amplitude and laterality do not predict that ordering.** A movement-amplitude account
 predicts large proximal movements (upper arm, leg) decode *best*, and the data show the
 opposite. A laterality account has nothing to say about why tongue and lip separate so
-well. The somatotopic account predicts all three observations, so the shared axis found
-in the four-class transfer analysis is best read as somatotopic.
+well. The somatotopic account predicts all three observations.
+
+> **Correction, same day.** An earlier version of this section ended by extending that
+> conclusion to the transfer result — "so the shared axis found in the four-class
+> transfer analysis is best read as somatotopic." That does not follow, and the direct
+> test refutes it. The three findings above concern representational **distances**, and
+> distances do not fix a **direction**. Orienting six contrasts by somatotopic rank a
+> priori and transferring between them gives mean transfer of `0.4570`, below chance,
+> with only 7 of 20 pairs above it — although the transfer itself is strongly reliable,
+> and the original four-class effect replicates at `0.6345`. Somatotopy organises the
+> arrangement of the representation, not a single direction within it. See
+> [`SOMATOTOPIC_TRANSFER.md`](SOMATOTOPIC_TRANSFER.md).
 
 ## What this changes for the project
 

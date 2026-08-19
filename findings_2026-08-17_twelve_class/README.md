@@ -90,3 +90,16 @@ conditions in the set, so `0.8314` was obtained on the most confusable four-way 
 the dataset contains.
 
 Full write-up: [`docs/TWELVE_CLASS_DECODING.md`](docs/TWELVE_CLASS_DECODING.md).
+
+### The directional test, and a correction
+
+Orienting six binary contrasts by somatotopic rank **a priori** and transferring between
+them gives mean transfer of **0.4570** — below chance, 7/20 pairs above it. The shared
+decision axis is therefore **not** a graded somatotopic gradient, and a sentence in the
+decoding document claiming it was has been withdrawn.
+
+The transfer itself is real: 24 of 30 ordered pairs are consistent on at least 28 of 30
+folds, and the original four-class effect replicates at `0.6345` against `0.6525`.
+Somatotopy organises the **arrangement** of the representation, not a single
+**direction** within it.
+[`docs/SOMATOTOPIC_TRANSFER.md`](docs/SOMATOTOPIC_TRANSFER.md).

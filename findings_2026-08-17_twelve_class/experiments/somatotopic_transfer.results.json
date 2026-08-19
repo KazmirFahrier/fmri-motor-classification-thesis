@@ -1,0 +1,485 @@
+{
+  "checkpoint_dir": "/Users/USER/Documents/New project/status_2026-08-17_twelve_class/seq",
+  "outer_split_count": 30,
+  "chance": 0.5,
+  "contrast_definition": {
+    "toe_ankle": {
+      "class0": "Toe",
+      "class1": "Ankle",
+      "rank0": 1.0,
+      "rank1": 2.0,
+      "directed": true
+    },
+    "upperarm_forearm": {
+      "class0": "Upper arm",
+      "class1": "Forearm",
+      "rank0": 5.0,
+      "rank1": 6.0,
+      "directed": true
+    },
+    "wrist_finger": {
+      "class0": "Wrist",
+      "class1": "Finger",
+      "rank0": 7.0,
+      "rank1": 8.0,
+      "directed": true
+    },
+    "jaw_lip": {
+      "class0": "Jaw",
+      "class1": "Lip",
+      "rank0": 9.0,
+      "rank1": 9.5,
+      "directed": true
+    },
+    "lip_tongue": {
+      "class0": "Lip",
+      "class1": "Tongue",
+      "rank0": 9.5,
+      "rank1": 10.0,
+      "directed": true
+    },
+    "leg_left_right": {
+      "class0": "Left leg",
+      "class1": "Right leg",
+      "rank0": 3.0,
+      "rank1": 3.0,
+      "directed": false
+    }
+  },
+  "within_contrast": {
+    "toe_ankle": {
+      "mean": 0.7202777777777778,
+      "ci95": [
+        0.7058450365750185,
+        0.7347105189805371
+      ],
+      "folds_above_chance": 30,
+      "fold_count": 30
+    },
+    "upperarm_forearm": {
+      "mean": 0.768888888888889,
+      "ci95": [
+        0.7522103823959179,
+        0.78556739538186
+      ],
+      "folds_above_chance": 30,
+      "fold_count": 30
+    },
+    "wrist_finger": {
+      "mean": 0.8246212121212121,
+      "ci95": [
+        0.8138453988707395,
+        0.8353970253716847
+      ],
+      "folds_above_chance": 30,
+      "fold_count": 30
+    },
+    "jaw_lip": {
+      "mean": 0.7981060606060607,
+      "ci95": [
+        0.7826029699547119,
+        0.8136091512574095
+      ],
+      "folds_above_chance": 30,
+      "fold_count": 30
+    },
+    "lip_tongue": {
+      "mean": 0.887929292929293,
+      "ci95": [
+        0.874919716071089,
+        0.900938869787497
+      ],
+      "folds_above_chance": 30,
+      "fold_count": 30
+    },
+    "leg_left_right": {
+      "mean": 0.8031186868686867,
+      "ci95": [
+        0.7921886612475838,
+        0.8140487124897896
+      ],
+      "folds_above_chance": 30,
+      "fold_count": 30
+    }
+  },
+  "transfer": {
+    "toe_ankle->upperarm_forearm": {
+      "mean": 0.3564141414141414,
+      "ci95": [
+        0.34175205137646625,
+        0.37107623145181656
+      ],
+      "folds_above_chance": 0,
+      "fold_count": 30
+    },
+    "toe_ankle->wrist_finger": {
+      "mean": 0.42869949494949494,
+      "ci95": [
+        0.414653716883055,
+        0.44274527301593486
+      ],
+      "folds_above_chance": 1,
+      "fold_count": 30
+    },
+    "toe_ankle->jaw_lip": {
+      "mean": 0.4654545454545455,
+      "ci95": [
+        0.4574737458225135,
+        0.47343534508657753
+      ],
+      "folds_above_chance": 1,
+      "fold_count": 30
+    },
+    "toe_ankle->lip_tongue": {
+      "mean": 0.5483080808080808,
+      "ci95": [
+        0.5371453662121194,
+        0.5594707954040422
+      ],
+      "folds_above_chance": 27,
+      "fold_count": 30
+    },
+    "toe_ankle->leg_left_right": {
+      "mean": 0.5290530303030303,
+      "ci95": [
+        0.5169219715162314,
+        0.5411840890898292
+      ],
+      "folds_above_chance": 26,
+      "fold_count": 30
+    },
+    "upperarm_forearm->toe_ankle": {
+      "mean": 0.42357323232323246,
+      "ci95": [
+        0.41350868698726206,
+        0.43363777765920286
+      ],
+      "folds_above_chance": 0,
+      "fold_count": 30
+    },
+    "upperarm_forearm->wrist_finger": {
+      "mean": 0.5005050505050506,
+      "ci95": [
+        0.4927535596681472,
+        0.5082565413419539
+      ],
+      "folds_above_chance": 13,
+      "fold_count": 30
+    },
+    "upperarm_forearm->jaw_lip": {
+      "mean": 0.5338888888888889,
+      "ci95": [
+        0.5271708787485432,
+        0.5406068990292345
+      ],
+      "folds_above_chance": 30,
+      "fold_count": 30
+    },
+    "upperarm_forearm->lip_tongue": {
+      "mean": 0.4373484848484849,
+      "ci95": [
+        0.426329444903191,
+        0.4483675247937787
+      ],
+      "folds_above_chance": 0,
+      "fold_count": 30
+    },
+    "upperarm_forearm->leg_left_right": {
+      "mean": 0.40867424242424233,
+      "ci95": [
+        0.3967687982494311,
+        0.42057968659905354
+      ],
+      "folds_above_chance": 0,
+      "fold_count": 30
+    },
+    "wrist_finger->toe_ankle": {
+      "mean": 0.4715656565656566,
+      "ci95": [
+        0.4634517636665235,
+        0.47967954946478963
+      ],
+      "folds_above_chance": 3,
+      "fold_count": 30
+    },
+    "wrist_finger->upperarm_forearm": {
+      "mean": 0.49559343434343434,
+      "ci95": [
+        0.49101855700097713,
+        0.5001683116858915
+      ],
+      "folds_above_chance": 7,
+      "fold_count": 30
+    },
+    "wrist_finger->jaw_lip": {
+      "mean": 0.46266414141414136,
+      "ci95": [
+        0.4535882380990526,
+        0.47174004472923015
+      ],
+      "folds_above_chance": 2,
+      "fold_count": 30
+    },
+    "wrist_finger->lip_tongue": {
+      "mean": 0.5721464646464649,
+      "ci95": [
+        0.5633699388202682,
+        0.5809229904726616
+      ],
+      "folds_above_chance": 30,
+      "fold_count": 30
+    },
+    "wrist_finger->leg_left_right": {
+      "mean": 0.517159090909091,
+      "ci95": [
+        0.5111886146163558,
+        0.5231295672018261
+      ],
+      "folds_above_chance": 25,
+      "fold_count": 30
+    },
+    "jaw_lip->toe_ankle": {
+      "mean": 0.3688888888888889,
+      "ci95": [
+        0.3540650126131031,
+        0.3837127651646747
+      ],
+      "folds_above_chance": 0,
+      "fold_count": 30
+    },
+    "jaw_lip->upperarm_forearm": {
+      "mean": 0.6158333333333333,
+      "ci95": [
+        0.5991016673193175,
+        0.6325649993473492
+      ],
+      "folds_above_chance": 30,
+      "fold_count": 30
+    },
+    "jaw_lip->wrist_finger": {
+      "mean": 0.4465404040404041,
+      "ci95": [
+        0.4330651244871906,
+        0.46001568359361766
+      ],
+      "folds_above_chance": 2,
+      "fold_count": 30
+    },
+    "jaw_lip->lip_tongue": {
+      "mean": 0.16140151515151516,
+      "ci95": [
+        0.14722965889174125,
+        0.17557337141128906
+      ],
+      "folds_above_chance": 0,
+      "fold_count": 30
+    },
+    "jaw_lip->leg_left_right": {
+      "mean": 0.3881691919191919,
+      "ci95": [
+        0.3755157096183633,
+        0.40082267422002055
+      ],
+      "folds_above_chance": 0,
+      "fold_count": 30
+    },
+    "lip_tongue->toe_ankle": {
+      "mean": 0.556010101010101,
+      "ci95": [
+        0.5441768026030309,
+        0.567843399417171
+      ],
+      "folds_above_chance": 28,
+      "fold_count": 30
+    },
+    "lip_tongue->upperarm_forearm": {
+      "mean": 0.4279419191919193,
+      "ci95": [
+        0.4178787588357491,
+        0.43800507954808954
+      ],
+      "folds_above_chance": 0,
+      "fold_count": 30
+    },
+    "lip_tongue->wrist_finger": {
+      "mean": 0.5593686868686869,
+      "ci95": [
+        0.5499744472600715,
+        0.5687629264773023
+      ],
+      "folds_above_chance": 30,
+      "fold_count": 30
+    },
+    "lip_tongue->jaw_lip": {
+      "mean": 0.3072979797979798,
+      "ci95": [
+        0.293337429697539,
+        0.3212585298984206
+      ],
+      "folds_above_chance": 0,
+      "fold_count": 30
+    },
+    "lip_tongue->leg_left_right": {
+      "mean": 0.5675378787878789,
+      "ci95": [
+        0.5553846442421422,
+        0.5796911133336156
+      ],
+      "folds_above_chance": 29,
+      "fold_count": 30
+    },
+    "leg_left_right->toe_ankle": {
+      "mean": 0.5695454545454546,
+      "ci95": [
+        0.5541129127621439,
+        0.5849779963287652
+      ],
+      "folds_above_chance": 30,
+      "fold_count": 30
+    },
+    "leg_left_right->upperarm_forearm": {
+      "mean": 0.36549242424242423,
+      "ci95": [
+        0.3470351800727733,
+        0.3839496684120752
+      ],
+      "folds_above_chance": 0,
+      "fold_count": 30
+    },
+    "leg_left_right->wrist_finger": {
+      "mean": 0.5973863636363637,
+      "ci95": [
+        0.5843865976855972,
+        0.6103861295871301
+      ],
+      "folds_above_chance": 30,
+      "fold_count": 30
+    },
+    "leg_left_right->jaw_lip": {
+      "mean": 0.3464772727272727,
+      "ci95": [
+        0.3288168378711968,
+        0.36413770758334857
+      ],
+      "folds_above_chance": 0,
+      "fold_count": 30
+    },
+    "leg_left_right->lip_tongue": {
+      "mean": 0.7439267676767677,
+      "ci95": [
+        0.7279552133263155,
+        0.7598983220272199
+      ],
+      "folds_above_chance": 30,
+      "fold_count": 30
+    }
+  },
+  "directed_summary": {
+    "mean_transfer": 0.4569722222222222,
+    "pairs_above_chance": 7,
+    "pair_count": 20,
+    "correlation_with_somatotopic_distance": 0.28626493406694054,
+    "pairs": [
+      {
+        "pair": "toe_ankle->upperarm_forearm",
+        "distance": 4.0,
+        "transfer": 0.3564141414141414
+      },
+      {
+        "pair": "toe_ankle->wrist_finger",
+        "distance": 6.0,
+        "transfer": 0.42869949494949494
+      },
+      {
+        "pair": "toe_ankle->jaw_lip",
+        "distance": 7.75,
+        "transfer": 0.4654545454545455
+      },
+      {
+        "pair": "toe_ankle->lip_tongue",
+        "distance": 8.25,
+        "transfer": 0.5483080808080808
+      },
+      {
+        "pair": "upperarm_forearm->toe_ankle",
+        "distance": 4.0,
+        "transfer": 0.42357323232323246
+      },
+      {
+        "pair": "upperarm_forearm->wrist_finger",
+        "distance": 2.0,
+        "transfer": 0.5005050505050506
+      },
+      {
+        "pair": "upperarm_forearm->jaw_lip",
+        "distance": 3.75,
+        "transfer": 0.5338888888888889
+      },
+      {
+        "pair": "upperarm_forearm->lip_tongue",
+        "distance": 4.25,
+        "transfer": 0.4373484848484849
+      },
+      {
+        "pair": "wrist_finger->toe_ankle",
+        "distance": 6.0,
+        "transfer": 0.4715656565656566
+      },
+      {
+        "pair": "wrist_finger->upperarm_forearm",
+        "distance": 2.0,
+        "transfer": 0.49559343434343434
+      },
+      {
+        "pair": "wrist_finger->jaw_lip",
+        "distance": 1.75,
+        "transfer": 0.46266414141414136
+      },
+      {
+        "pair": "wrist_finger->lip_tongue",
+        "distance": 2.25,
+        "transfer": 0.5721464646464649
+      },
+      {
+        "pair": "jaw_lip->toe_ankle",
+        "distance": 7.75,
+        "transfer": 0.3688888888888889
+      },
+      {
+        "pair": "jaw_lip->upperarm_forearm",
+        "distance": 3.75,
+        "transfer": 0.6158333333333333
+      },
+      {
+        "pair": "jaw_lip->wrist_finger",
+        "distance": 1.75,
+        "transfer": 0.4465404040404041
+      },
+      {
+        "pair": "jaw_lip->lip_tongue",
+        "distance": 0.5,
+        "transfer": 0.16140151515151516
+      },
+      {
+        "pair": "lip_tongue->toe_ankle",
+        "distance": 8.25,
+        "transfer": 0.556010101010101
+      },
+      {
+        "pair": "lip_tongue->upperarm_forearm",
+        "distance": 4.25,
+        "transfer": 0.4279419191919193
+      },
+      {
+        "pair": "lip_tongue->wrist_finger",
+        "distance": 2.25,
+        "transfer": 0.5593686868686869
+      },
+      {
+        "pair": "lip_tongue->jaw_lip",
+        "distance": 0.5,
+        "transfer": 0.3072979797979798
+      }
+    ]
+  }
+}
