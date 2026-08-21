@@ -29,6 +29,17 @@
       "archive_sha256": "0092bed8d972f5df61999cd986b07ffb28086428021bfc05fc47268b063833e2",
       "archived_file_count": 6979,
       "nonresident_placeholder_count": 1223
+    },
+    {
+      "handle": "kazmirfahrierniloy/new-project-encrypted-archive-20260821",
+      "size_bytes": 67718224,
+      "encrypted_archive_sha256": "23690a6d0648f9bbe072eba31d5327897b4e29aec42a020ee7c5e6c5f5c6e910",
+      "decrypted_archive_sha256": "74a8d39870507ba46fddcdafc3287f5df9ed7eb2ea6f1a0a954fb5eb13e169bc",
+      "archived_entry_count": 1830,
+      "nonresident_placeholder_count": 783,
+      "nonresident_placeholder_apparent_bytes": 1192471,
+      "encryption": "AES-256-CBC PBKDF2 600000 iterations",
+      "keychain_service": "codex.new-project.archive.2026-08-21"
     }
   ],
   "verification_samples": {
