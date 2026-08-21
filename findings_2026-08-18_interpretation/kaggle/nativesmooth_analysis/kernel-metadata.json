@@ -1,0 +1,17 @@
+{
+  "id": "kazmirfahrierniloy/thesis-nativesmooth-analysis",
+  "title": "thesis nativesmooth analysis",
+  "code_file": "thesis-nativesmooth-analysis.py",
+  "language": "python",
+  "kernel_type": "script",
+  "is_private": true,
+  "enable_gpu": false,
+  "enable_internet": false,
+  "dataset_sources": [],
+  "competition_sources": [],
+  "kernel_sources": [
+    "kazmirfahrierniloy/thesis-nativesmooth-shard0",
+    "kazmirfahrierniloy/thesis-nativesmooth-shard1",
+    "kazmirfahrierniloy/thesis-nativesmooth-shard2"
+  ]
+}

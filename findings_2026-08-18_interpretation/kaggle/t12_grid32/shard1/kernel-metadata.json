@@ -1,0 +1,8 @@
+{
+  "id": "kazmirfahrierniloy/thesis-t12-grid32-shard1",
+  "title": "thesis t12 grid32 shard1",
+  "code_file": "thesis-t12-grid32-shard1.py",
+  "language": "python", "kernel_type": "script", "is_private": true,
+  "enable_gpu": false, "enable_internet": true,
+  "dataset_sources": [], "competition_sources": [], "kernel_sources": []
+}
