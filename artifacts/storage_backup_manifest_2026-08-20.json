@@ -1,0 +1,40 @@
+{
+  "created_local_date": "2026-08-20",
+  "purpose": "Recovery manifest for large thesis artifacts removed from the local New project workspace",
+  "github_repository": "https://github.com/KazmirFahrier/fmri-motor-classification-thesis",
+  "new_private_kaggle_datasets": [
+    {
+      "handle": "kazmirfahrierniloy/thesis-targeted-raw-qc-20260624",
+      "size_bytes": 2890023397,
+      "checksum_manifest_sha256": "82ef4fdb95b9092601ab2631380d396b547d64c33133673054ccba7d2411412c"
+    },
+    {
+      "handle": "kazmirfahrierniloy/thesis-targeted-weak-run-qc-20260713",
+      "size_bytes": 1310395399,
+      "checksum_manifest_sha256": "0385184da97ff96ec95f125fd540a2ada8a060a46287a158423a54ea02e0951c"
+    },
+    {
+      "handle": "kazmirfahrierniloy/thesis-twelve-class-artifacts-20260817",
+      "size_bytes": 3767216364,
+      "checksum_manifest_sha256": "3c3a4c7f2d69f6c24eca2f7bf3b9d85b476ad1fab3613f8d87785f1dd02314f4"
+    },
+    {
+      "handle": "kazmirfahrierniloy/thesis-surface-projection-20260813",
+      "size_bytes": 3026243720,
+      "checksum_manifest_sha256": "2efc38a41830f297ddcf4ab5f33fb4702874fe9a12c1c8dee5403e1e68fde64a"
+    },
+    {
+      "handle": "kazmirfahrierniloy/thesis-lightweight-workspace-archive-20260820",
+      "size_bytes": 94321347,
+      "archive_sha256": "0092bed8d972f5df61999cd986b07ffb28086428021bfc05fc47268b063833e2",
+      "archived_file_count": 6979,
+      "nonresident_placeholder_count": 1223
+    }
+  ],
+  "verification_samples": {
+    "targeted_raw_qc_decompressed_nifti_sha256": "f7d9b277a74d4bc0bba1f55febcbd15bebb30d38065e43eefb609f80513c9c54",
+    "targeted_weak_run_qc_decompressed_nifti_sha256": "7409de6d751e7b670a85a311a61deaed0609c123d7a70193b44267d6bdd89e43",
+    "twelve_class_sub01_npz_sha256": "941d3152c3a9c52368ad29897b1b194e79b46bf180346a32657275fb2fe50f45",
+    "surface_projection_sub01_npz_sha256": "5fbafca2738e9444f29261b4a7ca73f9dd5e66bc21de6421e634996595f33c8e"
+  }
+}
