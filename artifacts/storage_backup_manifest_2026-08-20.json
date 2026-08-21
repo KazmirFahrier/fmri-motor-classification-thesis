@@ -36,8 +36,10 @@
       "encrypted_archive_sha256": "23690a6d0648f9bbe072eba31d5327897b4e29aec42a020ee7c5e6c5f5c6e910",
       "decrypted_archive_sha256": "74a8d39870507ba46fddcdafc3287f5df9ed7eb2ea6f1a0a954fb5eb13e169bc",
       "archived_entry_count": 1830,
-      "nonresident_placeholder_count": 783,
-      "nonresident_placeholder_apparent_bytes": 1192471,
+      "materialized_delta_encrypted_sha256": "70eafcc07a20699f7bcc472903c9682f15fd41f589730b3c62aa7ed3d7501ea5",
+      "materialized_delta_decrypted_sha256": "204fc44f84fcbfb88563bf9a75ba0af489585e764e698c5c941efe7703a84fa4",
+      "materialized_delta_entry_count": 191,
+      "nonresident_placeholder_count": 592,
       "encryption": "AES-256-CBC PBKDF2 600000 iterations",
       "keychain_service": "codex.new-project.archive.2026-08-21"
     }

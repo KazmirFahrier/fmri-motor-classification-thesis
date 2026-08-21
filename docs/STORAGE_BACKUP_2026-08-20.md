@@ -19,7 +19,7 @@ Exact NPZ recovery was also checked. The twelve class `seq/sub-01.npz` hash was 
 
 The lightweight archive contains resident JSON, CSV, text, logs, figures, metadata, and copied source snapshots from historical `status_*` folders. Its `ICLOUD_PLACEHOLDERS.txt` lists 1,223 nonresident placeholders that were not reread into the archive. These placeholders are duplicated kernel or repository snapshots whose canonical source is GitHub or an existing Kaggle run.
 
-The final encrypted workspace archive contains every resident file left in `/Users/USER/Documents/New project` after reproducible environments, caches, generated page images, and exact duplicates were removed. It includes source repositories, Git object stores, remaining Kaggle sessions, the BiLSTM checkpoints, logs, course artifacts, and credentials inside AES 256 CBC encryption with PBKDF2 and 600,000 iterations. Its randomly generated passphrase is stored in the macOS login keychain under service `codex.new-project.archive.2026-08-21`. The private Kaggle dataset also contains checksums, recovery commands, and a manifest of 783 iCloud placeholders totaling 1,192,471 apparent bytes that did not materialize and are not represented as archived content.
+The final encrypted workspace archive contains every resident file left in `/Users/USER/Documents/New project` after reproducible environments, caches, generated page images, and exact duplicates were removed. It includes source repositories, Git object stores, remaining Kaggle sessions, the BiLSTM checkpoints, logs, course artifacts, and credentials inside AES 256 CBC encryption with PBKDF2 and 600,000 iterations. Its randomly generated passphrase is stored in the macOS login keychain under service `codex.new-project.archive.2026-08-21`. A second encrypted delta preserves 191 files that materialized during final iCloud retries. Its ciphertext SHA256 is `70eafcc07a20699f7bcc472903c9682f15fd41f589730b3c62aa7ed3d7501ea5`, and its decrypted archive SHA256 is `204fc44f84fcbfb88563bf9a75ba0af489585e764e698c5c941efe7703a84fa4`. The private Kaggle dataset also contains checksums, recovery commands, and a final manifest of 592 iCloud placeholders that did not materialize and are not represented as archived content.
 
 ## Existing large artifact coverage
 
@@ -61,8 +61,10 @@ Restore the final encrypted workspace archive with:
 kaggle datasets download kazmirfahrierniloy/new-project-encrypted-archive-20260821 -p RECOVERY_DIRECTORY --unzip
 security find-generic-password -a "$USER" -s "codex.new-project.archive.2026-08-21" -w > archive-passphrase.txt
 openssl enc -d -aes-256-cbc -pbkdf2 -iter 600000 -in new_project_resident_20260821.tar.gz.enc -out new_project_resident_20260821.tar.gz -pass file:archive-passphrase.txt
+openssl enc -d -aes-256-cbc -pbkdf2 -iter 600000 -in new_project_materialized_delta_20260821.tar.gz.enc -out new_project_materialized_delta_20260821.tar.gz -pass file:archive-passphrase.txt
 shasum -a 256 new_project_resident_20260821.tar.gz
 tar -xzf new_project_resident_20260821.tar.gz
+tar -xzf new_project_materialized_delta_20260821.tar.gz
 ```
 
 The datasets are private. Recovery therefore requires an authenticated Kaggle account with access to the owning account.
