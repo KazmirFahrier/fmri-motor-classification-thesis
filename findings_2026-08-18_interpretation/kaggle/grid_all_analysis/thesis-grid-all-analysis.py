@@ -256,3 +256,93 @@ def evaluate(block, y, records, splits, class_count, c_value=1e-4, label=""):
               f"balanced {np.mean(out['balanced']):.4f}", flush=True)
     return out
 # --- end protocol ------------------------------------------------------------------
+
+# ====================================================================================
+"""All four spatial grids, jointly, with the resolution choice nested.
+
+The first sweep compared `16^3`, `24^3` and `32^3` and found the disclosed `24^3` was
+suboptimal — `32^3` won 29 of 30 folds. It explicitly flagged that `32^3` was the largest
+grid tested, so the optimum might lie beyond it. This adds `48^3` (110592 features) and
+evaluates all four together, so the nested selection ranges over the whole set rather
+than a truncated one.
+
+Both extractions are mounted at once. They hold the same subject ids under different
+keys, so each grid is loaded with a path filter; without it a subject would be read twice
+and the record list would stop lining up with the feature rows.
+
+**Validation gate.** The `24^3` arm is the frozen pipeline and must reproduce `0.8098`.
+"""
+import json
+import numpy as np
+
+SWEEP = [f"/kaggle/input/thesis-gridsweep-shard{s}" for s in range(3)]
+G48 = [f"/kaggle/input/thesis-grid48-shard{s}" for s in range(3)]
+GRIDS = [16, 24, 32, 48]
+EXPECTED_24 = 0.8098
+TOLERANCE = 0.004
+
+blocks, y, records = {}, None, None
+for g in GRIDS:
+    dirs, flt = (G48, "grid48") if g == 48 else (SWEEP, "gridsweep")
+    block, labels, recs = load_and_preprocess(
+        dirs, f"grid{g}_offset_3_length_8_sequence", expect_features=g ** 3,
+        path_filter=flt)
+    if y is None:
+        y, records = labels, recs
+    else:
+        assert np.array_equal(labels, y), f"grid {g}: labels differ from grid {GRIDS[0]}"
+        assert len(recs) == len(records), f"grid {g}: record count differs"
+    blocks[g] = block
+    print(f"grid {g}: {block.shape}", flush=True)
+
+class_count = int(y.max()) + 1
+splits = outer_splits(records)
+print(f"{len(y)} events, {class_count} classes, {len(splits)} folds", flush=True)
+
+fixed = {}
+for g in GRIDS:
+    fixed[g] = evaluate(blocks[g], y, records, splits, class_count, label=f"grid {g}")
+    if g == 24:
+        observed = float(np.mean(fixed[24]["independent"]))
+        if abs(observed - EXPECTED_24) > TOLERANCE:
+            raise SystemExit(
+                f"VALIDATION FAILED: 24^3 gives {observed:.4f}, expected {EXPECTED_24}")
+        print(f"VALIDATION PASSED: 24^3 {observed:.4f}", flush=True)
+
+# Nested selection of the grid on inner subject folds of each training set only.
+nested = {"independent": [], "balanced": []}
+selected = []
+for split in splits:
+    inner = inner_splits(records, split["train_idx"])
+    means = {}
+    for g in GRIDS:
+        vals = []
+        for isp in inner:
+            s = svm_scores(blocks[g], y, isp["train_idx"], isp["val_idx"])
+            vals.append(balanced_accuracy(y[isp["val_idx"]],
+                                          s.argmax(axis=1).astype(np.int64), class_count))
+        means[g] = float(np.mean(vals))
+    best = max(GRIDS, key=lambda g: means[g])
+    selected.append(best)
+    s = svm_scores(blocks[best], y, split["train_idx"], split["val_idx"])
+    nested["independent"].append(balanced_accuracy(
+        y[split["val_idx"]], s.argmax(axis=1).astype(np.int64), class_count))
+    nested["balanced"].append(balanced_accuracy(
+        y[split["val_idx"]], apply_balanced_assignment(s, split["val_idx"], records),
+        class_count))
+    print(f"{split['split']} selected {best}", flush=True)
+
+summary = {str(g): {r: float(np.mean(v)) for r, v in fixed[g].items()} for g in GRIDS}
+summary["nested"] = {r: float(np.mean(v)) for r, v in nested.items()}
+counts = {str(g): selected.count(g) for g in GRIDS}
+json.dump({"grids": GRIDS, "summary": summary, "selected_counts": counts,
+           "fixed_folds": {str(g): fixed[g] for g in GRIDS}, "nested_folds": nested},
+          open("/kaggle/working/grid_all_results.json", "w"), indent=2)
+
+print("\n  grid    features    independent   balanced")
+for g in GRIDS:
+    print(f"  {g:<7} {g**3:<11} {summary[str(g)]['independent']:.4f}        "
+          f"{summary[str(g)]['balanced']:.4f}")
+print(f"  nested              {summary['nested']['independent']:.4f}        "
+      f"{summary['nested']['balanced']:.4f}")
+print(f"selected: {counts}")

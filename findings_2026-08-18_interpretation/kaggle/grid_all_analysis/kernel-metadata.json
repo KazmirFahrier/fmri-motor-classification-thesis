@@ -1,0 +1,16 @@
+{
+  "id": "kazmirfahrierniloy/thesis-grid-all-analysis",
+  "title": "thesis grid all analysis",
+  "code_file": "thesis-grid-all-analysis.py",
+  "language": "python", "kernel_type": "script", "is_private": true,
+  "enable_gpu": false, "enable_internet": false,
+  "dataset_sources": [], "competition_sources": [],
+  "kernel_sources": [
+    "kazmirfahrierniloy/thesis-gridsweep-shard0",
+    "kazmirfahrierniloy/thesis-gridsweep-shard1",
+    "kazmirfahrierniloy/thesis-gridsweep-shard2",
+    "kazmirfahrierniloy/thesis-grid48-shard0",
+    "kazmirfahrierniloy/thesis-grid48-shard1",
+    "kazmirfahrierniloy/thesis-grid48-shard2"
+  ]
+}
