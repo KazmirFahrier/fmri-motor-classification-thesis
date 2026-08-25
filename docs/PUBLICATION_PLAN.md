@@ -1,17 +1,22 @@
 # Publication Plan
 
-Last updated: 2026-07-13.
+Last updated: 2026-08-24.
 
-The contribution is a leakage-aware analysis of 4-class motor-task fMRI classification on the full public `ds004044` cohort. Broad model discovery is complete. Publication work now uses the frozen protocol and consolidated benchmark described in [Investigation Closeout](INVESTIGATION_CLOSEOUT.md).
+The contribution is a leakage-aware analysis of motor-task fMRI classification on the full public `ds004044` cohort. The paper must explain which preprocessing choices create transferable signal, distinguish inductive from transductive evaluation, and report both the difficult four-class subset and the full twelve-condition task. Broad architecture discovery is closed. The remaining modeling work is a bounded confirmatory comparison of preprocessing choices under nested subject validation.
 
 ## Claims
 
 - The historical `0.8522` pooled result is not evidence of full-cohort subject generalization. The full pooled legacy model ended at `0.2629`, and the legacy subject-wise holdout ended at `0.2500`.
-- The frozen independent decoder reaches `0.8314` across 30 repeated nested subject folds and applies to incomplete, imbalanced, or online event streams.
-- The frozen complete-run decoder reaches `0.8948` only when the design supplies exactly two events per class in each complete run. It is a transductive assignment protocol using unlabeled target-run event relationships, not ordinary independent classification.
+- The earlier frozen hierarchy reaches `0.8314` across 30 repeated nested subject folds, but its apparent advantage over a preprocessing-matched linear SVM is only `+0.0040` with a confidence interval crossing zero. It is a historical comparator, not the primary novelty claim.
+- Nested native Gaussian smoothing at `24^3` reaches `0.8639` independent balanced accuracy and `0.8959` with complete-run balanced assignment. The inner selector chooses sigma `1.1` in 10 folds and `1.4` in 20 folds. On the independent protocol, the subject-level paired gain over the frozen hierarchy is `+0.0326` with 95% interval `[+0.0159, +0.0497]`; 41 subjects improve, one ties, and 20 regress.
+- Nested spatial-resolution selection across `16^3`, `24^3`, `32^3`, and `48^3` chooses `48^3` in all 30 outer folds and reaches `0.8447` independent balanced accuracy without native smoothing.
+- A joint nested confirmation over the `24^3` and `32^3` native-smoothing families plus the unsmoothed `48^3` winner is the final allowed internal preprocessing comparison. Its result replaces neither prior evidence nor the final primary estimate until all three validation anchors and all 30 outer folds pass.
+- The complete-run repetition-consistency decoder reaches `0.8948` only when the design supplies exactly two events per class in each run. It is a transductive assignment protocol, not ordinary independent classification.
 - The fixed `3:8` mean-window hierarchy remains the conservative baseline at `0.8752`.
 - Five-run target-subject arm calibration is labeled personalization and must be reported separately at `0.8913` balanced and `0.8430` independent.
 - All 62 subjects define the primary estimate. QC-60 is a prespecified sensitivity analysis excluding `sub-42` and `sub-52`, never a replacement cohort.
+- Twelve-class independent decoding reaches `0.6838` against an empirical within-run permutation null of `0.0832`; the preprocessing-matched `smooth_3` result reaches `0.7040`.
+- Subject-run centering consults unlabeled target-run data and accounts for most of the performance gain. The manuscript must describe this as test-time transductive preprocessing and quantify its data requirement.
 
 ## Evidence Package
 
@@ -38,7 +43,11 @@ If a future exact cohort becomes available, freeze its label mapping and protoco
 3. Add the all-subject/QC-60 sensitivity table, class-recall table, fold/seed stability summary, subject distribution, and bootstrap intervals.
 4. Add restrained stability-map interpretation and the two irreducible response-outlier case studies without unsupported anatomical causality.
 5. Reconcile every thesis number with `experiments/confirmation/investigation_closeout.results.json` and the artifact hashes.
-6. Do not resume legacy neural training, retune the frozen cohort, or start an unrestricted architecture sweep.
+6. Add the nested native-smoothing and nested grid confirmations, followed by the joint nested result and paired subject-level inference.
+7. Run a permutation null for the final selected conventional pipeline, recomputing all label-independent preprocessing inside each permutation where applicable.
+8. Prespecify a coarse motor replication on HCP or another compatible public cohort to test the centering and smoothing claim without relabeling conditions after seeing results.
+9. Add continuous integration for unit tests and a public lightweight benchmark package whose hashes match the private recoverable artifacts.
+10. Do not resume legacy neural training or start an unrestricted architecture sweep.
 
 ## Repository Rule
 

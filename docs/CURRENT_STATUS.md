@@ -279,3 +279,16 @@ Phase 1 is designed to separate optimistic pooled-split performance from leakage
 - Describe the complete-run decoder as design-constrained transductive assignment, the independent decoder as the applicable online/incomplete rule, and calibration as labeled personalization.
 - Use the affine-aware feature maps only as training-fold selection-stability evidence; do not make named-region or causal anatomical claims from representative geometry.
 - Reopen modeling only if a future exact external cohort identifies a specific timing, registration, or domain-shift failure. Do not resume legacy training or begin an unrestricted architecture search.
+
+## Q1 Confirmation Update, 2026-08-24
+
+- The preprocessing-matched reassessment supersedes the earlier claim that the covariance hierarchy is superior to conventional MVPA. At matched `24^3 + smooth_3` preprocessing, its independent gain over linear SVM is `+0.0040` with the paired interval crossing zero.
+- Kaggle kernel `kazmirfahrierniloy/thesis-nativesmooth-nested` completed. Inner subject-fold sigma selection reaches `0.8639` independent balanced accuracy and `0.8959` complete-run balanced accuracy. The selector chooses sigma `1.1` in 10 of 30 folds and `1.4` in 20.
+- Recovered frozen hierarchy subject rows permit the missing paired test. Nested native smoothing improves independent subject-level accuracy by `+0.0326` with 95% bootstrap interval `[+0.0159, +0.0497]`; 41 subjects improve, one ties, and 20 regress. Its complete-run balanced gain is `+0.0152`, but that interval crosses zero.
+- Kaggle kernel `kazmirfahrierniloy/thesis-grid-all-analysis` completed. Inner subject-fold grid selection chooses `48^3` in all 30 folds and reaches `0.8447` independent balanced accuracy and `0.8856` complete-run balanced accuracy without native smoothing.
+- The final bounded internal experiment jointly selects from the `24^3` and `32^3` native-smoothing families plus unsmoothed `48^3`, using only inner training-subject folds. Its three unsmoothed validation anchors must reproduce `0.8098`, `0.8233`, and `0.8447` before any result is accepted.
+- Publication framing is now preprocessing and evaluation protocol first. Subject-run centering is label-free but transductive, the custom hierarchy is not a demonstrated architectural improvement, and the twelve-class result supplies the broader neuroscience evidence.
+- Kaggle kernel `kazmirfahrierniloy/thesis-joint-preprocessing-nested` version 2 is running the final bounded joint confirmation across nine prespecified grid and smoothing candidates.
+- The frozen Kaggle analysis protocol is published as `kazmirfahrierniloy/thesis-q1-frozen-protocol`. Kernel `kazmirfahrierniloy/thesis-exact-pipeline-null` is running a two-draw smoke test that repeats inner preprocessing selection under within-run label permutation before the full 200-draw null is authorized.
+- The HCP mechanism replication is frozen before outcome access in `docs/HCP_EXTERNAL_REPLICATION_PROTOCOL.md`. It uses the five genuine HCP labels, family-grouped subject validation, and no balanced assignment or post-hoc label substitution.
+- A submission-structured working manuscript, journal strategy, machine-generated benchmark table, and GitHub Actions quality workflow are now tracked. A clean GitHub clone passes all 19 tests without warnings.

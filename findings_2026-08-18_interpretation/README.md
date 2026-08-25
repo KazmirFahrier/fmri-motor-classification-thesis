@@ -9,6 +9,26 @@ All four analyses run under the **frozen 30-fold protocol** (6 outer folds x see
 11/23/37/51/71) on the existing checkpoints, so every number here is directly
 comparable with the previous round.
 
+## Q1 confirmation update, 2026-08-24
+
+Two queued controls are now complete. Nested native-smoothing selection at `24^3`
+reaches `0.8639` independent and `0.8959` complete-run balanced accuracy; sigma `1.1`
+is selected in 10 outer folds and `1.4` in 20. Nested grid selection across `16^3`,
+`24^3`, `32^3`, and `48^3` selects `48^3` in all 30 folds and reaches `0.8447`
+independent and `0.8856` complete-run balanced accuracy without native smoothing.
+
+The final bounded internal comparison now jointly selects grid and native smoothing
+inside each training cohort. It is tracked in
+`experiments/q1_confirmation.results.json`. No further unrestricted model search is
+authorized by these results.
+
+The archived frozen hierarchy subject rows were recovered and paired against the nested
+native-smoothing result. Independent subject-level accuracy improves by `+0.0326`, with
+a 95% subject bootstrap interval of `[+0.0159, +0.0497]`; 41 subjects improve, one ties,
+and 20 regress. The complete-run balanced gain is `+0.0152`, but its interval
+`[-0.0007, +0.0317]` crosses zero. The independent comparison is therefore the primary
+confirmatory result.
+
 ## Headline
 
 **The hierarchy's advantage over conventional MVPA does not survive a

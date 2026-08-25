@@ -1,0 +1,82 @@
+{
+  "reference": {
+    "name": "nested_candidate_selection_repeated.json",
+    "sha256": "c83c2c05fdbd359fcaa380bd0c5c167685b46cccf6ac0a96732c4d90a563886e"
+  },
+  "comparison": {
+    "name": "nativesmooth_nested.json",
+    "sha256": "a1a1daf75c6cd8356bb0accf8f015c613a9fe94bfe116f39a5404b72fac9bfa7"
+  },
+  "unit": "subject mean balanced accuracy across repeated held out folds",
+  "positive_difference_means": "nested preprocessing above frozen hierarchy",
+  "bootstrap_iterations": 20000,
+  "bootstrap_seed": 20260824,
+  "comparisons": {
+    "independent|all62": {
+      "subject_count": 62,
+      "reference_mean": 0.8316532258064515,
+      "comparison_mean": 0.8642473118279569,
+      "comparison_minus_reference": 0.03259408602150535,
+      "ci95": [
+        0.015860215053763418,
+        0.0497311827956989
+      ],
+      "excludes_zero": true,
+      "comparison_wins": 41,
+      "ties": 1,
+      "comparison_losses": 20,
+      "excluded_subjects": []
+    },
+    "independent|qc60": {
+      "subject_count": 60,
+      "reference_mean": 0.8488888888888887,
+      "comparison_mean": 0.8841666666666667,
+      "comparison_minus_reference": 0.035277777777777755,
+      "ci95": [
+        0.01798611111111108,
+        0.05270833333333329
+      ],
+      "excludes_zero": true,
+      "comparison_wins": 41,
+      "ties": 1,
+      "comparison_losses": 18,
+      "excluded_subjects": [
+        "sub-42",
+        "sub-52"
+      ]
+    },
+    "balanced|all62": {
+      "subject_count": 62,
+      "reference_mean": 0.8809139784946237,
+      "comparison_mean": 0.8961021505376343,
+      "comparison_minus_reference": 0.015188172043010767,
+      "ci95": [
+        -0.0007392473118279572,
+        0.03165322580645164
+      ],
+      "excludes_zero": false,
+      "comparison_wins": 38,
+      "ties": 1,
+      "comparison_losses": 23,
+      "excluded_subjects": []
+    },
+    "balanced|qc60": {
+      "subject_count": 60,
+      "reference_mean": 0.8997222222222222,
+      "comparison_mean": 0.9158333333333332,
+      "comparison_minus_reference": 0.016111111111111125,
+      "ci95": [
+        -0.0004861111111110708,
+        0.03312500000000001
+      ],
+      "excludes_zero": false,
+      "comparison_wins": 37,
+      "ties": 1,
+      "comparison_losses": 22,
+      "excluded_subjects": [
+        "sub-42",
+        "sub-52"
+      ]
+    }
+  }
+}

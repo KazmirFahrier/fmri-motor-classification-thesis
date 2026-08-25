@@ -1,0 +1,23 @@
+{
+  "id": "kazmirfahrierniloy/thesis-joint-preprocessing-nested",
+  "title": "thesis joint preprocessing nested",
+  "code_file": "thesis-joint-preprocessing-nested.py",
+  "language": "python",
+  "kernel_type": "script",
+  "is_private": true,
+  "enable_gpu": false,
+  "enable_internet": false,
+  "dataset_sources": [],
+  "competition_sources": [],
+  "kernel_sources": [
+    "kazmirfahrierniloy/thesis-nativesmooth-shard0",
+    "kazmirfahrierniloy/thesis-nativesmooth-shard1",
+    "kazmirfahrierniloy/thesis-nativesmooth-shard2",
+    "kazmirfahrierniloy/thesis-ns32-shard0",
+    "kazmirfahrierniloy/thesis-ns32-shard1",
+    "kazmirfahrierniloy/thesis-ns32-shard2",
+    "kazmirfahrierniloy/thesis-grid48-shard0",
+    "kazmirfahrierniloy/thesis-grid48-shard1",
+    "kazmirfahrierniloy/thesis-grid48-shard2"
+  ]
+}

@@ -18,9 +18,14 @@ This repository tracks thesis work on 4-class motor-task fMRI classification usi
 ## Current Status
 - The repository contains the cleaned training pipeline, configs, scripts, and tests for leakage-aware experiments.
 - The older notebooks and `notebook_code.py` preserve the earlier prototype workflow used to build the initial model idea.
-- The unpublished manuscript is intentionally **not** included in this public repo.
+- A result-grounded working manuscript is tracked in `manuscript/`; author identities,
+  unpublished submission correspondence, and private drafts remain outside the public
+  repository.
 - Phase 1 full-dataset legacy runs are complete: the pooled legacy baseline was stopped at epoch 25 by the controlled decision policy, and the subject-wise legacy run completed at chance-level holdout performance.
-- Broad internal discovery is closed. The frozen complete-run result is `0.8948`, the independent result is `0.8314`, and five-run labeled personalization is reported separately at `0.8913` balanced / `0.8430` independent.
+- Broad architecture discovery is closed. Later preprocessing-matched controls show that the frozen hierarchy's advantage over a linear SVM is not statistically distinguishable from zero, so it is no longer the intended primary novelty claim.
+- Completed nested confirmations reach `0.8639` independent / `0.8959` complete-run balanced accuracy for native smoothing at `24^3`, and `0.8447` / `0.8856` for nested spatial-grid selection. Native smoothing improves independent subject-level accuracy over the frozen hierarchy by `+0.0326`, with 95% paired interval `[+0.0159, +0.0497]`. A bounded joint nested confirmation is the final internal preprocessing comparison.
+- The design-constrained repetition-consistency result remains `0.8948`, the earlier hierarchy result remains `0.8314`, and five-run labeled personalization remains separate at `0.8913` balanced / `0.8430` independent.
+- Full twelve-class subject-wise decoding reaches `0.6838` against an empirical null of `0.0832`; this is now part of the scientific contribution.
 - No legacy neural resume or unrestricted architecture sweep is active. Current decisions and reproducibility checks are tracked in `docs/INVESTIGATION_CLOSEOUT.md` and `experiments/confirmation/`.
 
 ## Dataset Context
@@ -44,6 +49,7 @@ This repository tracks thesis work on 4-class motor-task fMRI classification usi
 - `configs/`: strict YAML experiment configs.
 - `tests/`: unit and smoke tests.
 - `appendices/`: leakage and reproducibility notes.
+- `manuscript/`: machine-generated tables and the current submission draft.
 - `*.ipynb` and `notebook_code.py`: earlier thesis experimentation and Kaggle-oriented workflows.
 
 ## Research Outcome
@@ -51,7 +57,9 @@ This repository tracks thesis work on 4-class motor-task fMRI classification usi
 2. The useful signal appears after explicit subject/run nuisance control and late event-window modeling.
 3. Independent prediction, design-constrained transductive assignment, and labeled personalization are distinct protocols and are reported separately.
 4. The fixed cohort, splits, seeds, candidates, QC definition, and hyperparameters are frozen against further tuning.
-5. Remaining work is final statistics, interpretation, thesis writing, and exact-protocol external confirmation if a compatible cohort becomes available.
+5. Remaining work is the exact pipeline null, external HCP mechanism replication,
+   final figures and references, and independent methodological review. HCP is not an
+   exact four-label replication and is prespecified separately.
 
 ## Experiment Registry
 The `experiments/` directory records what is running and what has completed. Result JSONs are intentionally lightweight: they store status, protocol, metrics, fold progress, Kaggle kernel links, and artifact dataset references, not raw data or model checkpoints.
@@ -169,6 +177,9 @@ python scripts/make_report.py \
 - Strict config validation before training.
 - Deterministic seeding and tracked run manifests.
 - Subject-wise leakage checks in split generation.
+- GitHub Actions runs the unit and smoke suite from a clean checkout.
+- `python scripts/build_q1_publication_tables.py` regenerates the main manuscript table
+  from frozen JSON records.
 
 ## Notes
 - Higher accuracy is useful, but only if it holds on the full dataset under a defendable evaluation protocol.

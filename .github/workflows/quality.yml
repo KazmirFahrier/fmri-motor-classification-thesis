@@ -1,0 +1,42 @@
+name: Quality
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt
+          python -m pip install -e .
+
+      - name: Run tests
+        env:
+          PYTEST_DISABLE_PLUGIN_AUTOLOAD: "1"
+        run: python -m pytest
+
+      - name: Validate confirmation records
+        run: |
+          python -m json.tool findings_2026-08-18_interpretation/experiments/frozen_vs_nested_native_smoothing.results.json >/dev/null
+          python -m json.tool findings_2026-08-18_interpretation/experiments/q1_confirmation.results.json >/dev/null
+
+      - name: Verify generated manuscript tables
+        run: |
+          python scripts/build_q1_publication_tables.py
+          git diff --exit-code -- manuscript/tables

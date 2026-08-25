@@ -22,6 +22,7 @@ actually lives.
 | Native Gaussian, sigma 1.1 | 0.8638 | 0.8943 |
 | **Native Gaussian, sigma 1.4** | **0.8648** | **0.8969** |
 | Native sigma 1.4 **plus** `box3` | 0.8475 | 0.8867 |
+| **Nested sigma selection** | **0.8639** | **0.8959** |
 
 Native smoothing is worth **`+0.0550`** over no smoothing and **`+0.0373`** over the
 post-hoc box filter the project currently uses. That makes it the second-largest effect
@@ -47,28 +48,22 @@ sigma-0 arm is the frozen pipeline exactly and must reproduce `0.8098` or the ru
 It reproduced `0.8098` to four decimals. Every other number here rests on the same
 verified code path.
 
-## Two caveats that must travel with this
+## Nested confirmation and paired inference
 
-**The sigma was chosen with all 30 folds visible.** This is precisely the cohort-visible
-design search the project has spent considerable effort measuring elsewhere, and it has
-*not* been nested here. Based on the four measured points, the cost of nesting tracks how
-stable the choice is across folds — `0%` surviving for the temporal window, `42%` for the
-ANOVA threshold, `88%` for the grid, `100%` for the box kernel. Accuracy is still rising
-at the largest sigma tested, so the optimum has not been bracketed and the selection could
-well be unstable. **The `0.8648` figure should be treated as an upper bound until a
-nested run exists**, which is queued.
+The queued nested run is complete. Sigma is selected only inside four training-subject
+folds for each of the 30 outer folds. Sigma `1.1` is selected 10 times and sigma `1.4`
+20 times, producing `0.8639` independent and `0.8959` complete-run balanced accuracy.
+The nesting cost relative to the best fixed sigma is only `0.0009` independently.
 
-**No paired test against the frozen hierarchy is possible right now.** The comparison
-would be `0.8648` against the hierarchy's `0.8314`, but the hierarchy's per-subject rows
-were stored outside the repository and have since been deleted along with the rest of the
-`status_*` directories. Only the aggregate results of the earlier paired tests were
-committed. Regenerating those rows needs the hierarchy's upstream candidate stages, which
-have not been ported. Until then this is a **point-estimate comparison, not a paired
-one**, and the earlier paired results stand as the rigorous evidence.
+The archived frozen hierarchy subject rows were also recovered. A paired 20,000 draw
+subject bootstrap gives an independent gain of `+0.0326`, with interval
+`[+0.0159, +0.0497]`; 41 subjects improve, one ties, and 20 regress. In the QC-60
+sensitivity stratum the gain is `+0.0353`, with interval `[+0.0180, +0.0527]`.
 
-For scale: at a difference of `+0.0334`, and given the earlier paired intervals had
-half-widths near `0.016`–`0.020`, a paired test would very likely exclude zero. That is a
-reasonable expectation, not a result, and the manuscript should not use it as one.
+The complete-run balanced gain is smaller at `+0.0152`, with interval
+`[-0.0007, +0.0317]`. Therefore the conventional native-smoothed linear SVM is now the
+primary independent internal result, while the complete-run comparison remains
+inconclusive.
 
 ## What it does to the picture
 

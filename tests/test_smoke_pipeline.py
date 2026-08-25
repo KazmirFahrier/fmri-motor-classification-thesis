@@ -8,7 +8,7 @@ import pandas as pd
 import torch
 
 from fmri_pipeline.models import build_model
-from fmri_pipeline.training.pipeline import train_fold
+from fmri_pipeline.training.pipeline import _save_confusion_matrix, train_fold
 from fmri_pipeline.utils.log_utils import setup_logger
 
 
@@ -33,6 +33,15 @@ def test_temporal_resnet3d_groupnorm_forward():
     x = torch.randn(2, 6, 1, 16, 16, 16)
     y = model(x)
     assert y.shape == (2, 4)
+
+
+def test_confusion_matrix_handles_empty_class(tmp_path: Path):
+    cm = np.asarray([[3, 1], [0, 0]], dtype=np.int64)
+    out_path = tmp_path / "confusion_matrix.png"
+
+    _save_confusion_matrix(cm, ["present", "absent"], out_path, "test")
+
+    assert out_path.exists()
 
 
 def test_smoke_train_fold(tmp_path: Path):

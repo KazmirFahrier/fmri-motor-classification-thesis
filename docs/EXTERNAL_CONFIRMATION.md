@@ -1,6 +1,6 @@
 # External Confirmation Decision
 
-Search date: 2026-07-13.
+Search date: 2026-07-13. Confirmatory mechanism protocol added 2026-08-24.
 
 ## Eligibility Locked Before Evaluation
 
@@ -34,6 +34,12 @@ No compatible external four-class confirmation cohort was identified in this sea
 - HCP, `ds005366`, and `ds000114` must not be used with post-hoc label substitutions to manufacture an apparent replication.
 - If a future cohort satisfies the locked criteria, run the independent decoder first. Run repetition-consistency only if the exact two-per-class complete-run composition is present.
 - If external performance fails, reopen only timing, registration, or domain-shift diagnostics implicated by that failure. Do not restart unrestricted architecture search.
+
+An exact label replication remains unavailable, but a separate external mechanism
+replication is now prespecified in
+[`HCP_EXTERNAL_REPLICATION_PROTOCOL.md`](HCP_EXTERNAL_REPLICATION_PROTOCOL.md). It uses
+the five genuine HCP motor labels and tests run normalization and native smoothing
+without relabeling conditions or using design-constrained assignment.
 
 ## Search Record
 

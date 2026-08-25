@@ -29,7 +29,12 @@ def _save_confusion_matrix(cm: np.ndarray, class_names: Sequence[str], out_path:
 
     row_sums = cm.sum(axis=1, keepdims=True)
     with np.errstate(divide="ignore", invalid="ignore"):
-        cm_norm = np.divide(cm, row_sums, where=row_sums != 0)
+        cm_norm = np.divide(
+            cm,
+            row_sums,
+            out=np.zeros_like(cm, dtype=np.float64),
+            where=row_sums != 0,
+        )
 
     sns.heatmap(
         cm_norm,

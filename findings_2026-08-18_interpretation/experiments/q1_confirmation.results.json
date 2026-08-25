@@ -1,0 +1,97 @@
+{
+  "experiment_id": "q1_confirmation_preprocessing",
+  "status": "joint_confirmation_and_null_smoke_running",
+  "updated_at": "2026-08-24",
+  "completed_evidence": {
+    "nested_native_smoothing_24": {
+      "kaggle_kernel": "kazmirfahrierniloy/thesis-nativesmooth-nested",
+      "status": "complete",
+      "outer_subject_folds": 30,
+      "inner_subject_folds": 4,
+      "candidates": [0.0, 0.7, 1.1, 1.4],
+      "selected_counts": {
+        "0.0": 0,
+        "0.7": 0,
+        "1.1": 10,
+        "1.4": 20
+      },
+      "independent_balanced_accuracy": 0.8638952020202021,
+      "complete_run_balanced_accuracy": 0.8958522727272729,
+      "fixed_best_independent_balanced_accuracy": 0.8647790404040404,
+      "nesting_cost": 0.0008838383838383,
+      "paired_vs_frozen_hierarchy": {
+        "unit": "subject mean balanced accuracy",
+        "comparison_minus_frozen": 0.03259408602150535,
+        "ci95": [0.015860215053763418, 0.0497311827956989],
+        "wins_ties_losses": [41, 1, 20],
+        "excludes_zero": true
+      },
+      "output_sha256": "a1a1daf75c6cd8356bb0accf8f015c613a9fe94bfe116f39a5404b72fac9bfa7"
+    },
+    "nested_spatial_grid": {
+      "kaggle_kernel": "kazmirfahrierniloy/thesis-grid-all-analysis",
+      "status": "complete",
+      "outer_subject_folds": 30,
+      "inner_subject_folds": 4,
+      "candidates": [16, 24, 32, 48],
+      "selected_counts": {
+        "16": 0,
+        "24": 0,
+        "32": 0,
+        "48": 30
+      },
+      "independent_balanced_accuracy": 0.8446590909090907,
+      "complete_run_balanced_accuracy": 0.8855681818181819,
+      "output_sha256": "c510db81069bd587b5d50b277221109cdeb4e46408a12d791a0f9853c6fc2c07"
+    }
+  },
+  "queued_confirmation": {
+    "kaggle_kernel": "kazmirfahrierniloy/thesis-joint-preprocessing-nested",
+    "kernel_version": 2,
+    "status": "running",
+    "selection_metric": "inner independent balanced accuracy",
+    "outer_subject_folds": 30,
+    "inner_subject_folds": 4,
+    "candidate_families": {
+      "grid24_native_sigma": [0.0, 0.7, 1.1, 1.4],
+      "grid32_native_sigma": [0.0, 1.4, 1.8, 2.2],
+      "grid48_native_sigma": [0.0]
+    },
+    "validation_anchors": {
+      "grid24_sigma0": 0.8098,
+      "grid32_sigma0": 0.8233,
+      "grid48_sigma0": 0.8447
+    },
+    "required_outputs": [
+      "fixed candidate fold results",
+      "nested selected candidates",
+      "independent and complete run metrics",
+      "per subject means for paired inference"
+    ]
+  },
+  "exact_pipeline_null": {
+    "kaggle_kernel": "kazmirfahrierniloy/thesis-exact-pipeline-null",
+    "kernel_version": 1,
+    "status": "smoke_running",
+    "smoke_permutations": 2,
+    "planned_permutations": 200,
+    "outer_subject_folds": 6,
+    "outer_seed": 11,
+    "inner_subject_folds": 4,
+    "shuffle_unit": "within subject run",
+    "required_gate": "observed smoke folds must reconstruct the matching joint confirmation folds before the 200 draw run"
+  },
+  "external_replication": {
+    "status": "protocol_frozen_before_outcome_access",
+    "cohort": "HCP Young Adult 2025 motor task",
+    "primary_classes": 5,
+    "primary_protocol": "independent family grouped subject decoding",
+    "protocol_path": "docs/HCP_EXTERNAL_REPLICATION_PROTOCOL.md",
+    "exact_four_label_replication": false
+  },
+  "decision_rule": {
+    "primary_protocol": "independent subject wise decoding",
+    "secondary_protocol": "design constrained complete run assignment",
+    "prohibited": "selecting a candidate from outer fold or aggregate test performance"
+  }
+}

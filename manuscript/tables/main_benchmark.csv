@@ -1,0 +1,10 @@
+analysis,protocol,test_information,metric,all_62,qc_60,role
+Legacy pooled neural model,pooled historical split,historical pooled evaluation,balanced accuracy,0.2648,,negative control
+Legacy neural subject holdout,independent subject holdout,single event features,balanced accuracy,0.2500,,negative control
+Frozen temporal hierarchy,independent repeated nested folds,unlabeled target run adaptation,subject mean balanced accuracy,0.8317,0.8489,frozen comparator
+Nested native smoothing plus linear SVM,independent repeated nested folds,unlabeled target run adaptation,subject mean balanced accuracy,0.8642,0.8842,primary internal conventional model
+Nested spatial grid plus linear SVM,independent repeated nested folds,unlabeled target run adaptation,fold mean balanced accuracy,0.8447,,representation confirmation
+Conservative mean window hierarchy,complete run balanced assignment,known two per class run composition,balanced accuracy,0.8752,,transductive baseline
+Frozen repetition consistency hierarchy,complete run repetition consistency,known run composition and repetition structure,subject mean balanced accuracy,0.8950,0.9142,design constrained transductive result
+Nested native smoothing plus balanced assignment,complete run balanced assignment,known two per class run composition,subject mean balanced accuracy,0.8961,0.9158,secondary transductive conventional model
+Five run arm calibration,independent personalized prediction,five labeled target subject runs,accuracy,0.8430,,labeled personalization

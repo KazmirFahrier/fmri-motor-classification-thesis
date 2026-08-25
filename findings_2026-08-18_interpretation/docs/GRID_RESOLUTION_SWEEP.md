@@ -2,7 +2,8 @@
 
 Added: 2026-08-18. Extraction: `../kaggle/gridsweep/`.
 Script: `../scripts/run_grid_resolution_sweep.py`.
-Result: `grid_resolution_sweep.results.json`.
+Results: `grid_resolution_sweep.results.json` and the completed Kaggle
+`grid_all_results.json` confirmation.
 
 The manuscript discloses three choices made with all 62 subjects visible: the temporal
 averaging window, the covariance caps, and the `24^3` feature grid. Two have since been
@@ -22,16 +23,18 @@ on each grid, so applying it would confound resolution with smoothing extent.
 | --- | ---: | ---: | ---: |
 | `16^3` | 4096 | 0.7185 | 0.7612 |
 | `24^3` (disclosed choice) | 13824 | 0.8098 | 0.8485 |
-| **`32^3`** | 32768 | **0.8233** | **0.8684** |
-| **Nested selection** | | **0.8217** | **0.8682** |
+| `32^3` | 32768 | 0.8233 | 0.8684 |
+| **`48^3`** | 110592 | **0.8447** | **0.8856** |
+| **Nested selection across all four grids** | | **0.8447** | **0.8856** |
 
-`32^3` is selected in **29 of 30 folds**, and nesting costs almost nothing — `0.8217`
-against a fixed `0.8233`, a loss of `0.0016`.
+The original three-grid run selected `32^3` in 29 of 30 folds. The bounded follow-up
+adds `48^3`, which is selected in **all 30 folds** and reproduces its fixed score under
+nested selection.
 
 ## Two things follow
 
-**The disclosed choice was not the best one.** `32^3` beats `24^3` by `+0.0135`
-independent and `+0.0199` balanced. This is the first of the project's disclosed
+**The disclosed choice was not the best one.** `48^3` beats `24^3` by `+0.0349`
+independent and `+0.0370` balanced. This is the first of the project's disclosed
 cohort-visible choices that turns out to have been made *against* the authors' interest:
 the temporal window was essentially optimal, and here the chosen value leaves accuracy on
 the table. That direction is worth stating plainly, because a disclosed search that
@@ -44,7 +47,8 @@ four measured points on the design-search spectrum:
 | --- | ---: | ---: | ---: | --- |
 | Temporal window | +0.0054 | −0.0003 | 0% | split across 5 windows |
 | ANOVA threshold | +0.0143 | +0.0060 | 42% | split across 4 thresholds |
-| **Grid resolution** | **+0.0135** | **+0.0119** | **88%** | 29/30 folds agree |
+| **Grid resolution, original bounded set** | **+0.0135** | **+0.0119** | **88%** | 29/30 folds agree |
+| **Grid resolution, extended set** | **+0.0349** | **+0.0349** | **100%** | 30/30 folds choose `48^3` |
 | Smoothing kernel | +0.0177 | +0.0177 | 100% | 30/30 folds agree |
 
 The pattern is now unambiguous: **what nesting costs is the variance of the choice across
@@ -55,9 +59,9 @@ to 100%.
 
 ## Consequence for the headline
 
-`24^3` is the grid the frozen hierarchy runs on. A plain linear SVM on `32^3` reaches
-`0.8233` against the hierarchy's `0.8314` — before any smoothing, which was separately
-worth `+0.0177`. The headline reassessment already found the hierarchy's advantage over a
+`24^3` is the grid the frozen hierarchy runs on. A plain linear SVM on `48^3` reaches
+`0.8447` against the hierarchy's `0.8314`, before native smoothing. The headline
+reassessment already found the hierarchy's advantage over a
 `smooth_3` baseline was `+0.0040` with an interval spanning zero; a better grid moves the
 comparison further in the same direction.
 
@@ -67,7 +71,6 @@ noise.
 
 ## Caveat
 
-Only three grids were tested, and `32^3` is the largest. The optimum may lie beyond it,
-and this sweep cannot say where. Finer grids cost quadratically more in the Gram matrix
-the dual basis builds, so the practical ceiling arrives quickly; `48^3` would be `110592`
-features and is the obvious next point if it matters.
+The tested range now extends through `48^3`, which is the bounded computational ceiling
+for this confirmation. The optimum may lie beyond it, but further grid expansion is not
+authorized on this cohort because every added choice consumes confirmatory credibility.
