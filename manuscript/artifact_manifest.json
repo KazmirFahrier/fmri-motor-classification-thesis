@@ -1,0 +1,71 @@
+{
+  "manifest_version": 1,
+  "scope": "lightweight Q1 confirmation and publication package",
+  "files": [
+    {
+      "path": "experiments/confirmation/investigation_closeout.results.json",
+      "bytes": 3676,
+      "sha256": "aee017e5a5e919a396b29e70193882ece0a5d49625afdf6e25fa1751537a3e3c"
+    },
+    {
+      "path": "findings_2026-08-18_interpretation/experiments/frozen_vs_nested_native_smoothing.results.json",
+      "bytes": 2332,
+      "sha256": "93d02c6cd65c1283487f56c880e6dad9f8f2ddb60e9aa9eaef5a06dcff3afe1d"
+    },
+    {
+      "path": "findings_2026-08-18_interpretation/experiments/q1_confirmation.results.json",
+      "bytes": 3523,
+      "sha256": "8ec0b42dcf5cc1b8717689c90b4d1b6ea6f9cf815cf2c13ab0de452f078f0823"
+    },
+    {
+      "path": "findings_2026-08-18_interpretation/scripts/compare_frozen_vs_nested_preprocessing.py",
+      "bytes": 4951,
+      "sha256": "47c50300d19cb09b5bce61f508d03be6d4ae09d4b53129bbd8ce10b3ce3562e1"
+    },
+    {
+      "path": "docs/HCP_EXTERNAL_REPLICATION_PROTOCOL.md",
+      "bytes": 7374,
+      "sha256": "b019f94227338faf5735e7eb30f8a0b9d5221520674949e517c0339439c81c05"
+    },
+    {
+      "path": "docs/JOURNAL_STRATEGY.md",
+      "bytes": 3621,
+      "sha256": "77c576533dd0a1cc04552b00b1391abbf1fc80a937eba08e1bcfbc2e08ea76a8"
+    },
+    {
+      "path": "manuscript/Q1_MANUSCRIPT.md",
+      "bytes": 15273,
+      "sha256": "425133078dff0432669aea81e7a9a3a85b2c986fbee8701cf219a30a2d314952"
+    },
+    {
+      "path": "manuscript/tables/main_benchmark.csv",
+      "bytes": 1523,
+      "sha256": "f4ac85549e592633a172545fa5bea543edb6406f958195bdf650b522c4652e57"
+    },
+    {
+      "path": "manuscript/tables/main_benchmark.md",
+      "bytes": 1716,
+      "sha256": "b32f2bf6e738a6d0a99700ccec82831f37b0af4c80e3e414001c4f6e42317351"
+    },
+    {
+      "path": "manuscript/figures/protocol_separated_performance.pdf",
+      "bytes": 28527,
+      "sha256": "c0c0f1a067073363a0bea9ae3c0a04bbd8b7efe42e80b9c3512c950086f3b946"
+    },
+    {
+      "path": "manuscript/figures/protocol_separated_performance.png",
+      "bytes": 273187,
+      "sha256": "b3ef81341699ce414989e0c48ef59ca88a538a0ab0e9d2b236a1101953813eb6"
+    },
+    {
+      "path": "scripts/build_q1_figures.py",
+      "bytes": 6281,
+      "sha256": "68707cb876627a0218004c0bab05a5772b3efb25c5efaeee1c4d96a0b08c3c26"
+    },
+    {
+      "path": "scripts/build_q1_publication_tables.py",
+      "bytes": 7074,
+      "sha256": "35f73898a62ca4fbb025234036252720977bc925707ec0be62cd3deed3110afc"
+    }
+  ]
+}

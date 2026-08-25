@@ -39,4 +39,6 @@ jobs:
       - name: Verify generated manuscript tables
         run: |
           python scripts/build_q1_publication_tables.py
+          python scripts/build_publication_manifest.py
           git diff --exit-code -- manuscript/tables
+          git diff --exit-code -- manuscript/artifact_manifest.json
